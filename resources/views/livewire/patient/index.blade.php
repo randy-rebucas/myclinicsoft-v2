@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Patient;
-use function Livewire\Volt\{layout, state, on, with, usesPagination};
+use function Livewire\Volt\{layout, protect, state, on, with, usesPagination};
 
 layout('layouts.app');
 
@@ -17,9 +17,19 @@ $delete = function (Patient $patient) {
     $patient->delete();
 };
 
-$open_form = function ($type, ?Patient $patient) {
+$form = function ($type, ?Patient $patient) {
     $this->redirectRoute('patient-form', ['state' => $type, 'patient' => $patient]);
 };
+
+$detail = function (Patient $patient) {
+    // $this->ensureDetailCanBeViewed();
+
+    $this->redirectRoute('patient-detail', ['patientId' => $patient]);
+};
+
+// $ensureDetailCanBeViewed = protect(function () {
+//     return;
+// });
 
 ?>
 <section>
@@ -36,7 +46,7 @@ $open_form = function ($type, ?Patient $patient) {
                     <div class="space-y-6">
                         <div class="flex justify-between">
                             <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />
-                            <x-secondary-button wire:click="open_form('create')">
+                            <x-secondary-button wire:click="form('create')">
                                 {{ __('Create New') }}
                             </x-secondary-button>
                         </div>
@@ -66,16 +76,16 @@ $open_form = function ($type, ?Patient $patient) {
                                                 :action="true">
                                                 <button type="button" class="btn btn-info m-1 font-medium underline"
                                                     wire:click="detail({{ $patient }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-                                                        <path fill-rule="evenodd"
-                                                            d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
-                                                            clip-rule="evenodd" />
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="w-6 h-6">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
                                                     </svg>
+
                                                 </button>
                                                 <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="open_form('edit', {{ $patient }})">
+                                                    wire:click="form('edit', {{ $patient }})">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                                         fill="currentColor" class="w-5 h-5">
                                                         <path

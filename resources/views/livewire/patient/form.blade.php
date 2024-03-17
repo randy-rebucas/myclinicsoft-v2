@@ -18,7 +18,9 @@ state([
     ],
 ]);
 
-state(['title' => fn() => $this->patient ? 'Edit' : 'Create New']);
+state([
+    'title' => fn() => $this->patient ? 'Edit' : 'Create New',
+]);
 
 form(PatientForm::class);
 
@@ -42,6 +44,7 @@ $save = function () {
 $goback = function () {
     $this->redirect('/patients', navigate: true);
 };
+
 ?>
 
 <section>

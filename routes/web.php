@@ -12,6 +12,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('/profile', 'user.profile')->name('profile');
 
     Volt::route('/patients', 'patient.index')->name('patients');
+    Volt::route('/patient/detail', 'patient.detail')->name('patient-detail');
     Volt::route('/patient/{state}', 'patient.form')->name('patient-form');
 
     Volt::route('/doctors', 'doctor.index')->name('doctors');
