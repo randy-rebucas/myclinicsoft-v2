@@ -11,7 +11,13 @@ class PatientAddress extends Model
 
     protected $fillable = [
         'address_id',
-        'patient_id'
+        'patient_id',
+        'type',
+        'default'
+    ];
+
+    protected $casts = [
+        'default' => 'boolean',
     ];
 
     public function address()
