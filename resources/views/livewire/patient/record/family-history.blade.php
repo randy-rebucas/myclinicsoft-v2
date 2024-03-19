@@ -43,7 +43,7 @@ $delete = function (FamilyHistory $family_history) {
 
 <div>
     <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Family History') }}</h3>
-    <x-table for="allergies">
+    <x-table for="family-histories">
         <x-table.thead>
             <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
                 <x-table.thead-cell :title="__('Relationship')" class="text-left" />

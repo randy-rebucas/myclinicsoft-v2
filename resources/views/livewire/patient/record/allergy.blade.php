@@ -64,7 +64,7 @@ $delete = function (Allergy $allergy) {
                 <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$allergy->allergen" />
                     <x-table.tbody-cell :item="$allergy->reaction" />
-                    <x-table.tbody-cell :item="$allergy->severity" />
+                    <x-table.tbody-cell :item="$allergy->severity" class="uppercase"/>
                     <x-table.tbody-cell :item="$allergy->id" class="text-right md:py-1" :action="true">
                         <button type="button" class="btn btn-info m-1 text-red-600 font-medium underline"
                             wire:click="delete('{{ $allergy->id }}')">

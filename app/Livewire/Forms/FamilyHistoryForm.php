@@ -8,7 +8,7 @@ use Livewire\Form;
 
 class FamilyHistoryForm extends Form
 {
-    #[Validate('required|string|max:255')]
+    #[Validate('required')]
     public $relationship;
 
     #[Validate('required|string|max:255')]
