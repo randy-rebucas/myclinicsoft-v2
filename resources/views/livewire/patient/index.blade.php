@@ -22,8 +22,8 @@ $detail = function (Patient $patient) {
 
 $edit = function ($id) {
     $this->selectedPatient = Patient::find($id);
-    $this->dispatch('open-modal', 'edit-patient');
     $this->dispatch('setPatient');
+    $this->dispatch('open-modal', 'edit-patient');
 };
 ?>
 <section>
