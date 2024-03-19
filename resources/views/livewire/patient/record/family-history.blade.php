@@ -6,10 +6,10 @@ use function Livewire\Volt\{state, form, mount, computed};
 
 state([
     'patient',
-    'severity_levels' => [
-        'critical' => 'Critical',
-        'major' => 'Major',
-        'minor' => 'Minor',
+    'relations' => [
+        'family' => 'Family',
+        'friend' => 'Friend',
+        'work' => 'Work',
     ],
 ]);
 
@@ -95,8 +95,8 @@ $delete = function (FamilyHistory $family_history) {
             <div class="flex justify-between gap-4">
                 <div class="w-1/2">
                     <x-input-label for="relationship" value="{{ __('Relationship') }}" />
-                    <x-text-input wire:model="form.relationship" id="relationship" name="relationship" type="text"
-                        class="mt-1 block w-full" />
+                    <x-select wire:model="form.relationship" id="relationship" name="relationship" :options="$relations"
+                        class="block mt-1 w-full" />
                     <x-input-error :messages="$errors->get('form.relationship')" class="mt-2" />
                 </div>
                 <div class="w-1/2">
