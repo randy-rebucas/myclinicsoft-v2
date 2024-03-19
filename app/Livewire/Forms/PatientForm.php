@@ -9,28 +9,28 @@ use Livewire\Form;
 
 class PatientForm extends Form
 {
-    #[Validate('required|string|max:255')] 
+    #[Validate('required|string|max:255')]
     public $first_name;
 
-    #[Validate('required|string|max:255')] 
+    #[Validate('required|string|max:255')]
     public $last_name;
 
-    #[Validate('required')] 
+    #[Validate('required')]
     public $phone_number;
 
-    #[Validate('required')] 
+    #[Validate('required')]
     public $date_of_birth;
 
-    #[Validate('required')] 
+    #[Validate('required')]
     public $gender;
 
-    #[Validate('required|string|max:255')] 
+    #[Validate('required|string|max:255')]
     public $name;
 
-    #[Validate('required|string|lowercase|email|max:255|unique:' . User::class)] 
+    #[Validate('required|string|lowercase|email|max:255|unique:' . User::class)]
     public $email;
 
-    #[Validate('required|string')] 
+    #[Validate('required|string')]
     public $password;
 
     public ?Patient $patient = null;
@@ -38,9 +38,10 @@ class PatientForm extends Form
     public function store(?Patient $patient)
     {
         $this->validate();
+
         if ($patient) {
-            $this->patient = $patient;
-            $this->patient->where('id', $this->patient->id)->update([
+            // $this->patient = $patient;
+            $patient->update([
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,
                 'phone_number' => $this->phone_number,
@@ -49,7 +50,7 @@ class PatientForm extends Form
             ]);
         } else {
             $user = $this->ensureStoreUser();
-        
+
             Patient::create([
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,
@@ -59,7 +60,7 @@ class PatientForm extends Form
                 'user_id' => $user->id,
             ]);
         }
-        
+
         // $this->reset(); 
     }
 
@@ -74,12 +75,22 @@ class PatientForm extends Form
         return $user;
     }
 
-    public function setPatient(?Patient $patient = null) {
+    public function setPatient(?Patient $patient = null)
+    {
         $this->patient = $patient;
-        $this->first_name = $this->patient->first_name;
-        $this->last_name = $this->patient->last_name;
-        $this->phone_number = $this->patient->phone_number;
-        $this->date_of_birth = $this->patient->date_of_birth;
-        $this->gender = $this->patient->gender;
+        $this->first_name = $patient->first_name;
+        $this->last_name = $patient->last_name;
+        $this->phone_number = $patient->phone_number;
+        $this->date_of_birth = $patient->date_of_birth;
+        $this->gender = $patient->gender;
+    }
+
+    public function clearInputs()
+    {
+        $this->first_name = '';
+        $this->last_name = '';
+        $this->phone_number = '';
+        $this->date_of_birth = '';
+        $this->gender = '';
     }
 }

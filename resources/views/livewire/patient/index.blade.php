@@ -1,16 +1,35 @@
 <?php
 
+use Faker\Generator as Faker;
 use App\Models\Patient;
-use function Livewire\Volt\{layout, protect, state, on, with, computed, usesPagination};
+use Illuminate\Support\Facades\Hash;
+use App\Livewire\Forms\PatientForm;
+use function Livewire\Volt\{layout, state, on, form, mount, with, usesPagination};
 
-state(['search', 'selectedPatient']);
+form(PatientForm::class);
+
+state('patient');
+
+state([
+    'search',
+    'genders' => fn() => [
+        'male' => 'Male',
+        'female' => 'Female',
+        'unknown' => 'Unknown',
+    ],
+]);
 
 layout('layouts.app');
 
 usesPagination();
 
-on(['store']);
 with(fn() => ['patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
+
+mount(function (Faker $faker) {
+    $this->form->name = $faker->userName();
+    $this->form->email = $faker->unique()->email();
+    $this->form->password = Hash::make('password');
+});
 
 $delete = function (Patient $patient) {
     $patient->delete();
@@ -21,10 +40,26 @@ $detail = function (Patient $patient) {
 };
 
 $edit = function ($id) {
-    $this->selectedPatient = Patient::find($id);
-    $this->dispatch('setPatient');
-    $this->dispatch('open-modal', 'edit-patient');
+    $this->patient = Patient::find($id);
+    $this->form->setPatient($this->patient);
+    $this->dispatch('open-modal', 'form-patient');
 };
+
+$create = function () {
+    $this->patient = null;
+    $this->form->clearInputs();
+    $this->dispatch('open-modal', 'form-patient');
+};
+
+
+$save = function () {
+    $this->form->store($this->patient);
+
+    $this->dispatch('close-modal', 'form-patient');
+
+    $this->dispatch('refresh');
+};
+
 ?>
 <section>
     <x-slot name="header">
@@ -40,13 +75,12 @@ $edit = function ($id) {
                     <div class="space-y-6">
                         <div class="flex justify-between">
                             <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />
-                            <x-secondary-button x-data=""
-                                x-on:click="$dispatch('open-modal', 'create-new-patient')">
+                            <x-secondary-button wire:click="create">
                                 {{ __('Create New') }}
                             </x-secondary-button>
                         </div>
 
-                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg" wire:poll.15s>
+                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
                             <x-table for="patient">
                                 <x-table.thead>
                                     <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
@@ -117,13 +151,108 @@ $edit = function ($id) {
         </div>
     </div>
 
-    <x-modal name="create-new-patient" :show="$errors->isNotEmpty()" focusable>
-        <livewire:patient.form @store="$refresh"/>
-    </x-modal>
+    <x-modal name="form-patient" :show="$errors->isNotEmpty()" focusable>
+        <form wire:submit="save" class="p-6">
+            <h2 class="text-lg font-medium text-gray-900">
+                {{ __('Patient Form') }}
+            </h2>
 
-    <x-modal name="edit-patient" :show="$errors->isNotEmpty()" focusable>
-        @if ($this->selectedPatient)
-            <livewire:patient.form :patient="$this->selectedPatient" @store="$refresh"/>
-        @endif
+            <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md">
+                <legend class="dark:text-gray-200 px-2">{{ __('Personal Details') }}</legend>
+                <div class="flex justify-between gap-4">
+                    <div class="w-1/2">
+                        <x-input-label for="first_name" :value="__('First Name')" />
+                        <x-text-input wire:model="form.first_name" id="first_name" class="block mt-1 w-full"
+                            type="text" name="first_name" autofocus />
+                        <x-input-error :messages="$errors->get('form.first_name')" class="mt-2" />
+                    </div>
+
+                    <div class="w-1/2">
+                        <x-input-label for="last_name" :value="__('Last Name')" />
+                        <x-text-input wire:model="form.last_name" id="last_name" class="block mt-1 w-full"
+                            type="text" name="last_name" />
+                        <x-input-error :messages="$errors->get('form.last_name')" class="mt-2" />
+                    </div>
+                </div>
+                <div class="flex justify-between gap-4 mt-4">
+                    <div class="w-1/3">
+                        <x-input-label for="phone_number" :value="__('Phone Number')" />
+                        <x-text-input wire:model="form.phone_number" id="phone_number" class="block mt-1 w-full"
+                            type="text" name="phone_number" />
+                        <x-input-error :messages="$errors->get('form.phone_number')" class="mt-2" />
+                    </div>
+                    <div class="w-1/3">
+                        <x-input-label for="date_of_birth" :value="__('Birth Date')" />
+                        <x-text-input wire:model="form.date_of_birth" id="date_of_birth" class="block mt-1 w-full"
+                            type="text" name="date_of_birth" />
+                        <x-input-error :messages="$errors->get('form.date_of_birth')" class="mt-2" />
+                    </div>
+                    <div class="w-1/3">
+                        <x-input-label for="gender" :value="__('Gender')" />
+                        <x-select wire:model="form.gender" id="gender" name="gender" :options="$genders"
+                            class="block mt-1 w-full" />
+                        <x-input-error :messages="$errors->get('form.gender')" class="mt-2" />
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mt-6 border-2 border-double border-gray-200 p-4 rounded-md hidden">
+                <legend class="dark:text-gray-200 px-2">{{ __('Auth Credentials') }}</legend>
+                <div class="flex justify-between gap-4">
+                    <div class="w-1/2">
+                        <x-input-label for="name" :value="__('Username')" />
+                        <x-text-input wire:model="form.name" id="name" class="block mt-1 w-full bg-gray-100"
+                            type="text" name="name" autofocus autocomplete="username" readonly />
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="w-1/2">
+                        <x-input-label for="email" :value="__('Email')" />
+                        <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full bg-gray-100"
+                            type="email" name="email" readonly />
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                    </div>
+                </div>
+                <!-- Password -->
+                <div class="mt-4">
+                    <x-input-label for="password" :value="__('Password')" />
+
+                    <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full bg-gray-100"
+                        type="password" name="password" autocomplete="new-password" readonly />
+
+                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                </div>
+            </fieldset>
+
+            <div class="mt-6 flex justify-end">
+                <x-secondary-button x-on:click="$dispatch('close')">
+                    {{ __('Cancel') }}
+                </x-secondary-button>
+
+                <x-primary-button class="ms-3">
+                    {{ __('Save') }}
+                </x-primary-button>
+            </div>
+        </form>
     </x-modal>
+    @push('scripts')
+        <script>
+            var picker = new Pikaday({
+                field: document.getElementById('date_of_birth'),
+                format: 'D/M/YYYY',
+                toString(date, format) {
+                    // you should do formatting based on the passed format,
+                    // but we will just return 'D/M/YYYY' for simplicity
+                    const day = date.getDate();
+                    const month = date.getMonth() + 1;
+                    const year = date.getFullYear();
+                    return `${year}-${month}-${day}`;
+                },
+                onSelect: function() {
+                    @this.set('form.date_of_birth', picker.toString());
+                }
+            });
+        </script>
+    @endpush
 </section>
