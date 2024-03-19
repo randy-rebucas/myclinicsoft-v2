@@ -15,6 +15,7 @@ state([
 form(MedicalConditionForm::class);
 
 mount(function () {
+    $this->form->diagnosis_date = date('Y-m-d');
     $this->form->patient_id = $this->patient->id;
 });
 

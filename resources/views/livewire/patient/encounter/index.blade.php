@@ -35,6 +35,22 @@ $create = function () {
         <legend class="dark:text-gray-200 px-2">{{ __('Latest Encounter') }}</legend>
 
         @if ($this->encounter)
+            <x-table for="diagnostic_test">
+                <x-table.tbody class="dark:border-gray-500">
+                    <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+                        <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
+                        <x-table.tbody-cell :item="$this->encounter->chief_complaint ?? '--'" />
+        
+                        <x-table.thead-cell :title="__('Encounter Date')" class="text-left" />
+                        <x-table.tbody-cell :item="$this->encounter->encounter_date  ?? '--'" class="font-bold"/>
+                    </x-table.row>
+                    <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+                        <x-table.thead-cell :title="__('Notes')" class="text-left" />
+                        <x-table.tbody-cell :item="$this->encounter->notes  ?? '--'" colspan="3" />
+                    </x-table.row>
+                </x-table.tbody>
+            </x-table>
+
             <livewire:patient.encounter.physical-examination :encounter="$this->encounter" />
             <livewire:patient.encounter.diagnostic-test :encounter="$this->encounter" />
         @else

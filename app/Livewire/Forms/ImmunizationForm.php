@@ -11,7 +11,7 @@ class ImmunizationForm extends Form
     #[Validate('required|string|max:255')]
     public $vaccine_name;
 
-    #[Validate('required|date')]
+    #[Validate('required')]
     public $date_administered;
 
     #[Validate('required')]

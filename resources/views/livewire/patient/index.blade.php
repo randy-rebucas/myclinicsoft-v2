@@ -1,36 +1,30 @@
 <?php
 
 use App\Models\Patient;
-use function Livewire\Volt\{layout, protect, state, on, with, usesPagination};
+use function Livewire\Volt\{layout, protect, state, on, with, computed, usesPagination};
+
+state(['search', 'selectedPatient']);
 
 layout('layouts.app');
 
-state(['search']);
-
 usesPagination();
 
-on(['patient-created']);
-
+on(['store']);
 with(fn() => ['patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
 
 $delete = function (Patient $patient) {
     $patient->delete();
 };
 
-$form = function ($type, ?Patient $patient) {
-    $this->redirectRoute('patient-form', ['state' => $type, 'patient' => $patient]);
-};
-
 $detail = function (Patient $patient) {
-    // $this->ensureDetailCanBeViewed();
-
     $this->redirectRoute('patient-detail', ['patientId' => $patient]);
 };
 
-// $ensureDetailCanBeViewed = protect(function () {
-//     return;
-// });
-
+$edit = function ($id) {
+    $this->selectedPatient = Patient::find($id);
+    $this->dispatch('open-modal', 'edit-patient');
+    $this->dispatch('setPatient');
+};
 ?>
 <section>
     <x-slot name="header">
@@ -46,12 +40,13 @@ $detail = function (Patient $patient) {
                     <div class="space-y-6">
                         <div class="flex justify-between">
                             <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />
-                            <x-secondary-button wire:click="form('create')">
+                            <x-secondary-button x-data=""
+                                x-on:click="$dispatch('open-modal', 'create-new-patient')">
                                 {{ __('Create New') }}
                             </x-secondary-button>
                         </div>
 
-                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg" wire:poll.15s>
                             <x-table for="patient">
                                 <x-table.thead>
                                     <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
@@ -85,7 +80,7 @@ $detail = function (Patient $patient) {
 
                                                 </button>
                                                 <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="form('edit', {{ $patient }})">
+                                                    wire:click="edit({{ $patient->id }})">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                                         fill="currentColor" class="w-5 h-5">
                                                         <path
@@ -121,4 +116,14 @@ $detail = function (Patient $patient) {
             </div>
         </div>
     </div>
+
+    <x-modal name="create-new-patient" :show="$errors->isNotEmpty()" focusable>
+        <livewire:patient.form @store="$refresh"/>
+    </x-modal>
+
+    <x-modal name="edit-patient" :show="$errors->isNotEmpty()" focusable>
+        @if ($this->selectedPatient)
+            <livewire:patient.form :patient="$this->selectedPatient" @store="$refresh"/>
+        @endif
+    </x-modal>
 </section>

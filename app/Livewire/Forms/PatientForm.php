@@ -35,22 +35,32 @@ class PatientForm extends Form
 
     public ?Patient $patient = null;
 
-    public function store()
+    public function store(?Patient $patient)
     {
         $this->validate();
-
-        $user = $this->ensureStoreUser();
-    
-        Patient::create([
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'phone_number' => $this->phone_number,
-            'date_of_birth' => $this->date_of_birth,
-            'gender' => $this->gender,
-            'user_id' => $user->id,
-        ]);
-
-        $this->reset(); 
+        if ($patient) {
+            $this->patient = $patient;
+            $this->patient->where('id', $this->patient->id)->update([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+                'phone_number' => $this->phone_number,
+                'date_of_birth' => $this->date_of_birth,
+                'gender' => $this->gender
+            ]);
+        } else {
+            $user = $this->ensureStoreUser();
+        
+            Patient::create([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+                'phone_number' => $this->phone_number,
+                'date_of_birth' => $this->date_of_birth,
+                'gender' => $this->gender,
+                'user_id' => $user->id,
+            ]);
+        }
+        
+        // $this->reset(); 
     }
 
     public function ensureStoreUser()

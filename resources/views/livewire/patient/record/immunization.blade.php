@@ -15,6 +15,7 @@ state([
 form(ImmunizationForm::class);
 
 mount(function () {
+    $this->form->date_administered = date('Y-m-d');
     $this->form->patient_id = $this->patient->id;
 });
 
