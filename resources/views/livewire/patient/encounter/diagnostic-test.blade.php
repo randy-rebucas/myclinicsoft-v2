@@ -19,18 +19,18 @@ state([
         <x-table.tbody class="dark:border-gray-500">
             <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                 <x-table.thead-cell :title="__('Test Name')" class="text-left" />
-                <x-table.tbody-cell :item="$diagnostic_test ? $diagnostic_test->test_name : '--'" />
+                <x-table.tbody-cell :item="$diagnostic_test->test_name ?? '--'" />
 
                 <x-table.thead-cell :title="__('Date')" class="text-left" />
-                <x-table.tbody-cell :item="$diagnostic_test ? $diagnostic_test->test_date : '--'" class="font-bold"/>
+                <x-table.tbody-cell :item="$diagnostic_test->test_date  ?? '--'" class="font-bold"/>
             </x-table.row>
             <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                 <x-table.thead-cell :title="__('Results')" class="text-left" />
-                <x-table.tbody-cell :item="$diagnostic_test ? $diagnostic_test->results : '--'" colspan="3" />
+                <x-table.tbody-cell :item="$diagnostic_test->results  ?? '--'" colspan="3" />
             </x-table.row>
             <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                 <x-table.thead-cell :title="__('Notes')" class="text-left" />
-                <x-table.tbody-cell :item="$diagnostic_test ? $diagnostic_test->notes : '--'" colspan="3" />
+                <x-table.tbody-cell :item="$diagnostic_test->notes  ?? '--'" colspan="3" />
             </x-table.row>
         </x-table.tbody>
     </x-table>

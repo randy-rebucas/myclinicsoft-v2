@@ -17,15 +17,15 @@ state([
         <x-table.tbody class="dark:border-gray-500">
             <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                 <x-table.thead-cell :title="__('General Apperance')" class="text-left" />
-                <x-table.tbody-cell :item="$physical_exam ? $physical_exam->general_appearance : '--'" />
+                <x-table.tbody-cell :item="$physical_exam->general_appearance ?? '--'" />
             </x-table.row>
             <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                 <x-table.thead-cell :title="__('Systematic Findings')" class="text-left" />
-                <x-table.tbody-cell :item="$physical_exam ? $physical_exam->systematic_findings : '--'" />
+                <x-table.tbody-cell :item="$physical_exam->systematic_findings ?? '--'" />
             </x-table.row>
             <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                 <x-table.thead-cell :title="__('Notes')" class="text-left" />
-                <x-table.tbody-cell :item="$physical_exam ? $physical_exam->notes : '--'" />
+                <x-table.tbody-cell :item="$physical_exam->notes ?? '--'" />
             </x-table.row>
         </x-table.tbody>
     </x-table>
