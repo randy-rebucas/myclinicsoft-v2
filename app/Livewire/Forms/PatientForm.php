@@ -40,7 +40,6 @@ class PatientForm extends Form
         $this->validate();
 
         if ($patient) {
-            // $this->patient = $patient;
             $patient->update([
                 'first_name' => $this->first_name,
                 'last_name' => $this->last_name,
@@ -60,8 +59,6 @@ class PatientForm extends Form
                 'user_id' => $user->id,
             ]);
         }
-
-        // $this->reset(); 
     }
 
     public function ensureStoreUser()
