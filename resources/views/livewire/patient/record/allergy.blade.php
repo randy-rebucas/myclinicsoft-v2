@@ -41,7 +41,6 @@ $delete = function (Allergy $allergy) {
 ?>
 
 <div>
-    <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Allergies') }}</h3>
     <x-table for="allergies">
         <x-table.thead>
             <x-table.row class="dark:bg-gray-900 dark:text-gray-100">

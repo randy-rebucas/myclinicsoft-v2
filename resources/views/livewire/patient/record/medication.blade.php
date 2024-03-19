@@ -35,7 +35,6 @@ $delete = function (Medication $medication) {
 ?>
 
 <div>
-    <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Medication') }}</h3>
     <x-table for="medication">
         <x-table.thead>
             <x-table.row class="dark:bg-gray-900 dark:text-gray-100">

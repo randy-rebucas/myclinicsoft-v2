@@ -40,7 +40,6 @@ $delete = function (Immunization $immunization) {
 ?>
 
 <div>
-    <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Immunization') }}</h3>
     <x-table for="family-histories">
         <x-table.thead>
             <x-table.row class="dark:bg-gray-900 dark:text-gray-100">

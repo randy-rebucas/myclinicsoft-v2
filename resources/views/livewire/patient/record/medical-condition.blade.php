@@ -40,7 +40,6 @@ $delete = function (MedicalCondition $medical_condition) {
 ?>
 
 <div>
-    <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Medical Condition') }}</h3>
     <x-table for="medical-condition">
         <x-table.thead>
             <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
