@@ -12,7 +12,7 @@ state('patient');
         <livewire:patient.record.medical-condition :patient="$patient" />
         <livewire:patient.record.medication :patient="$patient" />
         <livewire:patient.record.family-history :patient="$patient" />
-        <livewire:patient.record.allergy :patient="$patient" :patientId="$patient" />
+        <livewire:patient.record.allergy :patient="$patient" />
         <livewire:patient.record.immunization :patient="$patient" />
     </fieldset>
 </div>
