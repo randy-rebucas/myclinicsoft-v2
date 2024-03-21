@@ -19,6 +19,13 @@ class PhysicalExamination extends Model
         'encounter_id'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'vital_signs' => 'collection',
+        ];
+    }
+
     public function encounter()
     {
         return $this->belongsTo(Encounter::class);

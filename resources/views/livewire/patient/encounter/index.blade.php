@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Encounter;
+use Carbon\Carbon;
 use App\Livewire\Forms\EncounterForm;
 use function Livewire\Volt\{state, form, mount, computed};
 
@@ -15,6 +16,7 @@ mount(function () {
 
 $encounter = computed(function () {
     return Encounter::where('patient_id', $this->patient->id)
+        ->where('encounter_date', Carbon::today())
         ->get()
         ->first();
 });
@@ -40,13 +42,13 @@ $create = function () {
                     <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                         <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
                         <x-table.tbody-cell :item="$this->encounter->chief_complaint ?? '--'" />
-        
+
                         <x-table.thead-cell :title="__('Encounter Date')" class="text-left" />
-                        <x-table.tbody-cell :item="$this->encounter->encounter_date  ?? '--'" class="font-bold"/>
+                        <x-table.tbody-cell :item="$this->encounter->encounter_date ?? '--'" class="font-bold" />
                     </x-table.row>
                     <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                         <x-table.thead-cell :title="__('Notes')" class="text-left" />
-                        <x-table.tbody-cell :item="$this->encounter->notes  ?? '--'" colspan="3" />
+                        <x-table.tbody-cell :item="$this->encounter->notes ?? '--'" colspan="3" />
                     </x-table.row>
                 </x-table.tbody>
             </x-table>
