@@ -63,7 +63,7 @@ $delete = function (Immunization $immunization) {
                 <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$immunization->vaccine_name" />
                     <x-table.tbody-cell :item="$immunization->date_administered" />
-                    <x-table.tbody-cell :item="$immunization->administrator" class="uppercase"/>
+                    <x-table.tbody-cell :item="$immunization->administrator" class="uppercase" />
                     <x-table.tbody-cell :item="$immunization->id" class="text-right md:py-1" :action="true">
                         <button type="button" class="btn btn-info m-1 text-red-600 font-medium underline"
                             wire:click="delete('{{ $immunization->id }}')">
@@ -105,10 +105,14 @@ $delete = function (Immunization $immunization) {
                         class="block mt-1 w-full" />
                     <x-input-error :messages="$errors->get('form.administrator')" class="mt-2" />
                 </div>
-                <div class="w-1/3">
+                <div class="w-1/3" x-data x-init="flatpickr($refs.dateInput, {
+                    altInput: true,
+                    altFormat: 'F j, Y',
+                    dateFormat: 'Y-m-d'
+                })">
                     <x-input-label for="date_administered" value="{{ __('Date Administered') }}" />
-                    <x-text-input wire:model="form.date_administered" id="date_administered" name="date_administered"
-                        type="text" class="mt-1 block w-full" />
+                    <x-text-input wire:model="form.date_administered" x-ref="dateInput" id="date_administered"
+                        name="date_administered" type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.date_administered')" class="mt-2" />
                 </div>
             </div>
@@ -130,23 +134,4 @@ $delete = function (Immunization $immunization) {
             </div>
         </form>
     </x-modal>
-    @push('scripts')
-        <script>
-            var picker = new Pikaday({
-                field: document.getElementById('date_administered'),
-                format: 'D/M/YYYY',
-                toString(date, format) {
-                    // you should do formatting based on the passed format,
-                    // but we will just return 'D/M/YYYY' for simplicity
-                    const day = date.getDate();
-                    const month = date.getMonth() + 1;
-                    const year = date.getFullYear();
-                    return `${year}-${month}-${day}`;
-                },
-                onSelect: function() {
-                    @this.set('form.date_administered', picker.toString());
-                }
-            });
-        </script>
-    @endpush
 </div>

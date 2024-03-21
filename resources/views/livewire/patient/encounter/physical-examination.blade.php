@@ -14,13 +14,6 @@ state([
     ],
 ]);
 
-rules(
-    fn() => [
-        'vital_signs.*.type' => ['required'],
-        'vital_signs.*.value' => ['required'],
-    ],
-);
-
 form(PhysicalExaminationForm::class);
 
 mount(function () {

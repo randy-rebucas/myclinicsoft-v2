@@ -15,7 +15,6 @@ state([
 form(MedicalConditionForm::class);
 
 mount(function () {
-    $this->form->diagnosis_date = date('Y-m-d');
     $this->form->patient_id = $this->patient->id;
 });
 
@@ -101,10 +100,14 @@ $delete = function (MedicalCondition $medical_condition) {
                         type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.condition_name')" class="mt-2" />
                 </div>
-                <div class="w-1/3">
+                <div class="w-1/3" x-data x-init="flatpickr($refs.dateInput, {
+                    altInput: true,
+                    altFormat: 'F j, Y',
+                    dateFormat: 'Y-m-d'
+                })">
                     <x-input-label for="diagnosis_date" value="{{ __('Diagnose Date') }}" />
-                    <x-text-input wire:model="form.diagnosis_date" id="diagnosis_date" name="diagnosis_date"
-                        type="text" class="mt-1 block w-full" />
+                    <x-text-input wire:model="form.diagnosis_date" x-ref="dateInput" id="diagnosis_date"
+                        name="diagnosis_date" type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.diagnosis_date')" class="mt-2" />
                 </div>
                 <div class="w-1/3">
@@ -138,23 +141,4 @@ $delete = function (MedicalCondition $medical_condition) {
             </div>
         </form>
     </x-modal>
-    @push('scripts')
-        <script>
-            var picker = new Pikaday({
-                field: document.getElementById('diagnosis_date'),
-                format: 'D/M/YYYY',
-                toString(date, format) {
-                    // you should do formatting based on the passed format,
-                    // but we will just return 'D/M/YYYY' for simplicity
-                    const day = date.getDate();
-                    const month = date.getMonth() + 1;
-                    const year = date.getFullYear();
-                    return `${year}-${month}-${day}`;
-                },
-                onSelect: function() {
-                    @this.set('form.diagnosis_date', picker.toString());
-                }
-            });
-        </script>
-    @endpush
 </div>
