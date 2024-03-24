@@ -33,6 +33,8 @@ mount(function (Faker $faker) {
 
 $delete = function (Patient $patient) {
     $patient->delete();
+
+    $this->dispatch('refresh');
 };
 
 $detail = function (Patient $patient) {
