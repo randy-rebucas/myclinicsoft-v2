@@ -42,14 +42,17 @@ $detail = function (Doctor $doctor) {
 };
 
 $edit = function ($id) {
-    $this->doctor = Doctor::find($id);
+    $this->doctor = Doctor::findOrFail($id);
+
     $this->form->setDoctor($this->doctor);
+
     $this->dispatch('open-modal', 'form-doctor');
 };
 
 $create = function () {
+    
     $this->doctor = null;
-    $this->form->clearInputs();
+
     $this->dispatch('open-modal', 'form-doctor');
 };
 

@@ -3,78 +3,17 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Patient;
-use App\Models\User;
 use Livewire\Attributes\Validate;
-use Livewire\Form;
+use App\Livewire\Forms\UserForm;
 
-class PatientForm extends Form
+class PatientForm extends UserForm
 {
-    #[Validate('required|string|max:255')]
-    public $first_name;
-
-    #[Validate('required|string|max:255')]
-    public $last_name;
-
-    #[Validate('required')]
-    public $phone_number;
 
     #[Validate('required')]
     public $date_of_birth;
 
-    #[Validate('required')]
-    public $gender;
-
-    #[Validate('required|string|max:255')]
-    public $name;
-
-    #[Validate('required|string|lowercase|email|max:255|unique:' . User::class)]
-    public $email;
-
-    #[Validate('required|string')]
-    public $password;
-
-    public ?Patient $patient = null;
-
-    public function store(?Patient $patient)
-    {
-        $this->validate();
-
-        if ($patient) {
-            $patient->update([
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-                'phone_number' => $this->phone_number,
-                'date_of_birth' => $this->date_of_birth,
-                'gender' => $this->gender
-            ]);
-        } else {
-            $user = $this->ensureStoreUser();
-
-            Patient::create([
-                'first_name' => $this->first_name,
-                'last_name' => $this->last_name,
-                'phone_number' => $this->phone_number,
-                'date_of_birth' => $this->date_of_birth,
-                'gender' => $this->gender,
-                'user_id' => $user->id,
-            ]);
-        }
-    }
-
-    public function ensureStoreUser()
-    {
-        $user = User::create([
-            'name' => $this->name,
-            'email' => $this->email,
-            'password' => $this->password,
-        ]);
-
-        return $user;
-    }
-
     public function setPatient(?Patient $patient = null)
     {
-        $this->patient = $patient;
         $this->first_name = $patient->first_name;
         $this->last_name = $patient->last_name;
         $this->phone_number = $patient->phone_number;
@@ -82,12 +21,39 @@ class PatientForm extends Form
         $this->gender = $patient->gender;
     }
 
-    public function clearInputs()
+    public function store(?Patient $patient)
     {
-        $this->first_name = '';
-        $this->last_name = '';
-        $this->phone_number = '';
-        $this->date_of_birth = '';
-        $this->gender = '';
+        $this->validate();
+
+        if ($patient) {
+            $this->update($patient);
+        } else {
+            $this->create();
+        }
+
+        $this->reset('first_name', 'last_name', 'phone_number', 'date_of_birth', 'gender');
+    }
+
+    public function update(Patient $patient)
+    {
+        $patient->update([
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'phone_number' => $this->phone_number,
+            'date_of_birth' => $this->date_of_birth,
+            'gender' => $this->gender
+        ]);
+    }
+
+    public function create()
+    {
+        Patient::create([
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'phone_number' => $this->phone_number,
+            'date_of_birth' => $this->date_of_birth,
+            'gender' => $this->gender,
+            'user_id' => $this->ensureStoreUser()->id,
+        ]);
     }
 }

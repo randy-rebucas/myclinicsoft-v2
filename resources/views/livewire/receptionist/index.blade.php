@@ -42,7 +42,7 @@ $detail = function (Receptionist $receptionist) {
 };
 
 $edit = function ($id) {
-    $this->receptionist = Receptionist::find($id);
+    $this->receptionist = Receptionist::findOrFail($id);
 
     $this->form->setReceptionist($this->receptionist);
 
@@ -51,8 +51,6 @@ $edit = function ($id) {
 
 $create = function () {
     $this->receptionist = null;
-
-    $this->form->clearInputs();
 
     $this->dispatch('open-modal', 'form-receptionist');
 };
@@ -102,8 +100,7 @@ $save = function () {
                                             <x-table.tbody-cell :item="$receptionist->full_name" />
                                             <x-table.tbody-cell :item="$receptionist->phone_number" class="text-center" />
                                             <x-table.tbody-cell :item="$receptionist->gender" class="text-center uppercase" />
-                                            <x-table.tbody-cell :item="$receptionist->id" class="text-right"
-                                                :action="true">
+                                            <x-table.tbody-cell :item="$receptionist->id" class="text-right" :action="true">
                                                 <button type="button" class="btn btn-info m-1 font-medium underline"
                                                     wire:click="detail({{ $receptionist }})">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"

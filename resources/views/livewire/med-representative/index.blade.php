@@ -42,7 +42,7 @@ $detail = function (MedRepresentative $medRepresentative) {
 };
 
 $edit = function ($id) {
-    $this->medRepresentative = MedRepresentative::find($id);
+    $this->medRepresentative = MedRepresentative::findOrFail($id);
 
     $this->form->setMedRepresentative($this->medRepresentative);
 
@@ -51,9 +51,7 @@ $edit = function ($id) {
 
 $create = function () {
     $this->medRepresentative = null;
-
-    $this->form->clearInputs();
-
+    
     $this->dispatch('open-modal', 'form-med-representative');
 };
 
