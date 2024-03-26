@@ -54,6 +54,11 @@ new class extends Component
                         {{ __('Receptionists') }}
                     </x-nav-link>
                 </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('roles')" :active="request()->routeIs('roles')" wire:navigate>
+                        {{ __('Roles') }}
+                    </x-nav-link>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -74,6 +79,9 @@ new class extends Component
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('settings')" wire:navigate>
+                            {{ __('Setting') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
