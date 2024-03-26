@@ -26,7 +26,6 @@ $delete = function (Role $role) {
 };
 
 $edit = function ($id) {
-
     $this->role = Role::findOrFail($id);
 
     $this->form->setRole($this->role);
@@ -82,7 +81,7 @@ $save = function () {
                                     @forelse ($this->roles as $role)
                                         <x-table.row class="bg-white dark:bg-gray-700 dark:text-white"
                                             wire:loading.class="opacity-50">
-                                            <x-table.tbody-cell :item="$role->name" />
+                                            <x-table.tbody-cell :item="$role->name" class="uppercase" />
                                             <x-table.tbody-cell :item="$role->permissions->count()" class="text-center" />
                                             <x-table.tbody-cell :item="$role->id" class="text-right" :action="true">
                                                 <button type="button" class="btn btn-info m-1 font-medium underline"
@@ -138,7 +137,8 @@ $save = function () {
                     @foreach ($this->form->permissions as $permission)
                         <li>
                             <label class="checkbox-wrap">
-                                <input type="checkbox" wire:model="form.assigned_permissions" value="{{ $permission }}">
+                                <input type="checkbox" wire:model="form.assigned_permissions"
+                                    value="{{ $permission }}">
                                 {{ $permission }}
                             </label>
                         </li>
