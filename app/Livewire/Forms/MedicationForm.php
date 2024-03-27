@@ -23,6 +23,9 @@ class MedicationForm extends Form
     #[Validate('required')]
     public $patient_id;
 
+    #[Validate('required')]
+    public $encounter_id;
+
     public function store()
     {
         $this->validate();
@@ -32,6 +35,7 @@ class MedicationForm extends Form
             'dosage' => $this->dosage,
             'frequency' => $this->frequency,
             'notes' => $this->notes,
+            'encounter_id' => $this->encounter_id,
             'patient_id' => $this->patient_id,
         ]);
 
