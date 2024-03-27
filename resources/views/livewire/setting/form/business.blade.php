@@ -10,6 +10,7 @@ form(SettingForm::class);
 mount(function () {
     $this->form->settings['logo'] = config('settings.logo');
     $this->form->settings['business_name'] = config('settings.business_name');
+    $this->form->settings['business_owner'] = config('settings.business_owner');
     $this->form->settings['business_contact'] = config('settings.business_contact');
     $this->form->settings['business_address'] = config('settings.business_address');
 });
@@ -43,6 +44,17 @@ $store = function () {
             </div>
             <div class="md:w-3/4">
                 <x-text-input wire:model="form.settings.business_name" id="business_name"
+                    class="w-full rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
+                    type="text" />
+            </div>
+        </div>
+        <div class="md:flex mb-2 p-4 shadow">
+            <div class="flex items-center md:w-1/4">
+                <x-input-label for="business_owner" :value="__('Business Owner')"
+                    class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
+            </div>
+            <div class="md:w-3/4">
+                <x-text-input wire:model="form.settings.business_owner" id="business_owner"
                     class="w-full rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
                     type="text" />
             </div>

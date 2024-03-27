@@ -71,7 +71,7 @@ $delete = function (Medication $medication) {
                 </x-table.row>
                 <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
-                    <x-table.tbody-cell :item="$medication->notes ?? '--'" colspan="4" />
+                    <x-table.tbody-cell :item="$medication->notes ?? '--'" colspan="3" />
                 </x-table.row>
             @empty
                 <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
