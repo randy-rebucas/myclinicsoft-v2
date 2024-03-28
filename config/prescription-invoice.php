@@ -7,6 +7,7 @@ return [
          * Default attributes for Car::class
          */
         'attributes' => [
+            'id' => '',
             'name' => '',
             'age' => '',
             'address' => '',

@@ -16,11 +16,17 @@ class Medication extends Model
         'dosage',
         'frequency',
         'notes',
-        'patient_id'
+        'patient_id',
+        'encounter_id'
     ];
 
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function encounter()
+    {
+        return $this->belongsTo(Encounter::class);
     }
 }

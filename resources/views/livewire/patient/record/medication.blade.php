@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\Encounter;
 use App\Models\Medication;
+use Carbon\Carbon;
 use App\Livewire\Forms\MedicationForm;
-use function Livewire\Volt\{state, form, mount, computed};
+use function Livewire\Volt\{state, form, on, mount, computed};
 
 state('patient');
 
@@ -10,6 +12,23 @@ form(MedicationForm::class);
 
 mount(function () {
     $this->form->patient_id = $this->patient->id;
+});
+
+on([
+    'encounter-created' => function ($encounterId) {
+        $this->form->setEncounterId($encounterId);
+    },
+]);
+
+mount(function () {
+    $encounter = Encounter::where('patient_id', $this->patient->id)
+        ->where('encounter_date', Carbon::today())
+        ->get()
+        ->first();
+    if ($encounter) {
+        $this->form->setEncounterId($encounter->id);
+    }
+    $this->form->setPatientId($this->patient->id);
 });
 
 $medications = computed(function () {

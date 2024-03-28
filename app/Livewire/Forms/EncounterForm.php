@@ -22,15 +22,16 @@ class EncounterForm extends Form
 
     public function store()
     {
-        $validated = $this->validate();
+        $this->validate();
 
-        Encounter::create([
+        $encounter = Encounter::create([
             'chief_complaint' => $this->chief_complaint,
             'encounter_date' => $this->encounter_date,
             'notes' => $this->notes,
             'patient_id' => $this->patient_id,
         ]);
 
+        return $encounter->id;
     }
 
     public function empty()

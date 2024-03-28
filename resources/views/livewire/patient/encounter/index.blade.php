@@ -5,38 +5,49 @@ use Carbon\Carbon;
 use App\Livewire\Forms\EncounterForm;
 use function Livewire\Volt\{state, form, mount, computed};
 
-state('patient');
+state(['patient', 'encounterId', 'encounters', 'filter', 'show' => false]);
 
 form(EncounterForm::class);
 
 mount(function () {
     $this->form->patient_id = $this->patient->id;
+
+    $this->encounters = Encounter::where('patient_id', $this->patient->id)->get();
 });
 
 $encounter = computed(function () {
     return Encounter::where('patient_id', $this->patient->id)
-        ->where('encounter_date', Carbon::today())
+        ->where('encounter_date', $this->filter ? $this->filter : Carbon::today())
         ->get()
         ->first();
 });
 
 $create = function () {
-    $this->form->store();
+    $this->encounterId = $this->form->store();
 
     $this->form->empty();
+
+    $this->dispatch('encounter-created', encounterId: $this->encounterId);
 
     $this->dispatch('close-modal', 'create-new-encounter');
 
     $this->dispatch('refresh');
+};
+
+$toggle = function () {
+    $this->show = !$this->show;
+};
+
+$filterDate = function (Encounter $encounter) {
+    $this->filter = $encounter->encounter_date;
 };
 ?>
 
 <div>
     <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md" wire:loading.class="opacity-50">
         <legend class="dark:text-gray-200 px-2">{{ __('Latest Encounter') }}</legend>
-
         @if ($this->encounter)
-            <x-table for="diagnostic_test">
+            <x-table for="encounter">
                 <x-table.tbody class="dark:border-gray-500">
                     <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                         <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
@@ -66,12 +77,37 @@ $create = function () {
             <livewire:patient.encounter.diagnostic-test :encounter="$this->encounter" />
         @else
             <div class="flex flex-col items-center">
-                <p class="mb-3">{{ __('no encounter recorded yet.') }}</p>
-                <x-secondary-button class="ms-3 py-3" x-data=""
-                    x-on:click="$dispatch('open-modal', 'create-new-encounter')">
-                    {{ __('Create Encounter') }}
-                </x-secondary-button>
+                <p class="mb-3">{{ __('no encounter recorded today.') }}</p>
+                <div class="flex gap-4 items-center">
+                    <x-secondary-button class="ms-3 py-3" x-data=""
+                        x-on:click="$dispatch('open-modal', 'create-new-encounter')">
+                        {{ __('Create Encounter') }}
+                    </x-secondary-button>
+                    <p>{{ __('-or-') }}</p>
+                    <x-secondary-button class="ms-3 py-3" wire:click="toggle">
+                        {{ __('Pick on lists') }}
+                    </x-secondary-button>
+                </div>
             </div>
+            @if ($this->show)
+                <x-table for="encounters">
+                    <x-table.thead>
+                        <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+                            <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
+                            <x-table.thead-cell :title="__('Date')" class="text-left" />
+                        </x-table.row>
+                    </x-table.thead>
+                    <x-table.tbody class="dark:border-gray-500">
+                        @foreach ($encounters as $encounter)
+                            <x-table.row class="bg-white dark:bg-gray-700 dark:text-white"
+                                wire:click="filterDate({{ $encounter }})">
+                                <x-table.tbody-cell :item="$encounter->chief_complaint ?? '--'" />
+                                <x-table.tbody-cell :item="$encounter->encounter_date ?? '--'" class="font-bold" />
+                            </x-table.row>
+                        @endforeach
+                    </x-table.tbody>
+                </x-table>
+            @endif
         @endif
     </fieldset>
     <x-modal name="create-new-encounter" :show="$errors->isNotEmpty()">

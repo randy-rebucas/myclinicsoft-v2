@@ -38,7 +38,6 @@ class MedicationForm extends Form
             'encounter_id' => $this->encounter_id,
             'patient_id' => $this->patient_id,
         ]);
-
     }
 
     public function empty()
@@ -47,5 +46,15 @@ class MedicationForm extends Form
         $this->dosage = '';
         $this->frequency = '';
         $this->notes = '';
+    }
+
+    public function setEncounterId($encounter_id)
+    {
+        $this->encounter_id = $encounter_id;
+    }
+
+    public function setPatientId($patient_id)
+    {
+        $this->patient_id = $patient_id;
     }
 }
