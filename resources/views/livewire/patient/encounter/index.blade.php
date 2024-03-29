@@ -12,7 +12,9 @@ form(EncounterForm::class);
 mount(function () {
     $this->form->patient_id = $this->patient->id;
 
-    $this->encounters = Encounter::where('patient_id', $this->patient->id)->get();
+    $this->encounters = Encounter::where('patient_id', $this->patient->id)
+        ->orderBy('encounter_date', 'desc')
+        ->get();
 });
 
 $encounter = computed(function () {
@@ -27,7 +29,7 @@ $create = function () {
 
     $this->form->empty();
 
-    $this->dispatch('encounter-created', encounterId: $this->encounterId);
+    $this->dispatch('set-encounter', encounterId: $this->encounterId);
 
     $this->dispatch('close-modal', 'create-new-encounter');
 
@@ -40,13 +42,45 @@ $toggle = function () {
 
 $filterDate = function (Encounter $encounter) {
     $this->filter = $encounter->encounter_date;
+    $this->show = false;
+    $this->dispatch('set-encounter', encounterId: $encounter->id);
 };
 ?>
 
 <div>
     <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md" wire:loading.class="opacity-50">
         <legend class="dark:text-gray-200 px-2">{{ __('Latest Encounter') }}</legend>
-        @if ($this->encounter)
+
+        <div class="flex gap-4 items-end">
+            <x-secondary-button class="ms-3 py-3" x-data=""
+                x-on:click="$dispatch('open-modal', 'create-new-encounter')">
+                {{ __('Create Encounter') }}
+            </x-secondary-button>
+            <x-secondary-button class="ms-3 py-3" wire:click="toggle">
+                {{ __('View all Encounter') }}
+            </x-secondary-button>
+        </div>
+
+        @if ($this->show)
+            <x-table for="encounters">
+                <x-table.thead>
+                    <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+                        <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
+                        <x-table.thead-cell :title="__('Date')" class="text-left" />
+                    </x-table.row>
+                </x-table.thead>
+                <x-table.tbody class="dark:border-gray-500">
+                    @foreach ($encounters as $encounter)
+                        <x-table.row class="bg-white dark:bg-gray-700 dark:text-white cursor-pointer"
+                            wire:click="filterDate({{ $encounter }})">
+                            <x-table.tbody-cell :item="$encounter->chief_complaint ?? '--'" />
+                            <x-table.tbody-cell :item="$encounter->encounter_date ?? '--'" class="font-bold" />
+                        </x-table.row>
+                    @endforeach
+                </x-table.tbody>
+            </x-table>
+        @endif
+        @if ($this->encounter && !$this->show)
             <x-table for="encounter">
                 <x-table.tbody class="dark:border-gray-500">
                     <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
@@ -59,55 +93,12 @@ $filterDate = function (Encounter $encounter) {
                     <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
                         <x-table.thead-cell :title="__('Notes')" class="text-left" />
                         <x-table.tbody-cell :item="$this->encounter->notes ?? '--'" colspan="3" />
-                        <x-table.tbody-cell :item="$this->encounter->id" :action="true">
-                            <a href="{{ route('prescription', $this->encounter->id) }}"
-                                class="btn btn-info m-1 font-medium underline" target="_blank">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="m9 14.25 6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0c1.1.128 1.907 1.077 1.907 2.185ZM9.75 9h.008v.008H9.75V9Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm4.125 4.5h.008v.008h-.008V13.5Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                </svg>
-                            </a>
-                        </x-table.tbody-cell>
                     </x-table.row>
                 </x-table.tbody>
             </x-table>
 
             <livewire:patient.encounter.physical-examination :encounter="$this->encounter" />
             <livewire:patient.encounter.diagnostic-test :encounter="$this->encounter" />
-        @else
-            <div class="flex flex-col items-center">
-                <p class="mb-3">{{ __('no encounter recorded today.') }}</p>
-                <div class="flex gap-4 items-center">
-                    <x-secondary-button class="ms-3 py-3" x-data=""
-                        x-on:click="$dispatch('open-modal', 'create-new-encounter')">
-                        {{ __('Create Encounter') }}
-                    </x-secondary-button>
-                    <p>{{ __('-or-') }}</p>
-                    <x-secondary-button class="ms-3 py-3" wire:click="toggle">
-                        {{ __('Pick on lists') }}
-                    </x-secondary-button>
-                </div>
-            </div>
-            @if ($this->show)
-                <x-table for="encounters">
-                    <x-table.thead>
-                        <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
-                            <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
-                            <x-table.thead-cell :title="__('Date')" class="text-left" />
-                        </x-table.row>
-                    </x-table.thead>
-                    <x-table.tbody class="dark:border-gray-500">
-                        @foreach ($encounters as $encounter)
-                            <x-table.row class="bg-white dark:bg-gray-700 dark:text-white"
-                                wire:click="filterDate({{ $encounter }})">
-                                <x-table.tbody-cell :item="$encounter->chief_complaint ?? '--'" />
-                                <x-table.tbody-cell :item="$encounter->encounter_date ?? '--'" class="font-bold" />
-                            </x-table.row>
-                        @endforeach
-                    </x-table.tbody>
-                </x-table>
-            @endif
         @endif
     </fieldset>
     <x-modal name="create-new-encounter" :show="$errors->isNotEmpty()">

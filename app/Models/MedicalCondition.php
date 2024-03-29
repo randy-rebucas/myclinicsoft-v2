@@ -17,7 +17,8 @@ class MedicalCondition extends Model
         'status',
         'treatment_plan',
         'notes',
-        'patient_id'
+        'patient_id',
+        'encounter_id'
     ];
 
     protected $dates = [
@@ -27,5 +28,10 @@ class MedicalCondition extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function encounter()
+    {
+        return $this->belongsTo(Encounter::class);
     }
 }

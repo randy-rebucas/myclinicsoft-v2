@@ -10,12 +10,8 @@ state('patient');
 
 form(MedicationForm::class);
 
-mount(function () {
-    $this->form->patient_id = $this->patient->id;
-});
-
 on([
-    'encounter-created' => function ($encounterId) {
+    'set-encounter' => function ($encounterId) {
         $this->form->setEncounterId($encounterId);
     },
 ]);
@@ -32,7 +28,11 @@ mount(function () {
 });
 
 $medications = computed(function () {
-    return Medication::where('patient_id', $this->patient->id)->get();
+    $query = Medication::query();
+    if ($this->form->encounter_id) {
+        $query->where('encounter_id', $this->form->encounter_id);
+    }
+    return $query->where('patient_id', $this->patient->id)->get();
 });
 
 $create = function () {
@@ -61,13 +61,28 @@ $delete = function (Medication $medication) {
                 <x-table.thead-cell :title="__('Dosage')" class="text-left" />
                 <x-table.thead-cell :title="__('Frequency')" class="text-left" />
                 <x-table.thead-cell title="" :action="true" class="text-right">
-                    <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
-                        x-on:click="$dispatch('open-modal', 'create-new-medication')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path
-                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                        </svg>
-                    </button>
+                    @if ($this->form->encounter_id)
+                        <div class="flex gap-6 justify-end">
+                            <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
+                                x-on:click="$dispatch('open-modal', 'create-new-medication')">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="w-5 h-5">
+                                    <path
+                                        d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                                </svg>
+                            </button>
+                            @if ($this->medications->count())
+                                <a href="{{ route('prescription', $this->form->encounter_id) }}"
+                                    class="btn btn-info m-1 font-medium underline" target="_blank">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m9 14.25 6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0c1.1.128 1.907 1.077 1.907 2.185ZM9.75 9h.008v.008H9.75V9Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm4.125 4.5h.008v.008h-.008V13.5Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                    </svg>
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>

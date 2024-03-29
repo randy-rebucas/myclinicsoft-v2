@@ -1,8 +1,10 @@
 <?php
 
+use Carbon\Carbon;
+use App\Models\Encounter;
 use App\Models\MedicalCondition;
 use App\Livewire\Forms\MedicalConditionForm;
-use function Livewire\Volt\{state, form, mount, computed};
+use function Livewire\Volt\{state, form, mount, on, computed};
 
 state([
     'patient',
@@ -14,12 +16,29 @@ state([
 
 form(MedicalConditionForm::class);
 
+on([
+    'set-encounter' => function ($encounterId) {
+        $this->form->setEncounterId($encounterId);
+    },
+]);
+
 mount(function () {
-    $this->form->patient_id = $this->patient->id;
+    $encounter = Encounter::where('patient_id', $this->patient->id)
+        ->where('encounter_date', Carbon::today())
+        ->get()
+        ->first();
+    if ($encounter) {
+        $this->form->setEncounterId($encounter->id);
+    }
+    $this->form->setPatientId($this->patient->id);
 });
 
 $medical_conditions = computed(function () {
-    return MedicalCondition::where('patient_id', $this->patient->id)->get();
+    $query = MedicalCondition::query();
+    if ($this->form->encounter_id) {
+        $query->where('encounter_id', $this->form->encounter_id);
+    }
+    return $query->where('patient_id', $this->patient->id)->get();
 });
 
 $create = function () {
@@ -48,13 +67,16 @@ $delete = function (MedicalCondition $medical_condition) {
                 <x-table.thead-cell :title="__('Diagnosis Date')" class="text-left" />
                 <x-table.thead-cell :title="__('Status')" class="text-left" />
                 <x-table.thead-cell title="" :action="true" class="text-right">
-                    <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
-                        x-on:click="$dispatch('open-modal', 'create-new-medical-condition')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path
-                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                        </svg>
-                    </button>
+                    @if ($this->form->encounter_id)
+                        <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
+                            x-on:click="$dispatch('open-modal', 'create-new-medical-condition')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="w-5 h-5">
+                                <path
+                                    d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                            </svg>
+                        </button>
+                    @endif
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>

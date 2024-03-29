@@ -26,6 +26,9 @@ class MedicalConditionForm extends Form
     #[Validate('required')]
     public $patient_id;
 
+    #[Validate('required')]
+    public $encounter_id;
+
     public function store()
     {
         $this->validate();
@@ -36,6 +39,7 @@ class MedicalConditionForm extends Form
             'status' => $this->status,
             'treatment_plan' => $this->treatment_plan,
             'notes' => $this->notes,
+            'encounter_id' => $this->encounter_id,
             'patient_id' => $this->patient_id,
         ]);
 
@@ -48,5 +52,15 @@ class MedicalConditionForm extends Form
         $this->status = '';
         $this->treatment_plan = '';
         $this->notes = '';
+    }
+
+    public function setEncounterId($encounter_id)
+    {
+        $this->encounter_id = $encounter_id;
+    }
+
+    public function setPatientId($patient_id)
+    {
+        $this->patient_id = $patient_id;
     }
 }
