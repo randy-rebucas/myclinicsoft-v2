@@ -5,16 +5,12 @@ use Carbon\Carbon;
 use App\Livewire\Forms\EncounterForm;
 use function Livewire\Volt\{state, form, mount, computed};
 
-state(['patient', 'encounterId', 'encounters', 'filter', 'show' => false]);
+state(['patient', 'encounterId', 'filter', 'show' => false]);
 
 form(EncounterForm::class);
 
 mount(function () {
     $this->form->patient_id = $this->patient->id;
-
-    $this->encounters = Encounter::where('patient_id', $this->patient->id)
-        ->orderBy('encounter_date', 'desc')
-        ->get();
 });
 
 $encounter = computed(function () {
@@ -22,6 +18,12 @@ $encounter = computed(function () {
         ->where('encounter_date', $this->filter ? $this->filter : Carbon::today())
         ->get()
         ->first();
+});
+
+$encounters = computed(function () {
+    return Encounter::where('patient_id', $this->patient->id)
+        ->orderBy('encounter_date', 'desc')
+        ->get();
 });
 
 $create = function () {
@@ -70,7 +72,7 @@ $filterDate = function (Encounter $encounter) {
                     </x-table.row>
                 </x-table.thead>
                 <x-table.tbody class="dark:border-gray-500">
-                    @foreach ($encounters as $encounter)
+                    @foreach ($this->encounters as $encounter)
                         <x-table.row class="bg-white dark:bg-gray-700 dark:text-white cursor-pointer"
                             wire:click="filterDate({{ $encounter }})">
                             <x-table.tbody-cell :item="$encounter->chief_complaint ?? '--'" />
