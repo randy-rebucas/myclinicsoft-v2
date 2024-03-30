@@ -20,6 +20,7 @@ $encounter = computed(function () {
         ->first();
 });
 
+// get all encounters
 $encounters = computed(function () {
     return Encounter::where('patient_id', $this->patient->id)
         ->orderBy('encounter_date', 'desc')
