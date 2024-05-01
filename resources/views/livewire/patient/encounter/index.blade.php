@@ -110,14 +110,10 @@ $filterDate = function (Encounter $encounter) {
             <h2 class="text-lg font-medium text-gray-900">
                 {{ __('Create New') }}
             </h2>
-            <div class="w-1/3" x-data x-init="flatpickr($refs.dateInput, {
-                altInput: true,
-                altFormat: 'F j, Y',
-                dateFormat: 'Y-m-d'
-            })">
+            <div class="w-1/3">
                 <x-input-label for="encounter_date" value="{{ __('Encounter Date') }}" />
-                <x-text-input wire:model="form.encounter_date" x-ref="dateInput" id="encounter_date"
-                    name="encounter_date" type="text" class="mt-1 block w-full" />
+                <x-text-input wire:model="form.encounter_date" id="encounter_date"
+                    name="encounter_date" type="date" class="mt-1 block w-full" />
                 <x-input-error :messages="$errors->get('form.encounter_date')" class="mt-2" />
             </div>
             <div class="mt-4">

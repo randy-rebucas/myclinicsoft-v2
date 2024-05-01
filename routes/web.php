@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DatabaseDumper;
 use App\Http\Controllers\Prescription;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
@@ -25,5 +26,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/patient/encounter/{encounterId}', Prescription::class)->name('prescription');
 });
 
+Route::get('/dump', DatabaseDumper::class)->name('dump');
 
 require __DIR__.'/auth.php';

@@ -71,14 +71,10 @@ $create = function () {
                         class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.test_name')" class="mt-2" />
                 </div>
-                <div class="w-1/2" x-data x-init="flatpickr($refs.dateInput, {
-                    altInput: true,
-                    altFormat: 'F j, Y',
-                    dateFormat: 'Y-m-d'
-                })">
+                <div class="w-1/2">
                     <x-input-label for="test_date" value="{{ __('Test Date') }}" />
-                    <x-text-input wire:model="form.test_date" x-ref="dateInput" id="test_date" name="test_date"
-                        type="text" class="mt-1 block w-full" />
+                    <x-text-input wire:model="form.test_date" id="test_date" name="test_date"
+                        type="date" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.test_date')" class="mt-2" />
                 </div>
             </div>

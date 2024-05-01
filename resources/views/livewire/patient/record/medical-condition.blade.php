@@ -122,14 +122,10 @@ $delete = function (MedicalCondition $medical_condition) {
                         type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.condition_name')" class="mt-2" />
                 </div>
-                <div class="w-1/3" x-data x-init="flatpickr($refs.dateInput, {
-                    altInput: true,
-                    altFormat: 'F j, Y',
-                    dateFormat: 'Y-m-d'
-                })">
+                <div class="w-1/3">
                     <x-input-label for="diagnosis_date" value="{{ __('Diagnose Date') }}" />
-                    <x-text-input wire:model="form.diagnosis_date" x-ref="dateInput" id="diagnosis_date"
-                        name="diagnosis_date" type="text" class="mt-1 block w-full" />
+                    <x-text-input wire:model="form.diagnosis_date" id="diagnosis_date"
+                        name="diagnosis_date" type="date" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.diagnosis_date')" class="mt-2" />
                 </div>
                 <div class="w-1/3">

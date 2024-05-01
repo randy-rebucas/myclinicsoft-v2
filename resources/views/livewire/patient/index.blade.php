@@ -49,7 +49,7 @@ $edit = function ($id) {
 
 $create = function () {
     $this->patient = null;
-    $this->form->clearInputs();
+    // $this->form->clearInputs();
     $this->dispatch('open-modal', 'form-patient');
 };
 
@@ -186,7 +186,7 @@ $save = function () {
                     <div class="w-1/3">
                         <x-input-label for="date_of_birth" :value="__('Birth Date')" />
                         <x-text-input wire:model="form.date_of_birth" id="date_of_birth" class="block mt-1 w-full"
-                            type="text" name="date_of_birth" />
+                            type="date" name="date_of_birth" pattern="\d{4}-\d{2}-\d{2}"/>
                         <x-input-error :messages="$errors->get('form.date_of_birth')" class="mt-2" />
                     </div>
                     <div class="w-1/3">

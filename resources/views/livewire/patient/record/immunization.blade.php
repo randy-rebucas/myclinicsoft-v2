@@ -105,14 +105,10 @@ $delete = function (Immunization $immunization) {
                         class="block mt-1 w-full" />
                     <x-input-error :messages="$errors->get('form.administrator')" class="mt-2" />
                 </div>
-                <div class="w-1/3" x-data x-init="flatpickr($refs.dateInput, {
-                    altInput: true,
-                    altFormat: 'F j, Y',
-                    dateFormat: 'Y-m-d'
-                })">
+                <div class="w-1/3">
                     <x-input-label for="date_administered" value="{{ __('Date Administered') }}" />
-                    <x-text-input wire:model="form.date_administered" x-ref="dateInput" id="date_administered"
-                        name="date_administered" type="text" class="mt-1 block w-full" />
+                    <x-text-input wire:model="form.date_administered" id="date_administered"
+                        name="date_administered" type="date" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.date_administered')" class="mt-2" />
                 </div>
             </div>
