@@ -201,7 +201,7 @@
                 </main>
 
                 <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                    Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }}) <br />
+                    Myclinicsoft v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }}) <br />
                 </footer>
             </div>
         </div>
