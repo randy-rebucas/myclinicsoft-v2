@@ -16,15 +16,15 @@ class DiagnosticTest extends Model
         'test_date',
         'results',
         'notes',
-        'encounter_id'
+        'patient_id'
     ];
 
     protected $dates = [
         'test_date'
     ];
 
-    public function encounter()
+    public function patient()
     {
-        return $this->belongsTo(Encounter::class);
+        return $this->belongsTo(Patient::class);
     }
 }

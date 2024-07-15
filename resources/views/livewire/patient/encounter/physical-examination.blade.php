@@ -5,7 +5,7 @@ use App\Livewire\Forms\PhysicalExaminationForm;
 use function Livewire\Volt\{state, form, rules, mount, computed};
 
 state([
-    'encounter',
+    'patientId',
     'items',
     'types' => [
         'weight' => 'Weight',
@@ -17,12 +17,12 @@ state([
 form(PhysicalExaminationForm::class);
 
 mount(function () {
-    $this->form->encounter_id = $this->encounter->id;
+    $this->form->patient_id = $this->patientId;
     $this->items[] = [];
 });
 
 $physical_exam = computed(function () {
-    return PhysicalExamination::where('encounter_id', $this->encounter->id)
+    return PhysicalExamination::where('patient_id', $this->patientId)
         ->orderBy('created_at', 'desc')
         ->latest()
         ->first();
@@ -51,13 +51,15 @@ $remove = function ($index) {
 ?>
 
 <div class="relative">
-    <button type="button" class="btn btn-info m-1 font-medium underline absolute right-0 top-2" x-data=""
-        x-on:click="$dispatch('open-modal', 'create-new-physical-exam')">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-            <path
-                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-        </svg>
-    </button>
+    @if (!$this->physical_exam)
+        <button type="button" class="btn btn-info m-1 font-medium underline absolute right-0 top-2"
+            x-data="" x-on:click="$dispatch('open-modal', 'create-new-physical-exam')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                <path
+                    d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+            </svg>
+        </button>
+    @endif
     <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Physical Exam') }}</h3>
     <x-table for="physical_exam">
         <x-table.tbody class="dark:border-gray-500">
