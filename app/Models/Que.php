@@ -5,24 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PhysicalExamination extends Model
+class Que extends Model
 {
     use HasFactory;
 
-    public $timestamps = FALSE;
+    protected $table = 'queing';
 
     protected $fillable = [
-        'vital_signs',
-        'general_appearance',
-        'systematic_findings',
-        'notes',
-        'patient_id'
+        'que_number',
+        'metadata',
+        'patient_id',
+        'status'
     ];
 
     protected function casts(): array
     {
         return [
-            'vital_signs' => 'collection',
+            'metadata' => 'collection',
         ];
     }
 

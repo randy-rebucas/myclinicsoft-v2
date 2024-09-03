@@ -21,7 +21,7 @@ class DiagnosticTestForm extends Form
     public $notes;
 
     #[Validate('required')]
-    public $encounter_id;
+    public $patient_id;
 
     public function store()
     {
@@ -32,10 +32,10 @@ class DiagnosticTestForm extends Form
 
     public function empty()
     {
-        $this->condition_name = '';
-        $this->diagnosis_date = '';
-        $this->status = '';
-        $this->treatment_plan = '';
+        $this->test_name = '';
+        $this->test_date = '';
+        $this->results = '';
+        $this->patient_id = '';
         $this->notes = '';
     }
 }

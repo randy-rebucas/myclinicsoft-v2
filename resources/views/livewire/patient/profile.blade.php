@@ -15,7 +15,7 @@ state('patient');
             class="absolute -bottom-12 flex h-[87px] w-[87px] items-center justify-center rounded-full border-[4px] border-white bg-pink-400 dark:!border-navy-700">
             @if ($patient->avatar)
                 <img class="h-full w-full rounded-full" src="{{ asset('storage/' . $patient->avatar) }}"
-                    :alt="$patient - > full_name">
+                    :alt="$patient->full_name"/>
             @else
                 <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
             @endif

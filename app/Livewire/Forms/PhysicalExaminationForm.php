@@ -8,11 +8,7 @@ use Livewire\Form;
 
 class PhysicalExaminationForm extends Form
 {
-    
-    #[Validate('required|string|max:255')]
     public $general_appearance;
-    
-    #[Validate('required|string|max:255')]
     public $systematic_findings;
     
     #[Validate([
@@ -30,21 +26,21 @@ class PhysicalExaminationForm extends Form
     public $notes;
 
     #[Validate('required')]
-    public $encounter_id;
+    public $patient_id;
 
     // Blood Glucose
     // Blood Pressure
     public function store()
     {
         $validated = $this->validate();
+
         PhysicalExamination::create($validated);
     }
 
     public function empty()
     {
-        $this->medication_name = '';
-        $this->dosage = '';
-        $this->frequency = '';
+        $this->general_appearance = '';
+        $this->systematic_findings = '';
         $this->notes = '';
     }
 }
