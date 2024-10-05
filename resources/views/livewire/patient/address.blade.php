@@ -12,7 +12,7 @@ state([
 ?>
 
 <div>
-    <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Addresses') }}</h3>
+    <h3 class="text-xl font-bold text-navy-700">{{ __('Addresses') }}</h3>
     @if ($addresses)
         <ul class="flex min-w-[240px] flex-col gap-1 p-2 font-sans text-base font-normal text-blue-gray-700">
             @forelse ($addresses as $address)
@@ -25,7 +25,7 @@ state([
                     </address>
                 </li>
             @empty
-                <li class="bg-white dark:bg-gray-700 dark:text-white">
+                <li class="bg-white">
                     {{ __('No patient address found!!') }}
                 </li>
             @endforelse

@@ -55,10 +55,10 @@ $generateSequenceNumber = function ($tablename, array $conditions = [], string $
 
 <div>
     <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md" wire:loading.class="opacity-50">
-        <legend class="dark:text-gray-200 px-2">{{ __('Basic Information') }}</legend>
+        <legend class="text-gray-400 px-2">{{ __('Basic Information') }}</legend>
 
         <div class="align-center flex gap-4 justify-between">
-            <p class="text-xl font-bold text-navy-700 dark:text-white">{{ $this->que ? $this->que->que_number : '' }}</p>
+            <p class="text-xl font-bold text-navy-700">{{ $this->que ? $this->que->que_number : '' }}</p>
             @if ($this->que)
                 <x-danger-button class="ms-3 py-3" wire:click="delete('{{ $this->que->id }}')">
                     {{ __('Remove from waiting list') }}
@@ -69,7 +69,7 @@ $generateSequenceNumber = function ($tablename, array $conditions = [], string $
                 </x-secondary-button>
             @endif
         </div>
-        
+
         @if ($this->que)
             <livewire:patient.encounter.physical-examination :patientId="$this->patient->id" />
         @endif

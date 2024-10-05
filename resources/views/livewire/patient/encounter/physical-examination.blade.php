@@ -60,16 +60,16 @@ $remove = function ($index) {
             </svg>
         </button>
     @endif
-    <h3 class="text-xl font-bold text-navy-700 dark:text-white">{{ __('Physical Exam') }}</h3>
+    <h3 class="text-xl font-bold text-navy-700 ">{{ __('Physical Exam') }}</h3>
     <x-table for="physical_exam">
-        <x-table.tbody class="dark:border-gray-500">
-            <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+        <x-table.tbody class="">
+            <x-table.row class="bg-white ">
                 <x-table.thead-cell :title="__('General Apperance')" class="text-left" />
                 <x-table.tbody-cell :item="$this->physical_exam->general_appearance ?? '--'" colspan="2" />
                 <x-table.thead-cell :title="__('Systematic Findings')" class="text-left" />
                 <x-table.tbody-cell :item="$this->physical_exam->systematic_findings ?? '--'" colspan="2" />
             </x-table.row>
-            <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+            <x-table.row class="bg-white ">
                 @if ($this->physical_exam)
                     @foreach ($this->physical_exam->vital_signs as $vital_sign)
                         <x-table.thead-cell :title="__($vital_sign['type'])" class="text-left" />
@@ -95,7 +95,7 @@ $remove = function ($index) {
                     @endforeach
                 @endif
             </x-table.row>
-            <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+            <x-table.row class="bg-white ">
                 <x-table.thead-cell :title="__('Notes')" class="text-left" />
                 <x-table.tbody-cell :item="$this->physical_exam->notes ?? '--'" colspan="5" />
             </x-table.row>
@@ -122,7 +122,7 @@ $remove = function ($index) {
                 </div>
             </div>
             <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md mt-4">
-                <legend class="dark:text-gray-200 px-2">{{ __('Vital signs') }}</legend>
+                <legend class="text-gray-400 px-2">{{ __('Vital signs') }}</legend>
                 @foreach ($this->items as $index => $item)
                     <div class="flex justify-between items-end gap-4">
                         <div class="w-1/2">

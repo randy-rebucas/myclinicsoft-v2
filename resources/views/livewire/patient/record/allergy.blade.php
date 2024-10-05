@@ -43,7 +43,7 @@ $delete = function (Allergy $allergy) {
 <div>
     <x-table for="allergies">
         <x-table.thead>
-            <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+            <x-table.row class="">
                 <x-table.thead-cell :title="__('Allergen')" class="text-left" />
                 <x-table.thead-cell :title="__('Reaction')" class="text-left" />
                 <x-table.thead-cell :title="__('Severity')" class="text-left" />
@@ -58,9 +58,9 @@ $delete = function (Allergy $allergy) {
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             @forelse ($this->allergies as $allergy)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$allergy->allergen" />
                     <x-table.tbody-cell :item="$allergy->reaction" />
                     <x-table.tbody-cell :item="$allergy->severity" class="uppercase"/>
@@ -75,12 +75,12 @@ $delete = function (Allergy $allergy) {
                         </button>
                     </x-table.tbody-cell>
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
                     <x-table.tbody-cell :item="$allergy->notes ?? '--'" colspan="4" />
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white  text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No allergy record')" />
                 </x-table.row>
             @endforelse

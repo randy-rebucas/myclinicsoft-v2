@@ -8,7 +8,7 @@ state('patient');
 
 <div>
     <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md">
-        <legend class="dark:text-gray-200 px-2">{{ __('Record') }}</legend>
+        <legend class="text-gray-400 px-2">{{ __('Record') }}</legend>
         <ul class="" x-data="{ selected: 0 }">
             <li class="flex align-center flex-col">
                 <h4 @click="selected !== 0 ? selected = 0 : selected = null"

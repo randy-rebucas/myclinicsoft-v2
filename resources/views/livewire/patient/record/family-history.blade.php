@@ -44,7 +44,7 @@ $delete = function (FamilyHistory $family_history) {
 <div>
     <x-table for="family-histories">
         <x-table.thead>
-            <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+            <x-table.row class="">
                 <x-table.thead-cell :title="__('Relationship')" class="text-left" />
                 <x-table.thead-cell :title="__('Condition')" class="text-left" />
                 <x-table.thead-cell title="" :action="true" class="text-right">
@@ -58,9 +58,9 @@ $delete = function (FamilyHistory $family_history) {
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             @forelse ($this->family_histories as $family_history)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$family_history->relationship" />
                     <x-table.tbody-cell :item="$family_history->condition" />
                     <x-table.tbody-cell :item="$family_history->id" class="text-right md:py-1" :action="true">
@@ -74,12 +74,12 @@ $delete = function (FamilyHistory $family_history) {
                         </button>
                     </x-table.tbody-cell>
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
                     <x-table.tbody-cell :item="$family_history->notes ?? '--'" colspan="3" />
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white  text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No family history record')" />
                 </x-table.row>
             @endforelse
