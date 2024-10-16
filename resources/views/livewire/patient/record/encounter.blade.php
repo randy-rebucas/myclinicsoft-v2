@@ -41,7 +41,7 @@ $delete = function (Encounter $encounter) {
 <div>
     <x-table for="encounters">
         <x-table.thead>
-            <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+            <x-table.row class="">
                 <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
                 <x-table.thead-cell :title="__('Date')" class="text-left" />
                 <x-table.thead-cell title="" :action="true" class="text-right">
@@ -55,9 +55,9 @@ $delete = function (Encounter $encounter) {
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             @forelse ($this->encounters as $encounter)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white cursor-pointer"
+                <x-table.row class="bg-white  cursor-pointer"
                     wire:click="filterDate({{ $encounter }})">
                     <x-table.tbody-cell :item="$encounter->chief_complaint ?? '--'" />
                     <x-table.tbody-cell :item="$encounter->encounter_date ?? '--'" class="font-bold" />
@@ -73,7 +73,7 @@ $delete = function (Encounter $encounter) {
                     </x-table.tbody-cell>
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No encounter record')" />
                 </x-table.row>
             @endforelse

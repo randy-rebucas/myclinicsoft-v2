@@ -36,9 +36,9 @@ $delete = function (DiagnosticTest $diagnostic_test) {
 
 <div class="relative">
     <x-table for="diagnostic_test">
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             <x-table.thead>
-                <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+                <x-table.row class="">
                     <x-table.thead-cell colspan="5" title="" :action="true" class="text-right">
                         <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
                             x-on:click="$dispatch('open-modal', 'create-new-diagnostic-test')">
@@ -52,7 +52,7 @@ $delete = function (DiagnosticTest $diagnostic_test) {
                 </x-table.row>
             </x-table.thead>
             @forelse ($this->tests as $test)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+                <x-table.row class="bg-white ">
                     <x-table.thead-cell :title="__('Test Name')" class="text-left" />
                     <x-table.tbody-cell :item="$test->test_name ?? '--'" />
 
@@ -69,16 +69,16 @@ $delete = function (DiagnosticTest $diagnostic_test) {
                         </button>
                     </x-table.tbody-cell>
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+                <x-table.row class="bg-white ">
                     <x-table.thead-cell :title="__('Results')" class="text-left" />
                     <x-table.tbody-cell colspan="4" :item="$test->results ?? '--'" colspan="3" />
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+                <x-table.row class="bg-white ">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
                     <x-table.tbody-cell colspan="4" :item="$test->notes ?? '--'" colspan="3" />
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white  text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No diagnostic test record')" />
                 </x-table.row>
             @endforelse

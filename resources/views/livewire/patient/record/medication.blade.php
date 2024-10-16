@@ -56,7 +56,7 @@ $delete = function (Medication $medication) {
 <div>
     <x-table for="medication">
         <x-table.thead>
-            <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+            <x-table.row class="">
                 <x-table.thead-cell :title="__('Medication Name')" class="text-left" />
                 <x-table.thead-cell :title="__('Dosage')" class="text-left" />
                 <x-table.thead-cell :title="__('Frequency')" class="text-left" />
@@ -86,9 +86,9 @@ $delete = function (Medication $medication) {
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             @forelse ($this->medications as $medication)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$medication->medication_name" />
                     <x-table.tbody-cell :item="$medication->dosage" />
                     <x-table.tbody-cell :item="$medication->frequency" />
@@ -103,12 +103,12 @@ $delete = function (Medication $medication) {
                         </button>
                     </x-table.tbody-cell>
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
                     <x-table.tbody-cell :item="$medication->notes ?? '--'" colspan="3" />
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white  text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No medication record')" />
                 </x-table.row>
             @endforelse

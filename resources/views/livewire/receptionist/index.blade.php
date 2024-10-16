@@ -86,16 +86,16 @@ $save = function () {
                         <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
                             <x-table for="med-representative">
                                 <x-table.thead>
-                                    <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+                                    <x-table.row class="">
                                         <x-table.thead-cell :title="__('Full Name')" class="text-left" />
                                         <x-table.thead-cell :title="__('Phone Number')" class="text-center" />
                                         <x-table.thead-cell :title="__('Gender')" class="text-center" />
                                         <x-table.thead-cell title="" class="text-right" />
                                     </x-table.row>
                                 </x-table.thead>
-                                <x-table.tbody class="dark:border-gray-500">
+                                <x-table.tbody class="">
                                     @forelse ($receptionists as $receptionist)
-                                        <x-table.row class="bg-white dark:bg-gray-700 dark:text-white"
+                                        <x-table.row class="bg-white "
                                             wire:loading.class="opacity-50">
                                             <x-table.tbody-cell :item="$receptionist->full_name" />
                                             <x-table.tbody-cell :item="$receptionist->phone_number" class="text-center" />
@@ -133,7 +133,7 @@ $save = function () {
                                             </x-table.tbody-cell>
                                         </x-table.row>
                                     @empty
-                                        <x-table.row class="bg-white dark:bg-gray-700 dark:text-white">
+                                        <x-table.row class="bg-white ">
                                             <x-table.tbody-cell colspan="6" :item="__('No med receptionist found!!')" />
                                         </x-table.row>
                                     @endforelse
@@ -156,7 +156,7 @@ $save = function () {
             </h2>
 
             <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md">
-                <legend class="dark:text-gray-200 px-2">{{ __('Personal Details') }}</legend>
+                <legend class="text-gray-400 px-2">{{ __('Personal Details') }}</legend>
                 <div class="flex justify-between gap-4">
                     <div class="w-1/2">
                         <x-input-label for="first_name" :value="__('First Name')" />
@@ -189,7 +189,7 @@ $save = function () {
             </fieldset>
 
             <fieldset class="mt-6 border-2 border-double border-gray-200 p-4 rounded-md hidden">
-                <legend class="dark:text-gray-200 px-2">{{ __('Auth Credentials') }}</legend>
+                <legend class="text-gray-400 px-2">{{ __('Auth Credentials') }}</legend>
                 <div class="flex justify-between gap-4">
                     <div class="w-1/2">
                         <x-input-label for="name" :value="__('Username')" />

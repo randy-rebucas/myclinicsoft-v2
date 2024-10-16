@@ -43,7 +43,7 @@ $delete = function (Immunization $immunization) {
 <div>
     <x-table for="family-histories">
         <x-table.thead>
-            <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+            <x-table.row class="">
                 <x-table.thead-cell :title="__('Vaccine Name')" class="text-left" />
                 <x-table.thead-cell :title="__('Date Administered')" class="text-left" />
                 <x-table.thead-cell :title="__('Administrator')" class="text-left" />
@@ -58,9 +58,9 @@ $delete = function (Immunization $immunization) {
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             @forelse ($this->immunizations as $immunization)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$immunization->vaccine_name" />
                     <x-table.tbody-cell :item="$immunization->date_administered" />
                     <x-table.tbody-cell :item="$immunization->administrator" class="uppercase" />
@@ -75,12 +75,12 @@ $delete = function (Immunization $immunization) {
                         </button>
                     </x-table.tbody-cell>
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
                     <x-table.tbody-cell :item="$immunization->notes ?? '--'" colspan="4" />
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white  text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No immunization record')" />
                 </x-table.row>
             @endforelse

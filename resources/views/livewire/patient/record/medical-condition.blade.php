@@ -61,7 +61,7 @@ $delete = function (MedicalCondition $medical_condition) {
 <div>
     <x-table for="medical-condition">
         <x-table.thead>
-            <x-table.row class="dark:bg-gray-900 dark:text-gray-100">
+            <x-table.row class="">
                 <x-table.thead-cell :title="__('Condition Name')" class="text-left" />
                 <x-table.thead-cell :title="__('Treatment Plan')" class="text-left" />
                 <x-table.thead-cell :title="__('Diagnosis Date')" class="text-left" />
@@ -80,9 +80,9 @@ $delete = function (MedicalCondition $medical_condition) {
                 </x-table.thead-cell>
             </x-table.row>
         </x-table.thead>
-        <x-table.tbody class="dark:border-gray-500">
+        <x-table.tbody class="">
             @forelse ($this->medical_conditions as $medical_condition)
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.tbody-cell :item="$medical_condition->condition_name" />
                     <x-table.tbody-cell :item="$medical_condition->treatment_plan" />
                     <x-table.tbody-cell :item="$medical_condition->diagnosis_date" />
@@ -98,12 +98,12 @@ $delete = function (MedicalCondition $medical_condition) {
                         </button>
                     </x-table.tbody-cell>
                 </x-table.row>
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white" wire:loading.class="opacity-50">
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
                     <x-table.thead-cell :title="__('Notes')" class="text-left" />
                     <x-table.tbody-cell :item="$medical_condition->notes ?? '--'" colspan="5" />
                 </x-table.row>
             @empty
-                <x-table.row class="bg-white dark:bg-gray-700 dark:text-white text-center">
+                <x-table.row class="bg-white text-center">
                     <x-table.tbody-cell colspan="7" :item="__('No medical condition record')" />
                 </x-table.row>
             @endforelse
