@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Nova;
+use Illuminate\Support\Facades\Blade;
 use Laravel\Nova\NovaApplicationServiceProvider;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
@@ -16,6 +17,17 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+
+        Nova::footer(function ($request) {
+            return Blade::render('
+                @env(\'prod\')
+                    This is production!
+                @endenv
+            ');
+        });
+
+        Nova::withBreadcrumbs();
+        Nova::withoutThemeSwitcher();
     }
 
     /**
@@ -42,7 +54,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         Gate::define('viewNova', function ($user) {
             return in_array($user->email, [
-                //
+                'rebucasrandy1986@gmail.com'
             ]);
         });
     }

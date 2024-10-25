@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "13fd3dfbb7c6ee5a384f0f892cff00aa",
+    "content-hash": "51ba1e50d5a3ac5340d2c157a0708d99",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -7341,6 +7341,51 @@
                 }
             ],
             "time": "2022-03-08T17:03:00+00:00"
+        },
+        {
+            "name": "wamesk/laravel-nova-tel-input",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wamesk/laravel-nova-tel-input.git",
+                "reference": "11c8fd8888fec15a5a1dafe5389a3e728cbc2e6b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wamesk/laravel-nova-tel-input/zipball/11c8fd8888fec15a5a1dafe5389a3e728cbc2e6b",
+                "reference": "11c8fd8888fec15a5a1dafe5389a3e728cbc2e6b",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.3|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Wame\\TelInput\\FieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Wame\\TelInput\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A Laravel Nova field.",
+            "keywords": [
+                "laravel",
+                "nova"
+            ],
+            "support": {
+                "issues": "https://github.com/wamesk/laravel-nova-tel-input/issues",
+                "source": "https://github.com/wamesk/laravel-nova-tel-input/tree/1.0.0"
+            },
+            "time": "2023-03-13T14:36:34+00:00"
         },
         {
             "name": "webmozart/assert",

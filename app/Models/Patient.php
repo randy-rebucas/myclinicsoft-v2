@@ -32,6 +32,18 @@ class Patient extends Model
         'date_of_birth'
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'date_of_birth' => 'date',
+        ];
+    }
+
     public function getAgeAttribute()
     {
         return Carbon::parse($this->attributes['date_of_birth'])->age;
