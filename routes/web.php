@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('/settings', 'setting.index')->name('settings');
     
     Route::get('/patient/encounter/{encounterId}', Prescription::class)->name('prescription');
+    Route::get('/patient/{patient}/prescriptions', App\Livewire\Patient\Prescription\Index::class)->name('patient.prescriptions.index');
 });
 
 Route::get('/dump', DatabaseDumper::class)->name('dump');
