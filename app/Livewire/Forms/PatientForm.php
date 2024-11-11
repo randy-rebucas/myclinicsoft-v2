@@ -56,4 +56,13 @@ class PatientForm extends UserForm
             'user_id' => $this->ensureStoreUser()->id,
         ]);
     }
+
+    public function clearInputs()
+    {
+        $this->first_name = '';
+        $this->last_name = '';
+        $this->phone_number = '';
+        $this->date_of_birth = '';
+        $this->gender = '';
+    }
 }

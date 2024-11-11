@@ -18,7 +18,7 @@ new class extends Component
 
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -33,30 +33,8 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('patients')" :active="request()->routeIs('patients')" wire:navigate>
+                    <x-nav-link :href="route('patients')" :active="request()->routeIs('patients.*')" wire:navigate>
                         {{ __('Patients') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('doctors')" :active="request()->routeIs('doctors')" wire:navigate>
-                        {{ __('Doctors') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('med-representatives')" :active="request()->routeIs('med-representatives')" wire:navigate>
-                        {{ __('Med Representatives') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('receptionists')" :active="request()->routeIs('receptionists')" wire:navigate>
-                        {{ __('Receptionists') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('roles')" :active="request()->routeIs('roles')" wire:navigate>
-                        {{ __('Roles') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -111,6 +89,9 @@ new class extends Component
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('patients')" :active="request()->routeIs('patients.*')" wire:navigate>
+                {{ __('Patients') }}
             </x-responsive-nav-link>
         </div>
 
