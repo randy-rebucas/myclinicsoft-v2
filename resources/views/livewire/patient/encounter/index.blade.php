@@ -36,11 +36,20 @@ $delete = function (Que $que) {
     $this->dispatch('refresh');
 };
 
-// $filterDate = function (Encounter $encounter) {
-//     $this->filter = $encounter->encounter_date;
-//     $this->show = false;
-//     $this->dispatch('set-encounter', encounterId: $encounter->id);
-// };
+$filterDate = function (Encounter $encounter) {
+    $this->filter = $encounter->encounter_date;
+    $this->show = false;
+    $this->dispatch('set-encounter', encounterId: $encounter->id);
+};
+
+$encounters = computed(function () {
+    return Encounter::where('patient_id', $this->patient->id)
+        ->when($this->filter, function ($query) {
+            return $query->whereDate('encounter_date', $this->filter);
+        })
+        ->latest('encounter_date')
+        ->get();
+});
 
 $generateSequenceNumber = function ($tablename, array $conditions = [], string $prefix, int $length = 5) {
     $model = DB::table($tablename);
@@ -75,4 +84,23 @@ $generateSequenceNumber = function ($tablename, array $conditions = [], string $
         @endif
     </fieldset>
 
+    <div class="mt-4">
+        <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md">
+            <legend class="text-gray-400 px-2">{{ __('Encounter History') }}</legend>
+
+            <div class="space-y-4">
+                @foreach($this->encounters as $encounter)
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <span class="font-semibold">{{ $encounter->encounter_date->format('M d, Y') }}</span>
+                            <span class="text-gray-600 ml-2">{{ $encounter->encounter_type }}</span>
+                        </div>
+                        <x-secondary-button wire:click="filterDate('{{ $encounter->id }}')">
+                            {{ __('View Details') }}
+                        </x-secondary-button>
+                    </div>
+                @endforeach
+            </div>
+        </fieldset>
+    </div>
 </div>
