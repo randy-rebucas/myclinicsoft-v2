@@ -70,7 +70,7 @@ on(['set-date' => function ($date) {
 
 ?>
 <section>
-    <div class="min-w-full">
+    <div class="max-w-7xl mx-auto">
         <div class="space-y-6">
             <div class="flex justify-between">
                 <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />

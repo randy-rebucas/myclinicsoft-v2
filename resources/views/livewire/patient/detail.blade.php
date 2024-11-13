@@ -3,7 +3,7 @@
 use App\Models\Patient;
 use App\Models\Queue;
 use App\Models\Department;
-use function Livewire\Volt\{layout, form, computed, state, mount, title};
+use function Livewire\Volt\{layout, form, computed, state, on, mount, title};
 use App\Livewire\Forms\QueueForm;
 
 state(['patientId'])->url();
@@ -42,6 +42,7 @@ $update = function (Queue $que, $status) {
     $que->save();
 
     $this->dispatch('refresh');
+    $this->dispatch('encounter');
 };
 
 $generateSequenceNumber = function ($tablename, array $conditions = [], string $prefix, int $length = 5) {
