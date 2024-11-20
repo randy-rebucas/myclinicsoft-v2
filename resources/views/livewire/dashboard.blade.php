@@ -4,6 +4,7 @@ use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Visit;
 use App\Models\Patient;
+use App\Models\Queue;
 
 new #[Layout('layouts.app')] class extends Component {
     public function with(): array
@@ -13,32 +14,26 @@ new #[Layout('layouts.app')] class extends Component {
                 [
                     'label' => 'Total Patients',
                     'value' => Patient::count(),
-                    'icon' => 'users'
+                    'icon' => 'heroicon-o-users',
                 ],
                 [
                     'label' => 'New Patients',
                     'value' => Patient::whereMonth('created_at', now()->month)->count(),
-                    'icon' => 'user-plus'
+                    'icon' => 'heroicon-o-user-plus',
                 ],
                 [
                     'label' => 'Total Visits',
                     'value' => Visit::count(),
-                    'icon' => 'clipboard'
+                    'icon' => 'heroicon-o-clipboard',
                 ],
                 [
                     'label' => 'This Month',
                     'value' => Visit::whereMonth('created_at', now()->month)->count(),
-                    'icon' => 'calendar'
+                    'icon' => 'heroicon-o-calendar',
                 ],
             ],
-            'recentActivity' => Visit::with('patient')
-                ->latest()
-                ->take(8)
-                ->get(),
-            'todayQueue' => Visit::with('patient')
-                ->whereDate('created_at', today())
-                ->orderBy('created_at')
-                ->get()
+            'recentActivity' => Visit::with('patient')->latest()->take(8)->get(),
+            'todayQueue' => Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get(),
         ];
     }
 }; ?>
@@ -48,7 +43,7 @@ new #[Layout('layouts.app')] class extends Component {
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Stats Overview -->
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                @foreach($stats as $stat)
+                @foreach ($stats as $stat)
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center justify-between">
@@ -61,8 +56,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     </div>
                                 </div>
                                 <div class="p-3 bg-indigo-50 rounded-full">
-                                    {{-- @svg('heroicon-o-'.$stat['icon']) --}}
-                                    <x-heroicon-o-{{ $stat['icon'] }} class="w-6 h-6 text-indigo-600"/>
+                                    @svg($stat['icon'], 'w-6 h-6 text-indigo-600')
                                 </div>
                             </div>
                         </div>
@@ -106,15 +100,16 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="divide-y divide-gray-200">
                             @forelse($todayQueue as $visit)
                                 <div class="py-4 flex items-center space-x-4">
-                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-500 font-medium">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-500 font-medium">
                                         {{ $loop->iteration }}
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-medium text-gray-900 truncate">
-                                            {{ $visit->patient->name }}
+                                            {{ $visit->patient->full_name }}
                                         </p>
                                         <p class="text-xs text-gray-500">
-                                            {{ $visit->scheduled_time?->format('h:ia') ?? 'Unscheduled' }}
+                                            {{ $visit->created_at?->format('h:ia') ?? 'Unscheduled' }}
                                         </p>
                                     </div>
                                     <div class="text-sm text-gray-500">
