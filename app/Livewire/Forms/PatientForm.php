@@ -10,14 +10,31 @@ class PatientForm extends UserForm
 {
 
     #[Validate('required')]
-    public $date_of_birth;
+    public $first_name;
+
+    #[Validate('required')]
+    public $last_name;
+
+    #[Validate('required')]
+    public $height;
+
+    #[Validate('required')]
+    public $weight;
+
+    #[Validate('required')]
+    public $phone_number;
+
+    #[Validate('required')]
+    public $gender;
+
 
     public function setPatient(?Patient $patient = null)
     {
         $this->first_name = $patient->first_name;
         $this->last_name = $patient->last_name;
+        $this->height = $patient->height;
+        $this->weight = $patient->weight;
         $this->phone_number = $patient->phone_number;
-        $this->date_of_birth = $patient->date_of_birth;
         $this->gender = $patient->gender;
     }
 
@@ -31,7 +48,7 @@ class PatientForm extends UserForm
             $this->create();
         }
 
-        $this->reset('first_name', 'last_name', 'phone_number', 'date_of_birth', 'gender');
+        $this->reset('first_name', 'last_name', 'phone_number', 'height', 'weight', 'gender');
     }
 
     public function update(Patient $patient)
@@ -40,7 +57,8 @@ class PatientForm extends UserForm
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
-            'date_of_birth' => $this->date_of_birth,
+            'height' => $this->height,
+            'weight' => $this->weight,
             'gender' => $this->gender
         ]);
     }
@@ -51,9 +69,20 @@ class PatientForm extends UserForm
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
-            'date_of_birth' => $this->date_of_birth,
+            'height' => $this->height,
+            'weight' => $this->weight,
             'gender' => $this->gender,
             'user_id' => $this->ensureStoreUser()->id,
         ]);
+    }
+
+    public function clearInputs()
+    {
+        $this->first_name = '';
+        $this->last_name = '';
+        $this->phone_number = '';
+        $this->height = '';
+        $this->weight = '';
+        $this->gender = '';
     }
 }

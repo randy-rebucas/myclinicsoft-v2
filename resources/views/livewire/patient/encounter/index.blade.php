@@ -1,25 +1,23 @@
 <?php
 
 use App\Models\Encounter;
-use App\Models\Que;
+use App\Models\Queue;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Livewire\Forms\QueForm;
-use function Livewire\Volt\{state, form, mount, computed};
+use function Livewire\Volt\{state, form, on, mount, computed};
 
 state(['patient', 'encounterId', 'filter', 'show' => false]);
 
 form(QueForm::class);
 
 mount(function () {
-    $this->form->que_number = $this->generateSequenceNumber('queing', [], 'SQ-', 3);
-    // $this->form->metadata = $this->patient->id;
-    $this->form->status = 'waiting';
     $this->form->patient_id = $this->patient->id;
 });
 
 $que = computed(function () {
-    return Que::where('patient_id', $this->patient->id)
+    return Queue::where('patient_id', $this->patient->id)
+        ->where('status', 'waiting')
         ->latest()
         ->first();
 });
@@ -30,49 +28,72 @@ $create = function () {
     $this->form->empty();
 };
 
-$delete = function (Que $que) {
-    $que->delete();
-
-    $this->dispatch('refresh');
+$filterDate = function (Encounter $encounter) {
+    $this->filter = $encounter->encounter_date;
+    $this->show = false;
+    $this->dispatch('set-encounter', encounterId: $encounter->id);
 };
 
-// $filterDate = function (Encounter $encounter) {
-//     $this->filter = $encounter->encounter_date;
-//     $this->show = false;
-//     $this->dispatch('set-encounter', encounterId: $encounter->id);
-// };
+$encounters = computed(function () {
+    return Encounter::where('patient_id', $this->patient->id)
+        ->when($this->filter, function ($query) {
+            return $query->whereDate('encounter_date', $this->filter);
+        })
+        ->latest('encounter_date')
+        ->get();
+});
 
-$generateSequenceNumber = function ($tablename, array $conditions = [], string $prefix, int $length = 5) {
-    $model = DB::table($tablename);
+on([
+    'encounter' => function () {
+        $this->dispatch('refresh');
+    },
+]);
 
-    if (is_array($conditions) && count($conditions) > 0) {
-        $model = $model->where($conditions);
-    }
-
-    return $prefix . str_pad($model->count() + 1, $length, '0', STR_PAD_LEFT);
-};
 ?>
 
 <div>
-    <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md" wire:loading.class="opacity-50">
-        <legend class="text-gray-400 px-2">{{ __('Basic Information') }}</legend>
-
-        <div class="align-center flex gap-4 justify-between">
-            <p class="text-xl font-bold text-navy-700">{{ $this->que ? $this->que->que_number : '' }}</p>
-            @if ($this->que)
-                <x-danger-button class="ms-3 py-3" wire:click="delete('{{ $this->que->id }}')">
-                    {{ __('Remove from waiting list') }}
-                </x-danger-button>
-            @else
-                <x-secondary-button class="ms-3 py-3" wire:click="create">
-                    {{ __('Move to waiting list') }}
-                </x-secondary-button>
-            @endif
-        </div>
-
-        @if ($this->que)
-            <livewire:patient.encounter.physical-examination :patientId="$this->patient->id" />
-        @endif
-    </fieldset>
-
+    <x-table for="encounters">
+        <x-table.thead>
+            <x-table.row class="">
+                <x-table.thead-cell :title="__('Chief Complaint')" class="text-left" />
+                <x-table.thead-cell :title="__('Encounetr Date')" class="text-left" />
+                <x-table.thead-cell title="" :action="true" class="text-right">
+                    {{-- <button type="button" class="btn btn-info m-1 font-medium underline"
+                                x-data="" x-on:click="$dispatch('open-modal', 'create-new-immunization')">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                    class="w-5 h-5">
+                                    <path
+                                        d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                                </svg>
+                            </button> --}}
+                </x-table.thead-cell>
+            </x-table.row>
+        </x-table.thead>
+        <x-table.tbody class="">
+            @forelse ($this->encounters as $encounter)
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
+                    <x-table.tbody-cell :item="$encounter->chief_complaint" />
+                    <x-table.tbody-cell :item="$encounter->encounter_date" />
+                    <x-table.tbody-cell :item="$encounter->id" class="text-right md:py-1" :action="true">
+                        <button type="button" class="btn btn-info m-1 text-red-600 font-medium underline"
+                            wire:click="delete('{{ $encounter->id }}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                                class="w-5 h-5">
+                                <path
+                                    d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                            </svg>
+                        </button>
+                    </x-table.tbody-cell>
+                </x-table.row>
+                <x-table.row class="bg-white " wire:loading.class="opacity-50">
+                    <x-table.thead-cell :title="__('Notes')" class="text-left" />
+                    <x-table.tbody-cell :item="$encounter->notes ?? '--'" colspan="4" />
+                </x-table.row>
+            @empty
+                <x-table.row class="bg-white  text-center">
+                    <x-table.tbody-cell colspan="7" :item="__('No encounter record')" />
+                </x-table.row>
+            @endforelse
+        </x-table.tbody>
+    </x-table>
 </div>

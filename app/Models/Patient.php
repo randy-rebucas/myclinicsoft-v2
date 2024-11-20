@@ -17,7 +17,8 @@ class Patient extends Model
         'first_name',
         'last_name',
         'phone_number',
-        'date_of_birth',
+        'height',
+        'weight',
         'gender',
         'avatar',
         'user_id'
@@ -57,5 +58,10 @@ class Patient extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function full_name()
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }
