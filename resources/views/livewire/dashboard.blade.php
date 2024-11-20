@@ -2,17 +2,43 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
+use App\Models\Visit;
+use App\Models\Patient;
 
 new #[Layout('layouts.app')] class extends Component {
     public function with(): array
     {
         return [
             'stats' => [
-                ['label' => 'Total Patients', 'value' => \App\Models\Patient::count()],
-                ['label' => 'New Patients', 'value' => \App\Models\Patient::whereMonth('created_at', now()->month)->count()],
-                ['label' => 'Total Visits', 'value' => \App\Models\Visit::count()],
-                ['label' => 'This Month', 'value' => \App\Models\Visit::whereMonth('created_at', now()->month)->count()],
+                [
+                    'label' => 'Total Patients',
+                    'value' => Patient::count(),
+                    'icon' => 'users'
+                ],
+                [
+                    'label' => 'New Patients',
+                    'value' => Patient::whereMonth('created_at', now()->month)->count(),
+                    'icon' => 'user-plus'
+                ],
+                [
+                    'label' => 'Total Visits',
+                    'value' => Visit::count(),
+                    'icon' => 'clipboard'
+                ],
+                [
+                    'label' => 'This Month',
+                    'value' => Visit::whereMonth('created_at', now()->month)->count(),
+                    'icon' => 'calendar'
+                ],
             ],
+            'recentActivity' => Visit::with('patient')
+                ->latest()
+                ->take(8)
+                ->get(),
+            'todayQueue' => Visit::with('patient')
+                ->whereDate('created_at', today())
+                ->orderBy('created_at')
+                ->get()
         ];
     }
 }; ?>
@@ -25,11 +51,19 @@ new #[Layout('layouts.app')] class extends Component {
                 @foreach($stats as $stat)
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $stat['label'] }}
-                            </div>
-                            <div class="mt-1 text-3xl font-semibold text-gray-900">
-                                {{ $stat['value'] }}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500">
+                                        {{ $stat['label'] }}
+                                    </div>
+                                    <div class="mt-1 text-3xl font-semibold text-gray-900">
+                                        {{ $stat['value'] }}
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-indigo-50 rounded-full">
+                                    {{-- @svg('heroicon-o-'.$stat['icon']) --}}
+                                    <x-heroicon-o-{{ $stat['icon'] }} class="w-6 h-6 text-indigo-600"/>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -37,21 +71,59 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
 
             <!-- Recent Activity -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-                    <div class="space-y-4">
-                        <!-- Replace with actual activity items -->
-                        <div class="flex items-center space-x-4">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">Welcome to your new dashboard!</p>
-                                <p class="text-sm text-gray-500">Get started by customizing this template</p>
-                            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Latest Visits Queue -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Visits</h3>
+                        <div class="divide-y divide-gray-200">
+                            @forelse($recentActivity as $visit)
+                                <div class="py-4 flex items-center space-x-4">
+                                    <div class="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500"></div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ $visit->patient->name }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {{ $visit->created_at->format('M d, Y h:ia') }}
+                                        </p>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ $visit->reason }}
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="py-4 text-gray-500 text-sm">No recent visits</div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Queue -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Today's Queue</h3>
+                        <div class="divide-y divide-gray-200">
+                            @forelse($todayQueue as $visit)
+                                <div class="py-4 flex items-center space-x-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-500 font-medium">
+                                        {{ $loop->iteration }}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ $visit->patient->name }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {{ $visit->scheduled_time?->format('h:ia') ?? 'Unscheduled' }}
+                                        </p>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ $visit->status }}
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="py-4 text-gray-500 text-sm">No visits scheduled for today</div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
