@@ -8,7 +8,8 @@ use Livewire\Form;
 
 class VitalForm extends Form
 {
-    public $blood_pressure;
+    public $systolic;
+    public $diastolic;
     public $heart_rate;
     public $respiratory_rate;
     public $encounter_id;
@@ -27,7 +28,7 @@ class VitalForm extends Form
         Vital::create([
             'patient_id' => $this->patient_id,
             'temperature' => $this->temperature,
-            'blood_pressure' => $this->blood_pressure,
+            'blood_pressure' => $this->systolic . '/' . $this->diastolic,
             'heart_rate' => $this->heart_rate,
             'respiratory_rate' => $this->respiratory_rate,
             'oxygen_saturation' => $this->oxygen_saturation,
@@ -38,7 +39,8 @@ class VitalForm extends Form
     public function empty()
     {
         $this->temperature = '';
-        $this->blood_pressure = '';
+        $this->systolic = '';
+        $this->diastolic = '';
         $this->heart_rate = '';
         $this->respiratory_rate = '';
         $this->oxygen_saturation = '';

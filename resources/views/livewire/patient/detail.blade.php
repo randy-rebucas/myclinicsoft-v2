@@ -5,6 +5,7 @@ use App\Models\Queue;
 use App\Models\Department;
 use function Livewire\Volt\{layout, form, computed, state, on, mount, title};
 use App\Livewire\Forms\QueueForm;
+use Illuminate\Support\Str;
 
 state(['patientId'])->url();
 
@@ -32,7 +33,8 @@ $departments = computed(function () {
 
 $que = computed(function () {
     return Queue::where('patient_id', $this->patient->id)
-        // ->where('status', 'waiting')
+        ->where('status', '!=', 'completed')
+        ->whereDate('created_at', now()->toDateString()) // Add this line to filter by current date
         ->latest()
         ->first();
 });
@@ -86,17 +88,8 @@ $create = function () {
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-
                     @if ($this->que)
-                        @if ($this->que->status == 'cancelled')
-                            <x-secondary-button wire:click="update('{{ $this->que->id }}', 'waiting')">
-                                <span>{{ __('Update Queue') }}</span>
-                            </x-secondary-button>
-                        @else
-                            <x-danger-button wire:click="update('{{ $this->que->id }}', 'cancelled')">
-                                <span>{{ __('Remove from Queue') }}</span>
-                            </x-danger-button>
-                        @endif
+                        <p>{{ Str::headline($this->que->status) }}</p>
                     @else
                         <x-primary-button wire:click="add" class="flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,14 +99,6 @@ $create = function () {
                             <span>{{ __('Add to Queue') }}</span>
                         </x-primary-button>
                     @endif
-                    <x-secondary-button wire:click="$dispatch('navigate', { url: '/patients' })"
-                        class="flex items-center gap-2 dark:border-gray-600 dark:hover:bg-gray-700">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        <span>{{ __('Back to Patients') }}</span>
-                    </x-secondary-button>
                 </div>
             </div>
         </div>
@@ -149,6 +134,20 @@ $create = function () {
                             'absolute inset-x-0 bottom-0 h-0.5',
                             'bg-indigo-600 dark:bg-indigo-400' => $activeTab === 'encounters',
                             'bg-transparent' => $activeTab !== 'encounters',
+                        ])></span>
+                    </button>
+
+                    <button wire:click="$set('activeTab', 'vitals')" @class([
+                        'group relative min-w-0 flex-1 overflow-hidden py-4 px-1 text-center text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10 focus:outline-none',
+                        'text-indigo-600 dark:text-indigo-400' => $activeTab === 'vitals',
+                        'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' =>
+                            $activeTab !== 'vitals',
+                    ])>
+                        <span>{{ __('Vital Signs') }}</span>
+                        <span aria-hidden="true" @class([
+                            'absolute inset-x-0 bottom-0 h-0.5',
+                            'bg-indigo-600 dark:bg-indigo-400' => $activeTab === 'vitals',
+                            'bg-transparent' => $activeTab !== 'vitals',
                         ])></span>
                     </button>
                 </nav>
@@ -267,38 +266,38 @@ $create = function () {
                                             <div>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">Gender</p>
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->gender }}</p>
+                                                    {{ Str::title($patient->gender) ?? '-' }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">Blood Type</p>
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->blood_type }}</p>
+                                                    {{ $patient->blood_type ?? '-' }}</p>
                                             </div>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Marital Status</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->marital_status }}</p>
+                                                {{ $patient->marital_status ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Occupation</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->occupation }}</p>
+                                                {{ $patient->occupation ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">National ID</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->national_id }}</p>
+                                                {{ $patient->national_id ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Nationality</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->nationality }}</p>
+                                                {{ $patient->nationality ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Language</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->preferred_language }}</p>
+                                                {{ $patient->preferred_language ?? '-' }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -316,17 +315,17 @@ $create = function () {
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Primary Phone</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->phone }}</p>
+                                                {{ $patient->phone ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Secondary Phone</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->secondary_phone }}</p>
+                                                {{ $patient->secondary_phone ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->email }}</p>
+                                                {{ $patient->email ?? '-' }}</p>
                                         </div>
                                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                                             <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">Emergency
@@ -335,20 +334,20 @@ $create = function () {
                                                 <div>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->emergency_contact_name }}
+                                                        {{ $patient->emergency_contact_name ?? '-' }}
                                                     </p>
                                                 </div>
                                                 <div>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">Relationship
                                                     </p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->emergency_contact_relationship }}
+                                                        {{ $patient->emergency_contact_relationship ?? '-' }}
                                                     </p>
                                                 </div>
                                                 <div>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">Phone</p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->emergency_contact_phone }}
+                                                        {{ $patient->emergency_contact_phone ?? '-' }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -356,30 +355,30 @@ $create = function () {
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Address</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->address }}</p>
+                                                {{ $patient->address ?? '-' }}</p>
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">City</p>
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->city }}</p>
+                                                    {{ $patient->city ?? '-' }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">State/Province</p>
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->state }}</p>
+                                                    {{ $patient->state ?? '-' }}</p>
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">Postal Code</p>
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->postal_code }}</p>
+                                                    {{ $patient->postal_code ?? '-' }}</p>
                                             </div>
                                             <div>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">Country</p>
                                                 <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->country }}</p>
+                                                    {{ $patient->country ?? '-' }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -398,18 +397,18 @@ $create = function () {
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Insurance Provider</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->insurance_provider }}</p>
+                                                {{ $patient->insurance_provider ?: '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Insurance ID</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->insurance_id }}</p>
+                                                {{ $patient->insurance_id ?: '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Primary Care Physician
                                             </p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->primary_physician }}</p>
+                                                {{ $patient->primary_physician ?: '-' }}</p>
                                         </div>
                                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                                             <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">Medical
@@ -444,13 +443,13 @@ $create = function () {
                                                 <div>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">Height</p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->height }} cm
+                                                        {{ $patient->height ?? '-' }} cm
                                                     </p>
                                                 </div>
                                                 <div>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">Weight</p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->weight }} kg
+                                                        {{ $patient->weight ?? '-' }} kg
                                                     </p>
                                                 </div>
                                                 <div>
@@ -477,6 +476,10 @@ $create = function () {
                 @elseif ($activeTab === 'encounters')
                     <div class="bg-white dark:bg-gray-800 rounded-lg">
                         <livewire:patient.encounter.index :patient="$patient" />
+                    </div>
+                @elseif ($activeTab === 'vitals')
+                    <div class="bg-white dark:bg-gray-800 rounded-lg">
+                        <livewire:patient.record.vital-sign :patient="$patient" />
                     </div>
                 @endif
             </div>

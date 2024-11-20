@@ -162,19 +162,27 @@ on(['set-date' => function ($date) {
                     </div>
                 </div>
                 <div class="flex justify-between gap-4 mt-4">
-                    <div class="w-1/3">
+                    <div class="w-1/2">
+                        <x-input-label for="height" :value="__('Height (cm)')" />
+                        <x-text-input wire:model="form.height" id="height" class="block mt-1 w-full"
+                            type="number" name="height" />
+                        <x-input-error :messages="$errors->get('form.height')" class="mt-2" />
+                    </div>
+                    <div class="w-1/2">
+                        <x-input-label for="weight" :value="__('Weight (kg)')" />
+                        <x-text-input wire:model="form.weight" id="weight" class="block mt-1 w-full"
+                            type="number" name="weight" />
+                        <x-input-error :messages="$errors->get('form.weight')" class="mt-2" />
+                    </div>
+                </div>
+                <div class="flex justify-between gap-4 mt-4">
+                    <div class="w-1/2">
                         <x-input-label for="phone_number" :value="__('Phone Number')" />
                         <x-text-input wire:model="form.phone_number" id="phone_number" class="block mt-1 w-full"
                             type="text" name="phone_number" />
                         <x-input-error :messages="$errors->get('form.phone_number')" class="mt-2" />
                     </div>
-                    <div class="w-1/3">
-                        <x-input-label for="date_of_birth" :value="__('Birth Date')" />
-                        <x-text-input wire:model="form.date_of_birth" id="date_of_birth" class="block mt-1 w-full"
-                            type="date" name="date_of_birth" />
-                        <x-input-error :messages="$errors->get('form.date_of_birth')" class="mt-2" />
-                    </div>
-                    <div class="w-1/3">
+                    <div class="w-1/2">
                         <x-input-label for="gender" :value="__('Gender')" />
                         <x-select wire:model="form.gender" id="gender" name="gender" :options="$genders"
                             class="block mt-1 w-full" />
@@ -225,9 +233,11 @@ on(['set-date' => function ($date) {
     </x-modal>
     @push('scripts')
     <script>
+
         var picker = new Pikaday({
             field: document.getElementById('date_of_birth'),
             format: 'YYYY-MM-DD',
+            defaultDate: new Date({{ $patient->date_of_birth }}),
             toString(date, format) {
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
