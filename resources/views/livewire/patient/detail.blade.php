@@ -72,39 +72,44 @@ $create = function () {
 
 <div>
     <!-- Patient Header -->
-    <header class="border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                        <span class="text-indigo-600 dark:text-indigo-300 text-base font-semibold">
-                            {{ substr($patient->full_name, 0, 1) }}
-                        </span>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $patient->full_name }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Patient ID: #{{ $patient->id }}</p>
-                    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                    <span class="text-indigo-600 dark:text-indigo-300 text-base font-semibold">
+                        {{ substr($patient->full_name, 0, 1) }}
+                    </span>
                 </div>
-                <div class="flex items-center gap-3">
-                    @if ($this->que)
-                        <p>{{ Str::headline($this->que->status) }}</p>
-                    @else
-                        <x-primary-button wire:click="add" class="flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>{{ __('Add to Queue') }}</span>
-                        </x-primary-button>
-                    @endif
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $patient->full_name }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Patient ID: #{{ $patient->id }}</p>
                 </div>
             </div>
+            <div class="flex items-center gap-3">
+                @if ($this->que)
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">Queue Status:</span>
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {{ $this->que->status === 'waiting' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                {{ $this->que->status === 'in_progress' ? 'bg-blue-100 text-blue-800' : '' }}
+                                {{ $this->que->status === 'completed' ? 'bg-green-100 text-green-800' : '' }}">
+                            {{ Str::headline($this->que->status) }}
+                        </span>
+                    </div>
+                @else
+                    <x-primary-button wire:click="add" class="flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>{{ __('Add to Queue') }}</span>
+                    </x-primary-button>
+                @endif
+            </div>
         </div>
-    </header>
+    </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <!-- Enhanced Tab Navigation -->
             <div class="border-b border-gray-100 dark:border-gray-700">
