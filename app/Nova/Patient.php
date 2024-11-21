@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Actions\ExportAsCsv;
 use Laravel\Nova\Fields\Avatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -21,6 +22,36 @@ class Patient extends Resource
      * @var class-string<\App\Models\Patient>
      */
     public static $model = \App\Models\Patient::class;
+    /**
+     * The logical group associated with the resource.
+     *
+     * @var string
+     */
+    public static $group = 'User Management';
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 5;
+    /**
+     * Indicates whether to show the polling toggle button inside Nova.
+     *
+     * @var bool
+     */
+    public static $showPollingToggle = true;
+    /**
+     * The relationships that should be eager loaded on index queries.
+     *
+     * @var array
+     */
+    public static $with = ['user'];
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -58,7 +89,7 @@ class Patient extends Resource
             ID::make()->hideFromIndex()->hideFromDetail(),
             Avatar::make('Image', 'avatar'),
             Text::make('Name', function () {
-                return $this->first_name.' '.$this->last_name;
+                return $this->first_name . ' ' . $this->last_name;
             })->sortable()->hideWhenCreating(),
             Text::make('First Name', 'first_name')->hideFromIndex()->hideFromDetail(),
             Text::make('Last Name', 'last_name')->hideFromIndex()->hideFromDetail(),
@@ -117,7 +148,24 @@ class Patient extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            ExportAsCsv::make()->withFormat(function ($model) {
+                return [
+                    'ID' => $model->getKey(),
+                    'First Name' => $model->first_name,
+                    'Last Name' => $model->last_name,
+                    'Birthday' => $model->date_of_birth,
+                    'Gender' => $model->gender,
+                    'Phone Number' => $model->phone_number,
+                    // 'Address' => $model->address_line_1,
+                    // 'Address Line 2' => $model->address_line_2,
+                    // 'City' => $model->city,
+                    // 'State' => $model->state,
+                    // 'Postal Code' => $model->postal_code,
+                    // 'Country' => $model->country,
+                ];
+            }),
+        ];
     }
 
     /**
