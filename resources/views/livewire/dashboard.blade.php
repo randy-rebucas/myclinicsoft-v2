@@ -2,7 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
-use App\Models\Visit;
+// use App\Models\Visit;
 use App\Models\Patient;
 use App\Models\Queue;
 
@@ -23,16 +23,16 @@ new #[Layout('layouts.app')] class extends Component {
                 ],
                 [
                     'label' => 'Total Visits',
-                    'value' => Visit::count(),
+                    'value' => 0, // Visit::count(),
                     'icon' => 'heroicon-o-clipboard',
                 ],
                 [
                     'label' => 'This Month',
-                    'value' => Visit::whereMonth('created_at', now()->month)->count(),
+                    'value' => 0, // Visit::whereMonth('created_at', now()->month)->count(),
                     'icon' => 'heroicon-o-calendar',
                 ],
             ],
-            'recentActivity' => Visit::with('patient')->latest()->take(8)->get(),
+            'recentActivity' => [], // Visit::with('patient')->latest()->take(8)->get(),
             'todayQueue' => Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get(),
         ];
     }

@@ -80,9 +80,9 @@ on(['set-date' => function ($date) {
             </div>
 
             <div class="overflow-hidden">
-                <div class="grid grid-cols-1 gap-4">
+                <div class="grid grid-cols-1 gap-2">
                     @forelse ($patients as $patient)
-                        <div class="cursor-pointer bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow group" wire:click="detail({{ $patient }})">
+                        <div class="cursor-pointer bg-white p-2 rounded-lg shadow hover:shadow-md transition-shadow group" wire:click="detail({{ $patient }})">
                             <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0">
                                     <img class="h-12 w-12 rounded-full object-cover"
@@ -135,7 +135,7 @@ on(['set-date' => function ($date) {
                                             <span class="font-medium">Gender:</span> {{ strtoupper($patient->gender) }}
                                         </div>
                                         <div>
-                                            <span class="font-medium">Birthdate:</span> {{ $patient->date_of_birth ?? 'N/A' }}
+                                            <span class="font-medium">Birthdate:</span> {{ $patient->date_of_birth ? $patient->date_of_birth->format('M d, Y') : 'N/A' }}
                                         </div>
                                         <div>
                                             <span class="font-medium">Age:</span> {{ $patient->age }}
@@ -251,24 +251,4 @@ on(['set-date' => function ($date) {
             </div>
         </form>
     </x-modal>
-    @push('scripts')
-    <script>
 
-        var picker = new Pikaday({
-            field: document.getElementById('date_of_birth'),
-            format: 'YYYY-MM-DD',
-            defaultDate: new Date({{ $patient->date_of_birth }}),
-            toString(date, format) {
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                return `${year}-${month}-${day}`;
-            },
-            onSelect: function() {
-                Livewire.dispatch('set-date', {
-                    date: picker.toString()
-                });
-            }
-        });
-    </script>
-    @endpush
