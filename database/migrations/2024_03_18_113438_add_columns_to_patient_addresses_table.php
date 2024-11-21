@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('patient_addresses', function (Blueprint $table) {
+        Schema::table('addresses', function (Blueprint $table) {
             $table->string('label');
             $table->boolean('default')->default('0');
         });
