@@ -62,7 +62,7 @@ class Medication extends Resource
 
             Repeater::make('Prescriptions')
                 ->repeatables([
-                    PrescriptionItem::make(),
+                    PrescriptionItem::make()->confirmRemoval(),
                 ]),
 
             Textarea::make('Notes')
