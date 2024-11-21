@@ -79,57 +79,61 @@ on(['set-date' => function ($date) {
                 </x-secondary-button>
             </div>
 
-            <div class="overflow-x-auto border rounded-lg">
-                <x-table for="patient" class="min-w-full divide-y divide-gray-200">
-                    <x-table.thead>
-                        <x-table.row class="bg-gray-50">
-                            <x-table.thead-cell :title="__('Full Name')" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" />
-                            <x-table.thead-cell :title="__('Phone Number')" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase" />
-                            <x-table.thead-cell :title="__('Gender')" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase" />
-                            <x-table.thead-cell :title="__('Birthdate')" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase" />
-                            <x-table.thead-cell :title="__('Age')" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase" />
-                            <x-table.thead-cell title="" class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase" />
-                        </x-table.row>
-                    </x-table.thead>
-                    <x-table.tbody class="bg-white divide-y divide-gray-200">
-                        @forelse ($patients as $patient)
-                        <x-table.row class="hover:bg-gray-50" wire:loading.class="opacity-50">
-                            <x-table.tbody-cell :item="$patient->full_name" class="px-4 py-2 whitespace-nowrap text-sm text-gray-900" />
-                            <x-table.tbody-cell :item="$patient->phone_number" class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center" />
-                            <x-table.tbody-cell :item="$patient->gender" class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center uppercase" />
-                            <x-table.tbody-cell :item="$patient->date_of_birth" class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center" />
-                            <x-table.tbody-cell :item="$patient->age" class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center" />
-                            <x-table.tbody-cell :item="$patient->id" class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-right" :action="true">
-                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                    wire:click="detail({{ $patient }})">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                        <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-                                        <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                    wire:click="edit({{ $patient->id }})">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                        <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                                        <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                                    </svg>
-                                </button>
-                                <button type="button" class="btn btn-info m-1 text-red-600 font-medium underline"
-                                    wire:click="delete({{ $patient }})"
-                                    wire:confirm="Are you sure you want to delete this patient?">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                                        <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                            </x-table.tbody-cell>
-                        </x-table.row>
-                        @empty
-                        <x-table.row class="bg-white ">
-                            <x-table.tbody-cell colspan="6" :item="__('No patient found!!')" />
-                        </x-table.row>
-                        @endforelse
-                    </x-table.tbody>
-                </x-table>
+            <div class="overflow-x-auto">
+                <div class="grid grid-cols-1 gap-4">
+                    @forelse ($patients as $patient)
+                        <div class="cursor-pointer bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow group" wire:click="detail({{ $patient }})">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <img class="h-12 w-12 rounded-full object-cover"
+                                         src="{{ $patient->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($patient->full_name) }}"
+                                         alt="{{ $patient->full_name }}">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ $patient->full_name }}
+                                        </p>
+                                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button type="button" class="text-gray-600 hover:text-gray-900"
+                                                wire:click="edit({{ $patient->id }})">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                                    <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                                                    <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                                                </svg>
+                                            </button>
+                                            <button type="button" class="text-red-600 hover:text-red-900"
+                                                wire:click="delete({{ $patient }})"
+                                                wire:confirm="Are you sure you want to delete this patient?">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+                                                    <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-4 mt-2 text-sm text-gray-500">
+                                        <div>
+                                            <span class="font-medium">Phone:</span> {{ $patient->phone_number }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Gender:</span> {{ strtoupper($patient->gender) }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Birthdate:</span> {{ $patient->date_of_birth ?? 'N/A' }}
+                                        </div>
+                                        <div>
+                                            <span class="font-medium">Age:</span> {{ $patient->age }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="bg-white p-4 rounded-lg shadow text-center text-gray-500">
+                            {{ __('No patient found!!') }}
+                        </div>
+                    @endforelse
+                </div>
             </div>
             <div>
                 {{ $patients->links() }}
