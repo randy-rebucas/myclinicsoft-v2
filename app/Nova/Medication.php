@@ -60,10 +60,10 @@ class Medication extends Resource
 
             ID::make()->hideFromIndex()->hideFromDetail(),
 
-            Repeater::make('Prescriptions')
+            Repeater::make('Prescription Items')
                 ->repeatables([
                     PrescriptionItem::make()->confirmRemoval(),
-                ]),
+                ])->asJson(),
 
             Textarea::make('Notes')
                 ->alwaysShow()

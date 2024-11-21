@@ -16,7 +16,7 @@ use Livewire\Form;
 
 class SetupForm extends Form
 {
-    #[Validate] 
+    #[Validate]
     public string $email = '';
 
     public string $password = '';
@@ -41,14 +41,6 @@ class SetupForm extends Form
         $validated['password'] = Hash::make($validated['password']);
 
         event(new Registered($user = User::create($validated)));
-
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
-
-        Permission::create(['name' => 'menu.staff']);
-        
-        $role = Role::create(['name' => 'super-admin'])->givePermissionTo(Permission::all());
-
-        $user->assignRole($role);
 
         Auth::login($user);
 
