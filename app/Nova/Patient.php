@@ -13,6 +13,7 @@ use Laravel\Nova\Fields\Country;
 use Wame\TelInput\TelInput;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\MorphOne;
 
 class Patient extends Resource
 {
@@ -103,7 +104,7 @@ class Patient extends Resource
                 'International format only e.g. +63'
             ),
 
-            Panel::make('Address Information', $this->addressFields()),
+            MorphOne::make('Address'),
         ];
     }
 
@@ -157,31 +158,14 @@ class Patient extends Resource
                     'Birthday' => $model->date_of_birth,
                     'Gender' => $model->gender,
                     'Phone Number' => $model->phone_number,
-                    // 'Address' => $model->address_line_1,
-                    // 'Address Line 2' => $model->address_line_2,
-                    // 'City' => $model->city,
-                    // 'State' => $model->state,
-                    // 'Postal Code' => $model->postal_code,
-                    // 'Country' => $model->country,
+                    'Address' => $model->address->address_line_1,
+                    'Address Line 2' => $model->address->address_line_2,
+                    'City' => $model->address->city,
+                    'State' => $model->address->state,
+                    'Postal Code' => $model->address->postal_code,
+                    'Country' => $model->address->country,
                 ];
             }),
-        ];
-    }
-
-    /**
-     * Get the address fields for the resource.
-     *
-     * @return array
-     */
-    protected function addressFields()
-    {
-        return [
-            Text::make('Address', 'address_line_1')->hideFromIndex(),
-            Text::make('Address Line 2')->hideFromIndex(),
-            Text::make('City')->hideFromIndex(),
-            Text::make('State')->hideFromIndex(),
-            Text::make('Postal Code')->hideFromIndex(),
-            Country::make('Country')->hideFromIndex(),
         ];
     }
 }

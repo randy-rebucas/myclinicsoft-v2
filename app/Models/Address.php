@@ -10,25 +10,22 @@ class Address extends Model
     use HasFactory;
 
     protected $fillable = [
-        'line_1',
-        'line_2',
-        'district',
-        'city_id',
-        'postal_code'
+        'address_line_1',
+        'address_line_2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
     ];
 
-    protected $appends = [
-        'complete_address'
-    ];
+    public function addressable()
+    {
+        return $this->morphTo();
+    }
 
     public function city()
     {
         return $this->belongsTo(City::class);
-    }
-
-    public function patient_address()
-    {
-        return $this->belongsTo(PatientAddress::class);
     }
 
     public function getCompleteAddressAttribute()
