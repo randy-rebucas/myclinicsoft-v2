@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('general_appearance')->nullable();
             $table->string('systematic_findings')->nullable();
             $table->text('notes')->nullable();
-            $table->foreignId('encounter_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('patient_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

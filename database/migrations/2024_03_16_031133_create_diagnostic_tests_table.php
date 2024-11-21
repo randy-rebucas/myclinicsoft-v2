@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('test_date');
             $table->text('results');
             $table->text('notes')->nullable();
-            $table->foreignId('encounter_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('patient_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
         });
     }

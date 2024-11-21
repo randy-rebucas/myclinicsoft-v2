@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('phone_number')->nullable();
             $table->enum('gender', ['male', 'female', 'unknown'])->default('unknown');
+            $table->boolean('is_active')->default(false);
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();

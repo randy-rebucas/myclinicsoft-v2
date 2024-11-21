@@ -12,13 +12,23 @@ class Medication extends Model
     public $timestamps = FALSE;
 
     protected $fillable = [
-        'medication_name',
-        'dosage',
-        'frequency',
+        'prescription_items',
         'notes',
         'patient_id',
         'encounter_id'
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'prescription_items' => 'array',
+        ];
+    }
 
     public function patient()
     {

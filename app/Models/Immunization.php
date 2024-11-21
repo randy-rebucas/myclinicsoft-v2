@@ -18,9 +18,17 @@ class Immunization extends Model
         'patient_id'
     ];
 
-    protected $dates = [
-        'date_administered'
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'date_administered' => 'date',
+        ];
+    }
 
     public function patient()
     {

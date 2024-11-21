@@ -17,6 +17,7 @@ class Patient extends Model
         'first_name',
         'last_name',
         'phone_number',
+        'date_of_birth',
         'height',
         'weight',
         'gender',
@@ -43,6 +44,11 @@ class Patient extends Model
         return [
             'date_of_birth' => 'date',
         ];
+    }
+
+    public function addresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
     }
 
     public function getAgeAttribute()

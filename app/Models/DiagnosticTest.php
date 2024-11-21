@@ -19,9 +19,17 @@ class DiagnosticTest extends Model
         'patient_id'
     ];
 
-    protected $dates = [
-        'test_date'
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'test_date' => 'date',
+        ];
+    }
 
     public function patient()
     {

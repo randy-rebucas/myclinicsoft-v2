@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('medications', function (Blueprint $table) {
             $table->id();
-            $table->string('medication_name');
-            $table->string('dosage');
-            $table->string('frequency');
-            $table->text('notes')->nullable();
             $table->foreignId('patient_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->json('prescription_items');
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

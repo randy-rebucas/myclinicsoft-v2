@@ -13,16 +13,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        
+
         // create demo users
         $this->call([
-            CountrySeeder::class,
-            CitySeeder::class,
-            // PermissionsSeeder::class,
-            // PatientSeeder::class,
-            // DoctorSeeder::class,
-            // ReceptionistSeeder::class,
-            // MedRepresentativeSeeder::class
+            PatientSeeder::class,
+            DoctorSeeder::class,
+            ReceptionistSeeder::class
         ]);
     }
 }

@@ -3,15 +3,19 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Actions\ExportAsCsv;
 use Laravel\Nova\Fields\Avatar;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Country;
+use Laravel\Nova\Fields\MorphMany;
 use Wame\TelInput\TelInput;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\MorphOne;
 
 class Patient extends Resource
 {
@@ -21,6 +25,36 @@ class Patient extends Resource
      * @var class-string<\App\Models\Patient>
      */
     public static $model = \App\Models\Patient::class;
+    /**
+     * The logical group associated with the resource.
+     *
+     * @var string
+     */
+    public static $group = 'User Management';
+    /**
+     * Indicates whether the resource should automatically poll for new resources.
+     *
+     * @var bool
+     */
+    public static $polling = true;
+    /**
+     * The interval at which Nova should poll for new resources.
+     *
+     * @var int
+     */
+    public static $pollingInterval = 5;
+    /**
+     * Indicates whether to show the polling toggle button inside Nova.
+     *
+     * @var bool
+     */
+    public static $showPollingToggle = true;
+    /**
+     * The relationships that should be eager loaded on index queries.
+     *
+     * @var array
+     */
+    public static $with = ['user'];
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -55,11 +89,12 @@ class Patient extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            BelongsTo::make('User')->searchable(),
             ID::make()->hideFromIndex()->hideFromDetail(),
             Avatar::make('Image', 'avatar'),
             Text::make('Name', function () {
-                return $this->first_name.' '.$this->last_name;
-            })->sortable()->hideWhenCreating(),
+                return $this->full_name;
+            })->sortable()->hideFromIndex()->hideWhenCreating(),
             Text::make('First Name', 'first_name')->hideFromIndex()->hideFromDetail(),
             Text::make('Last Name', 'last_name')->hideFromIndex()->hideFromDetail(),
             Date::make('Birthday', 'date_of_birth'),
@@ -68,11 +103,34 @@ class Patient extends Resource
                 'female' => 'Female',
                 'unknown' => 'Unknown',
             ]),
-            TelInput::make('phone', 'phone_number')->onlyCountries(['PH'])->help(
-                'International format only e.g. +63'
-            ),
+            new Panel('Contact Information', [
+                TelInput::make('Phone Number', 'phone_number')
+                    ->onlyCountries(['PH'])
+                    ->help('International format only e.g. +63'),
+            ]),
 
-            Panel::make('Address Information', $this->addressFields()),
+            // new Panel('Emergency Contact', [
+            //     Text::make('Emergency Contact Name', 'emergency_contact_name')
+            //         ->rules('max:255')->hideFromIndex(),
+            //     TelInput::make('Emergency Contact Phone', 'emergency_contact_phone')
+            //         ->onlyCountries(['PH'])
+            //         ->help('International format only e.g. +63')->hideFromIndex(),
+            //     Text::make('Relationship to Patient', 'emergency_contact_relationship')
+            //         ->rules('max:100')->hideFromIndex(),
+            // ]),
+
+            // new Panel('Medical Information', [
+            //     Text::make('Blood Type')
+            //         ->rules('nullable', 'max:10')->hideFromIndex(),
+            //     Text::make('Allergies')
+            //         ->rules('nullable', 'max:255')->hideFromIndex(),
+            //     Text::make('Chronic Conditions', 'chronic_conditions')
+            //         ->rules('nullable', 'max:255')->hideFromIndex(),
+            //     Text::make('Current Medications', 'current_medications')
+            //         ->rules('nullable', 'max:255')->hideFromIndex(),
+            // ]),
+
+            MorphMany::make('Addresses', 'addresses'),
         ];
     }
 
@@ -117,23 +175,23 @@ class Patient extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
-    }
-
-    /**
-     * Get the address fields for the resource.
-     *
-     * @return array
-     */
-    protected function addressFields()
-    {
         return [
-            Text::make('Address', 'address_line_1')->hideFromIndex(),
-            Text::make('Address Line 2')->hideFromIndex(),
-            Text::make('City')->hideFromIndex(),
-            Text::make('State')->hideFromIndex(),
-            Text::make('Postal Code')->hideFromIndex(),
-            Country::make('Country')->hideFromIndex(),
+            ExportAsCsv::make()->withFormat(function ($model) {
+                return [
+                    'ID' => $model->getKey(),
+                    'First Name' => $model->first_name,
+                    'Last Name' => $model->last_name,
+                    'Birthday' => $model->date_of_birth,
+                    'Gender' => $model->gender,
+                    'Phone Number' => $model->phone_number,
+                    'Address' => $model->address->address_line_1,
+                    'Address Line 2' => $model->address->address_line_2,
+                    'City' => $model->address->city,
+                    'State' => $model->address->state,
+                    'Postal Code' => $model->address->postal_code,
+                    'Country' => $model->address->country,
+                ];
+            }),
         ];
     }
 }

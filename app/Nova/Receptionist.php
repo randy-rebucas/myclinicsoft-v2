@@ -3,21 +3,25 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules;
-use Laravel\Nova\Fields\Gravatar;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Email;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Select;
+use Wame\TelInput\TelInput;
 
-class User extends Resource
+class Receptionist extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\User>
+     * @var class-string<\App\Models\Receptionist>
      */
-    public static $model = \App\Models\User::class;
+    public static $model = \App\Models\Receptionist::class;
     /**
      * The logical group associated with the resource.
      *
@@ -29,7 +33,7 @@ class User extends Resource
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'id';
 
     /**
      * The columns that should be searched.
@@ -37,7 +41,7 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'id',
     ];
 
     /**
@@ -49,24 +53,24 @@ class User extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable()->hideFromIndex(),
+            BelongsTo::make('User')->noPeeking(),
 
-            Gravatar::make()->maxWidth(50),
-
-            Text::make('Name')
+            ID::make()->hideFromIndex()->hideFromDetail(),
+            Text::make('First Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
-
-            Text::make('Email')
+            Text::make('Last Name')
                 ->sortable()
-                ->rules('required', 'email', 'max:254')
-                ->creationRules('unique:users,email')
-                ->updateRules('unique:users,email,{{resourceId}}'),
+                ->rules('required', 'max:255'),
+            TelInput::make('Phone', 'phone_number')->onlyCountries(['PH'])->help(
+                'International format only e.g. +63'
+            ),
 
-            Password::make('Password')
-                ->onlyOnForms()
-                ->creationRules('required', Rules\Password::defaults())
-                ->updateRules('nullable', Rules\Password::defaults()),
+            Select::make('Gender', 'gender')->options([
+                'male' => 'Male',
+                'female' => 'Female',
+                'unknown' => 'Unknown',
+            ]),
         ];
     }
 

@@ -3,33 +3,34 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules;
-use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
 
-class User extends Resource
+class MedicalCondition extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\User>
+     * @var class-string<\App\Models\MedicalCondition>
      */
-    public static $model = \App\Models\User::class;
+    public static $model = \App\Models\MedicalCondition::class;
     /**
      * The logical group associated with the resource.
      *
      * @var string
      */
-    public static $group = 'User Management';
+    public static $group = 'Health Records';
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'id';
 
     /**
      * The columns that should be searched.
@@ -37,7 +38,7 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id', 'name', 'email',
+        'id',
     ];
 
     /**
@@ -49,24 +50,41 @@ class User extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable()->hideFromIndex(),
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->required(),
 
-            Gravatar::make()->maxWidth(50),
+            BelongsTo::make('Encounter')
+                ->nullable(),
 
-            Text::make('Name')
+            ID::make()->sortable(),
+
+            Text::make('Condition Name')
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            Text::make('Email')
+            Date::make('Diagnosis Date')
                 ->sortable()
-                ->rules('required', 'email', 'max:254')
-                ->creationRules('unique:users,email')
-                ->updateRules('unique:users,email,{{resourceId}}'),
+                ->rules('required', 'date'),
 
-            Password::make('Password')
-                ->onlyOnForms()
-                ->creationRules('required', Rules\Password::defaults())
-                ->updateRules('nullable', Rules\Password::defaults()),
+            Select::make('Status')
+                ->options([
+                    'active' => 'Active',
+                    'resolved' => 'Resolved',
+                    'chronic' => 'Chronic',
+                    'in_treatment' => 'In Treatment',
+                ])
+                ->sortable()
+                ->rules('required'),
+
+            Textarea::make('Treatment Plan')
+                ->rows(3)
+                ->alwaysShow(),
+
+            Textarea::make('Notes')
+                ->rows(3)
+                ->alwaysShow(),
+
         ];
     }
 
