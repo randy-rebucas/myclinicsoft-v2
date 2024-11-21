@@ -10,7 +10,7 @@ class MedicalCondition extends Model
     use HasFactory;
 
     public $timestamps = FALSE;
-    
+
     protected $fillable = [
         'condition_name',
         'diagnosis_date',
@@ -21,9 +21,17 @@ class MedicalCondition extends Model
         'encounter_id'
     ];
 
-    protected $dates = [
-        'diagnosis_date'
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'diagnosis_date' => 'date',
+        ];
+    }
 
     public function patient()
     {

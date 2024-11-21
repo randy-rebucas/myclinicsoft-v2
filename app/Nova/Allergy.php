@@ -3,8 +3,12 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Textarea;
 
 class Allergy extends Resource
 {
@@ -25,7 +29,7 @@ class Allergy extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -34,6 +38,7 @@ class Allergy extends Resource
      */
     public static $search = [
         'id',
+        'name',
     ];
 
     /**
@@ -46,6 +51,28 @@ class Allergy extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->rules('required'),
+
+            Text::make('Allergen')
+                ->rules('required', 'max:255'),
+
+            Text::make('Reaction')
+                ->rules('required', 'max:255'),
+
+            Select::make('Severity')
+                ->options([
+                    'mild' => 'Mild',
+                    'moderate' => 'Moderate',
+                    'severe' => 'Severe',
+                ])
+                ->rules('required'),
+
+            Textarea::make('Notes')
+                ->rows(3)
+                ->nullable(),
         ];
     }
 

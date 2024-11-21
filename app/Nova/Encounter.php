@@ -5,6 +5,11 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\DateTime;
 
 class Encounter extends Resource
 {
@@ -41,6 +46,21 @@ class Encounter extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->rules('required'),
+
+            Textarea::make('Chief Complaint')
+                ->rules('required')
+                ->alwaysShow(),
+
+            Date::make('Encounter Date')
+                ->sortable()
+                ->rules('required'),
+
+            Textarea::make('Notes')
+                ->alwaysShow()
         ];
     }
 

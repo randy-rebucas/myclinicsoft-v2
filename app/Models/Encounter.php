@@ -17,9 +17,18 @@ class Encounter extends Model
         'notes',
         'patient_id'
     ];
-    protected $dates = [
-        'encounter_date'
-    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'encounter_date' => 'date',
+        ];
+    }
 
     public function patient()
     {

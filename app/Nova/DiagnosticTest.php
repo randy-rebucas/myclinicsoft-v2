@@ -5,6 +5,10 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
 
 class DiagnosticTest extends Resource
 {
@@ -45,7 +49,28 @@ class DiagnosticTest extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->rules('required'),
+
             ID::make()->sortable(),
+
+            Text::make('Test Name')
+                ->sortable()
+                ->rules('required', 'max:255'),
+
+            Date::make('Test Date')
+                ->sortable()
+                ->rules('required'),
+
+            Textarea::make('Results')
+                ->rules('required'),
+
+            Textarea::make('Notes')
+                ->nullable()
+                ->hideFromIndex(),
+
+
         ];
     }
 

@@ -5,6 +5,10 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
 
 class FamilyHistory extends Resource
 {
@@ -45,7 +49,29 @@ class FamilyHistory extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->required(),
+
             ID::make()->sortable(),
+
+            Select::make('Relationship')
+                ->options([
+                    'Parent' => 'Parent',
+                    'Sibling' => 'Sibling',
+                    'Grandparent' => 'Grandparent',
+                    'Other' => 'Other',
+                ])
+                ->required(),
+
+            Text::make('Condition')
+                ->required(),
+
+            Textarea::make('Notes')
+                ->rows(3)
+                ->alwaysShow(),
+
+
         ];
     }
 

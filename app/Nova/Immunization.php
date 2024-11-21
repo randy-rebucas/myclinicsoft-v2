@@ -5,6 +5,11 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Date;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Select;
 
 class Immunization extends Resource
 {
@@ -45,7 +50,23 @@ class Immunization extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->required(),
             ID::make()->sortable(),
+            Text::make('Vaccine Name')
+                ->rules('required', 'max:255'),
+            Date::make('Date Administered')
+                ->rules('required'),
+            Select::make('Administrator')
+                ->options([
+                    'Physician' => 'Physician',
+                    'Nurse' => 'Nurse',
+                ])
+                ->rules('required', 'in:Physician,Nurse'),
+            Textarea::make('Notes')
+                ->nullable()
+                ->alwaysShow(),
         ];
     }
 

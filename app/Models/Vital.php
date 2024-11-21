@@ -17,14 +17,21 @@ class Vital extends Model
         'blood_sugar',
     ];
 
-    protected $casts = [
-        'heart_rate' => 'integer',
-        'temperature' => 'decimal:1',
-        'respiratory_rate' => 'integer',
-        'oxygen_saturation' => 'integer',
-        'blood_sugar' => 'integer',
-    ];
-
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'heart_rate' => 'integer',
+            'temperature' => 'decimal:1',
+            'respiratory_rate' => 'integer',
+            'oxygen_saturation' => 'integer',
+            'blood_sugar' => 'integer',
+        ];
+    }
     /**
      * Get the patient that owns these vitals.
      */

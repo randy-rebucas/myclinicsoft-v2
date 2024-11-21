@@ -2,9 +2,14 @@
 
 namespace App\Nova;
 
+use App\Nova\Repeater\PrescriptionItem;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Repeater;
 
 class Medication extends Resource
 {
@@ -45,7 +50,25 @@ class Medication extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable(),
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->required(),
+
+            BelongsTo::make('Encounter')
+                ->sortable()
+                ->nullable(),
+
+            ID::make()->hideFromIndex()->hideFromDetail(),
+
+            Repeater::make('Prescriptions')
+                ->repeatables([
+                    PrescriptionItem::make(),
+                ]),
+
+            Textarea::make('Notes')
+                ->alwaysShow()
+                ->nullable(),
+
         ];
     }
 

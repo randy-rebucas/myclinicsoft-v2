@@ -5,6 +5,7 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
 
 class Setting extends Resource
 {
@@ -45,7 +46,16 @@ class Setting extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable(),
+            ID::make()->hideFromIndex()->hideFromDetail(),
+
+            Text::make('Key')
+                ->rules('required', 'max:255')
+                ->creationRules('unique:settings,key')
+                ->updateRules('unique:settings,key,{{resourceId}}'),
+
+            Text::make('Value')
+                ->rules('required')
+                ->showOnIndex(),
         ];
     }
 
