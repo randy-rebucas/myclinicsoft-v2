@@ -5,11 +5,13 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Actions\ExportAsCsv;
 use Laravel\Nova\Fields\Avatar;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Country;
+use Laravel\Nova\Fields\MorphMany;
 use Wame\TelInput\TelInput;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -87,11 +89,12 @@ class Patient extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            BelongsTo::make('User')->searchable(),
             ID::make()->hideFromIndex()->hideFromDetail(),
             Avatar::make('Image', 'avatar'),
             Text::make('Name', function () {
-                return $this->first_name . ' ' . $this->last_name;
-            })->sortable()->hideWhenCreating(),
+                return $this->full_name;
+            })->sortable()->hideFromIndex()->hideWhenCreating(),
             Text::make('First Name', 'first_name')->hideFromIndex()->hideFromDetail(),
             Text::make('Last Name', 'last_name')->hideFromIndex()->hideFromDetail(),
             Date::make('Birthday', 'date_of_birth'),
@@ -100,11 +103,34 @@ class Patient extends Resource
                 'female' => 'Female',
                 'unknown' => 'Unknown',
             ]),
-            TelInput::make('phone', 'phone_number')->onlyCountries(['PH'])->help(
-                'International format only e.g. +63'
-            ),
+            new Panel('Contact Information', [
+                TelInput::make('Phone Number', 'phone_number')
+                    ->onlyCountries(['PH'])
+                    ->help('International format only e.g. +63'),
+            ]),
 
-            MorphOne::make('Address'),
+            // new Panel('Emergency Contact', [
+            //     Text::make('Emergency Contact Name', 'emergency_contact_name')
+            //         ->rules('max:255')->hideFromIndex(),
+            //     TelInput::make('Emergency Contact Phone', 'emergency_contact_phone')
+            //         ->onlyCountries(['PH'])
+            //         ->help('International format only e.g. +63')->hideFromIndex(),
+            //     Text::make('Relationship to Patient', 'emergency_contact_relationship')
+            //         ->rules('max:100')->hideFromIndex(),
+            // ]),
+
+            // new Panel('Medical Information', [
+            //     Text::make('Blood Type')
+            //         ->rules('nullable', 'max:10')->hideFromIndex(),
+            //     Text::make('Allergies')
+            //         ->rules('nullable', 'max:255')->hideFromIndex(),
+            //     Text::make('Chronic Conditions', 'chronic_conditions')
+            //         ->rules('nullable', 'max:255')->hideFromIndex(),
+            //     Text::make('Current Medications', 'current_medications')
+            //         ->rules('nullable', 'max:255')->hideFromIndex(),
+            // ]),
+
+            MorphMany::make('Addresses', 'addresses'),
         ];
     }
 

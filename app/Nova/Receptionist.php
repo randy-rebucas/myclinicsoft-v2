@@ -3,8 +3,16 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Email;
+use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Select;
+use Wame\TelInput\TelInput;
 
 class Receptionist extends Resource
 {
@@ -14,7 +22,12 @@ class Receptionist extends Resource
      * @var class-string<\App\Models\Receptionist>
      */
     public static $model = \App\Models\Receptionist::class;
-
+    /**
+     * The logical group associated with the resource.
+     *
+     * @var string
+     */
+    public static $group = 'User Management';
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
@@ -40,7 +53,24 @@ class Receptionist extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable(),
+            BelongsTo::make('User')->noPeeking(),
+
+            ID::make()->hideFromIndex()->hideFromDetail(),
+            Text::make('First Name')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            Text::make('Last Name')
+                ->sortable()
+                ->rules('required', 'max:255'),
+            TelInput::make('Phone', 'phone_number')->onlyCountries(['PH'])->help(
+                'International format only e.g. +63'
+            ),
+
+            Select::make('Gender', 'gender')->options([
+                'male' => 'Male',
+                'female' => 'Female',
+                'unknown' => 'Unknown',
+            ]),
         ];
     }
 

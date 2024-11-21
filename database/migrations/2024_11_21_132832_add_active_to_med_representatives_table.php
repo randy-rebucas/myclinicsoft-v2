@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('countries', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('code');
-            $table->boolean('is_enable')->default(false);
-            $table->timestamps();
+        Schema::table('med_representatives', function (Blueprint $table) {
+            $table->boolean('is_active')->default(false);
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('countries');
+        Schema::table('med_representatives', function (Blueprint $table) {
+            $table->dropColumn('is_active');
+        });
     }
 };

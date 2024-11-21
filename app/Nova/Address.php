@@ -5,15 +5,18 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Country;
+use Laravel\Nova\Fields\Select;
 
-class Country extends Resource
+class Address extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Country>
+     * @var class-string<\App\Models\Address>
      */
-    public static $model = \App\Models\Country::class;
+    public static $model = \App\Models\Address::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -40,7 +43,32 @@ class Country extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable(),
+            ID::make()->hideFromIndex()->hideFromDetail(),
+
+            Select::make('Label')->options([
+                'home' => 'Home',
+                'work' => 'Work',
+                'other' => 'Other',
+            ]),
+
+            Text::make('Street Address', 'address_line_1')
+                ->rules('required', 'max:255'),
+
+            Text::make('Apartment/Suite', 'address_line_2')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Text::make('City')
+                ->rules('required', 'max:100'),
+
+            Text::make('State')
+                ->rules('required', 'max:100'),
+
+            Text::make('Postal Code', 'postal_code')
+                ->rules('required', 'max:20'),
+
+            Country::make('Country')
+                ->rules('required'),
         ];
     }
 

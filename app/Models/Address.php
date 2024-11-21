@@ -16,6 +16,7 @@ class Address extends Model
         'state',
         'postal_code',
         'country',
+        'label'
     ];
 
     public function addressable()
@@ -23,16 +24,11 @@ class Address extends Model
         return $this->morphTo();
     }
 
-    public function city()
-    {
-        return $this->belongsTo(City::class);
-    }
-
     public function getCompleteAddressAttribute()
     {
-        $address = $this->line_1 . ', ' . $this->line_2;
-        $address .= $this->district . ', ' . $this->city->name;
-        $address .= $this->city->country->name . ', ' . $this->postal_code;
+        $address = $this->address_line_1 . ', ' . $this->address_line_2;
+        $address .= $this->city . ', ' . $this->state;
+        $address .= $this->country . ', ' . $this->postal_code;
         return $address;
     }
 }

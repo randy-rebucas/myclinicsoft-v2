@@ -46,9 +46,9 @@ class Patient extends Model
         ];
     }
 
-    public function address()
+    public function addresses()
     {
-        return $this->morphOne(Address::class, 'addressable');
+        return $this->morphMany(Address::class, 'addressable');
     }
 
     public function getAgeAttribute()
