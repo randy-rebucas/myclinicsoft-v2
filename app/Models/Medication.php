@@ -12,7 +12,7 @@ class Medication extends Model
     public $timestamps = FALSE;
 
     protected $fillable = [
-        'prescription_items',
+        // 'prescription_items',
         'notes',
         'patient_id',
         'encounter_id'
@@ -23,16 +23,21 @@ class Medication extends Model
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'prescription_items' => 'array',
-        ];
-    }
+    // protected function casts(): array
+    // {
+    //     return [
+    //         'prescription_items' => 'array',
+    //     ];
+    // }
 
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function medicationItems()
+    {
+        return $this->hasMany(MedicationItem::class);
     }
 
     public function encounter()

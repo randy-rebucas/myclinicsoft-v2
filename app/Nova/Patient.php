@@ -11,6 +11,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Country;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\MorphMany;
 use Wame\TelInput\TelInput;
 use Laravel\Nova\Panel;
@@ -103,12 +104,13 @@ class Patient extends Resource
                 'female' => 'Female',
                 'unknown' => 'Unknown',
             ]),
-            new Panel('Contact Information', [
-                TelInput::make('Phone Number', 'phone_number')
-                    ->onlyCountries(['PH'])
-                    ->help('International format only e.g. +63'),
-            ]),
+            TelInput::make('Phone Number', 'phone_number')
+                ->onlyCountries(['PH'])
+                ->help('International format only e.g. +63'),
 
+            MorphOne::make('Address', 'address'),
+
+            HasMany::make('Encounters', 'encounters'),
             // new Panel('Emergency Contact', [
             //     Text::make('Emergency Contact Name', 'emergency_contact_name')
             //         ->rules('max:255')->hideFromIndex(),
@@ -130,7 +132,7 @@ class Patient extends Resource
             //         ->rules('nullable', 'max:255')->hideFromIndex(),
             // ]),
 
-            MorphMany::make('Addresses', 'addresses'),
+
         ];
     }
 
