@@ -50,6 +50,8 @@ class Medication extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            ID::make()->hideFromDetail(),
+
             BelongsTo::make('Patient')
                 ->searchable()
                 ->required(),
@@ -58,9 +60,8 @@ class Medication extends Resource
                 ->sortable()
                 ->nullable(),
 
-            ID::make()->hideFromIndex()->hideFromDetail(),
 
-            Repeater::make('Medication Items', 'medicationItems')
+            Repeater::make('Medication Items', 'prescription_items')
                 ->uniqueField('id')
                 ->repeatables([
                     \App\Nova\Repeater\MedicationItem::make()->confirmRemoval(),
@@ -70,6 +71,30 @@ class Medication extends Resource
                 ->alwaysShow()
                 ->nullable(),
 
+        ];
+    }
+    /**
+     * Get the fields displayed by the resource on detail page.
+     *
+     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
+     * @return array
+     */
+    public function fieldsForDetail(NovaRequest $request)
+    {
+        return [
+            BelongsTo::make('Patient')
+                ->searchable()
+                ->required(),
+
+            Text::make('Prescription Items', function () {
+                return view('partials.medication-items', [
+                    'items' => $this->prescription_items,
+                ])->render();
+            })->asHtml(),
+
+            Textarea::make('Notes')
+                ->alwaysShow()
+                ->nullable(),
         ];
     }
 

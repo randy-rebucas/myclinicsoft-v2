@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\KeyValue;
 
 class Setting extends Resource
 {
@@ -47,6 +48,7 @@ class Setting extends Resource
     {
         return [
             ID::make()->hideFromIndex()->hideFromDetail(),
+            // KeyValue::make('Settings')->rules('json'),
 
             Text::make('Key')
                 ->rules('required', 'max:255')
