@@ -10,6 +10,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Repeater;
+use Laravel\Nova\Actions\Action;
 
 class Medication extends Resource
 {
@@ -131,14 +132,13 @@ class Medication extends Resource
         return [];
     }
 
-    /**
-     * Get the actions available for the resource.
-     *
-     * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
-     * @return array
-     */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            Actions\PrintPrescriptionPDF::make()
+                ->onlyOnDetail()
+                ->confirmButtonText('Generate PDF')
+                ->cancelButtonText('Cancel'),
+        ];
     }
 }
