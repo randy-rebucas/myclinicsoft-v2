@@ -2,11 +2,11 @@
 
 namespace App\Nova;
 
-use App\Nova\Repeater\PrescriptionItem;
+use App\Nova\Repeater\MedicationItem;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
-
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Repeater;
@@ -60,7 +60,8 @@ class Medication extends Resource
 
             ID::make()->hideFromIndex()->hideFromDetail(),
 
-            Repeater::make('Prescription Items')
+            Repeater::make('Medication Items', 'medicationItems')
+                ->uniqueField('id')
                 ->repeatables([
                     \App\Nova\Repeater\MedicationItem::make()->confirmRemoval(),
                 ])->asJson(),

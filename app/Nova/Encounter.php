@@ -10,6 +10,7 @@ use Laravel\Nova\Fields\Date;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasMany;
 
 class Encounter extends Resource
 {
@@ -60,7 +61,9 @@ class Encounter extends Resource
                 ->rules('required'),
 
             Textarea::make('Notes')
-                ->alwaysShow()
+                ->alwaysShow(),
+
+            HasMany::make('Medications', 'medications'),
         ];
     }
 
