@@ -2,12 +2,12 @@
 
 namespace App\Nova\Repeater;
 
+use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Repeater\Repeatable;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Laravel\Nova\Fields\Text;
 
-
-class PrescriptionItem extends Repeatable
+class MedicationItem extends Repeatable
 {
     /**
      * Get the fields displayed by the repeatable.

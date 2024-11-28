@@ -62,7 +62,7 @@ class Medication extends Resource
 
             Repeater::make('Prescription Items')
                 ->repeatables([
-                    PrescriptionItem::make()->confirmRemoval(),
+                    \App\Nova\Repeater\MedicationItem::make()->confirmRemoval(),
                 ])->asJson(),
 
             Textarea::make('Notes')
