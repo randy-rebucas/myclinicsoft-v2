@@ -63,8 +63,8 @@ class Medication extends Resource
             Repeater::make('Medication Items', 'medicationItems')
                 ->uniqueField('id')
                 ->repeatables([
-                    \App\Nova\MedicationItem::make(),
-                ])->asHasMany(),
+                    \App\Nova\Repeater\MedicationItem::make()->confirmRemoval(),
+                ])->asJson(),
 
             Textarea::make('Notes')
                 ->alwaysShow()
