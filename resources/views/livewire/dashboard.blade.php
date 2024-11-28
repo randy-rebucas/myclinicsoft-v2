@@ -79,7 +79,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             {{ $visit->patient->name }}
                                         </p>
                                         <p class="text-xs text-gray-500">
-                                            {{ $visit->created_at->format('M d, Y h:ia') }}
+                                            {{ $visit->encounter_date->format('M d, Y h:ia') }}
                                         </p>
                                     </div>
                                     <div class="text-sm text-gray-500">
