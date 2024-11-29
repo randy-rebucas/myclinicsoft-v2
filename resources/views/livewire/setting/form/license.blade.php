@@ -26,7 +26,17 @@ $store = function () {
 
 ?>
 
-<div class="max-w-4xl mx-auto">
+<section>
+    <header>
+        <h2 class="text-lg font-medium text-gray-900">
+            {{ __('License Information') }}
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600">
+            {{ __("Update your account's license information.") }}
+        </p>
+    </header>
+
     @if ($notification)
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
             class="fixed bottom-4 right-4 z-50 rounded-md p-3 flex items-center {{ $notification['type'] === 'success' ? 'bg-emerald-500' : 'bg-red-500' }} text-white">
@@ -66,4 +76,4 @@ $store = function () {
             </x-primary-button>
         </div>
     </form>
-</div>
+</section>

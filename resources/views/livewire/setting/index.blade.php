@@ -4,7 +4,7 @@ use function Livewire\Volt\{state, layout};
 
 layout('layouts.app');
 
-state(['activeTab' => 'business']);
+state(['activeTab' => 'profile']);
 
 ?>
 
@@ -14,6 +14,15 @@ state(['activeTab' => 'business']);
             <!-- Side Tab Navigation -->
             <div class="w-64 shrink-0">
                 <nav class="flex flex-col space-y-1" aria-label="Tabs">
+                    <button
+                        wire:click="$set('activeTab', 'profile')"
+                        class="{{ $activeTab === 'profile' ? 'bg-blue-50 border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700' }} flex items-center gap-3 px-3 py-2 text-sm font-medium border-l-4"
+                    >
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12zm0 1.5c-2.485 0-7.5 1.243-7.5 3.75V21h15v-3.75c0-2.507-5.015-3.75-7.5-3.75z" />
+                        </svg>
+                        Profile
+                    </button>
                     <button
                         wire:click="$set('activeTab', 'business')"
                         class="{{ $activeTab === 'business' ? 'bg-blue-50 border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700' }} flex items-center gap-3 px-3 py-2 text-sm font-medium border-l-4"
@@ -37,12 +46,16 @@ state(['activeTab' => 'business']);
 
             <!-- Tab Panels -->
             <div class="flex-1">
+                <div x-show="$wire.activeTab === 'profile'">
+                    <div class="rounded-2xl bg-white p-6 ring-1 ring-gray-200">
+                        <livewire:setting.form.profile />
+                    </div>
+                </div>
                 <div x-show="$wire.activeTab === 'business'">
                     <div class="rounded-2xl bg-white p-6 ring-1 ring-gray-200">
                         <livewire:setting.form.business />
                     </div>
                 </div>
-
                 <div x-show="$wire.activeTab === 'licenses'">
                     <div class="rounded-2xl bg-white p-6 ring-1 ring-gray-200">
                         <livewire:setting.form.license />
