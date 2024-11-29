@@ -62,94 +62,94 @@ $save = function () {
 
     $this->dispatch('refresh');
 };
- ?>
+?>
 
-<section>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Med Representatives') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="min-w-full">
-                    <div class="space-y-6">
-                        <div class="flex justify-between">
-                            <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Med Rep...')" />
-                            <x-secondary-button wire:click="create">
-                                {{ __('Create New') }}
-                            </x-secondary-button>
-                        </div>
-
-                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-                            <x-table for="med-representative">
-                                <x-table.thead>
-                                    <x-table.row class="">
-                                        <x-table.thead-cell :title="__('Full Name')" class="text-left" />
-                                        <x-table.thead-cell :title="__('Phone Number')" class="text-center" />
-                                        <x-table.thead-cell :title="__('Gender')" class="text-center" />
-                                        <x-table.thead-cell title="" class="text-right" />
-                                    </x-table.row>
-                                </x-table.thead>
-                                <x-table.tbody class="">
-                                    @forelse ($medRepresentatives as $medRepresentative)
-                                        <x-table.row class="bg-white "
-                                            wire:loading.class="opacity-50">
-                                            <x-table.tbody-cell :item="$medRepresentative->full_name" />
-                                            <x-table.tbody-cell :item="$medRepresentative->phone_number" class="text-center" />
-                                            <x-table.tbody-cell :item="$medRepresentative->gender" class="text-center uppercase" />
-                                            <x-table.tbody-cell :item="$medRepresentative->id" class="text-right"
-                                                :action="true">
-                                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="detail({{ $medRepresentative }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="w-6 h-6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
-                                                    </svg>
-
-                                                </button>
-                                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="edit({{ $medRepresentative->id }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path
-                                                            d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button"
-                                                    class="btn btn-info m-1 text-red-600 font-medium underline"
-                                                    wire:click="delete({{ $medRepresentative }})"
-                                                    wire:confirm="Are you sure you want to delete this patient?">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path fill-rule="evenodd"
-                                                            d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                            </x-table.tbody-cell>
-                                        </x-table.row>
-                                    @empty
-                                        <x-table.row class="bg-white ">
-                                            <x-table.tbody-cell colspan="6" :item="__('No med representative found!!')" />
-                                        </x-table.row>
-                                    @endforelse
-                                </x-table.tbody>
-                            </x-table>
-                        </div>
-                        <div>
-                            {{ $medRepresentatives->links() }}
+<div class="py-6">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-xl rounded-xl">
+            <!-- Modern Top Bar -->
+            <div class="border-b bg-gray-50">
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex-1 max-w-md">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" class="w-5 h-5 text-gray-400">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </div>
+                            <x-text-input wire:model.live="search" class="ps-12 w-full py-2.5 bg-white" type="search" :placeholder="__('Search representatives...')" />
                         </div>
                     </div>
+                    <x-primary-button wire:click="create" class="flex items-center gap-2 px-4 py-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        {{ __('Add Representative') }}
+                    </x-primary-button>
                 </div>
+            </div>
+
+            <!-- Modern Content Area -->
+            <div class="flex-1 overflow-auto">
+                <!-- Table Body -->
+                <div class="divide-y divide-gray-100">
+                    @forelse ($medRepresentatives as $medRepresentative)
+                        <div class="group hover:bg-gray-50 transition-all duration-150">
+                            <div class="flex items-center px-6 py-3">
+                                <div class="flex-1" wire:click="detail({{ $medRepresentative }})">
+                                    <div class="font-medium text-gray-900">{{ $medRepresentative->full_name }}</div>
+                                    <div class="flex items-center gap-4 text-sm text-gray-500 mt-0.5">
+                                        <span>{{ $medRepresentative->phone_number }}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                                            {{ $medRepresentative->gender === 'male' ? 'bg-blue-50 text-blue-700' :
+                                               ($medRepresentative->gender === 'female' ? 'bg-pink-50 text-pink-700' : 'bg-gray-50 text-gray-700') }}">
+                                            {{ Str::ucfirst($medRepresentative->gender) }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Modern Actions -->
+                                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                    <button wire:click.stop="edit({{ $medRepresentative->id }})"
+                                        class="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button wire:click.stop="delete({{ $medRepresentative }})"
+                                        wire:confirm="Are you sure you want to delete this representative?"
+                                        class="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            {{ __('No medical representatives found') }}
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Modern Pagination -->
+            <div class="border-t px-6 py-4 bg-gray-50">
+                {{ $medRepresentatives->links() }}
             </div>
         </div>
     </div>
-
+    <!-- Keep existing modal -->
     <x-modal name="form-med-representative" :show="$errors->isNotEmpty()" focusable>
         <form wire:submit="save" class="p-6">
             <h2 class="text-lg font-medium text-gray-900">
@@ -229,5 +229,5 @@ $save = function () {
             </div>
         </form>
     </x-modal>
-</section>
 
+</div>
