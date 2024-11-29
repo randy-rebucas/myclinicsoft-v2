@@ -30,95 +30,63 @@ $store = function () {
 
 ?>
 
-<div>
+<div class="max-w-4xl mx-auto">
     <!-- Notification Banner -->
     @if ($notification)
         <div x-data="{ show: true }"
              x-show="show"
              x-init="setTimeout(() => show = false, 3000)"
-             class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg {{ $notification['type'] === 'success' ? 'bg-green-500' : 'bg-red-500' }} text-white"
+             class="fixed bottom-4 right-4 z-50 rounded-lg shadow-lg {{ $notification['type'] === 'success' ? 'bg-emerald-500' : 'bg-red-500' }} text-white"
              role="alert">
-            <div class="flex items-center">
+            <div class="flex items-center p-3">
                 @if ($notification['type'] === 'success')
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                 @else
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 @endif
-                <span class="font-medium">{{ $notification['message'] }}</span>
-                <button @click="show = false" class="ml-4 text-white hover:text-gray-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+                <span class="font-medium text-sm">{{ $notification['message'] }}</span>
             </div>
         </div>
     @endif
 
-    <form wire:submit="store" class="space-y-6 p-6">
-        <!-- PRC Field -->
-        <div class="md:flex p-4 shadow rounded-lg hover:bg-gray-50 transition-colors">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="prc" :value="__('PRC')"
-                    class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
-            </div>
-            <div class="md:w-3/4">
-                <x-text-input 
-                    wire:model.blur="form.settings.prc" 
-                    id="prc"
-                    aria-label="{{ __('PRC') }}"
-                    class="w-full rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-                    type="text" />
-                <x-input-error :messages="$errors->get('form.settings.prc')" class="mt-2" />
-            </div>
-        </div>
+    <!-- Main Form -->
+    <form wire:submit="store" class="bg-white rounded-xl shadow-md divide-y divide-gray-100">
+        <!-- License Fields -->
+        @foreach(['prc' => 'PRC License', 'ptr' => 'PTR License', 's2' => 'S2 License'] as $field => $label)
+            <div class="p-6 transition duration-150 hover:bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                    <x-input-label
+                        for="{{ $field }}"
+                        :value="__($label)"
+                        class="font-medium text-gray-700 md:text-right" />
 
-        <!-- PTR Field -->
-        <div class="md:flex p-4 shadow rounded-lg hover:bg-gray-50 transition-colors">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="ptr" :value="__('PTR')"
-                    class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
+                    <div class="md:col-span-3">
+                        <x-text-input
+                            wire:model.blur="form.settings.{{ $field }}"
+                            id="{{ $field }}"
+                            :placeholder="__('Enter ' . $label . ' number')"
+                            class="w-full rounded-lg"
+                            type="text" />
+                        <x-input-error :messages="$errors->get('form.settings.' . $field)" class="mt-2" />
+                    </div>
+                </div>
             </div>
-            <div class="md:w-3/4">
-                <x-text-input 
-                    wire:model.blur="form.settings.ptr" 
-                    id="ptr"
-                    aria-label="{{ __('PTR') }}"
-                    class="w-full rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-                    type="text" />
-                <x-input-error :messages="$errors->get('form.settings.ptr')" class="mt-2" />
-            </div>
-        </div>
+        @endforeach
 
-        <!-- S2 Field -->
-        <div class="md:flex p-4 shadow rounded-lg hover:bg-gray-50 transition-colors">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="s2" :value="__('S2')"
-                    class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
-            </div>
-            <div class="md:w-3/4">
-                <x-text-input 
-                    wire:model.blur="form.settings.s2" 
-                    id="s2"
-                    aria-label="{{ __('S2') }}"
-                    class="w-full rounded py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500"
-                    type="text" />
-                <x-input-error :messages="$errors->get('form.settings.s2')" class="mt-2" />
-            </div>
-        </div>
-
-        <!-- Save Button -->
-        <div class="md:flex justify-end pt-4">
-            <x-primary-button 
-                class="mb-2" 
+        <!-- Action Buttons -->
+        <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end">
+            <x-primary-button
                 wire:loading.attr="disabled"
                 wire:target="store">
-                <span wire:loading.remove wire:target="store">{{ __('Save') }}</span>
+                <span wire:loading.remove wire:target="store">
+                    {{ __('Save Changes') }}
+                </span>
                 <span wire:loading wire:target="store" class="inline-flex items-center">
-                    <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>

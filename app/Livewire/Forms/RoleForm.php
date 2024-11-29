@@ -8,30 +8,42 @@ use Spatie\Permission\Models\Role;
 
 class RoleForm extends Form
 {
-    #[Validate('required|string|max:255')]
-    public $name;
+    public ?string $name = '';
+    public array $permissions = [];
+    public array $assigned_permissions = [];
 
-    public $permissions = [];
-
-    public $assigned_permissions = [];
+    public function rules()
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'assigned_permissions' => ['array'],
+        ];
+    }
 
     public function store(?Role $role)
     {
         $this->validate();
 
-        if ($role) {
-            $this->update($role);
-        } else {
-            $this->create();
-        }
+        $role = $role ?? new Role();
+        $role->name = $this->name;
+        $role->save();
 
-        $this->reset('name');
+        $role->syncPermissions($this->assigned_permissions);
+
+        $this->reset();
+        // if ($role) {
+        //     $this->update($role);
+        // } else {
+        //     $this->create();
+        // }
+
+        // $this->reset('name');
     }
 
-    public function setRole(?Role $role = null)
+    public function setRole(Role $role)
     {
         $this->name = $role->name;
-        $this->assigned_permissions = $role->permissions->pluck('name');
+        $this->assigned_permissions = $role->permissions->pluck('name')->toArray();
     }
 
     public function update(?Role $role)

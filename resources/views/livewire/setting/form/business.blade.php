@@ -1,144 +1,162 @@
 <?php
 
 use App\Livewire\Forms\SettingForm;
-use function Livewire\Volt\{state, form, mount, on, usesFileUploads};
-
-usesFileUploads();
+use function Livewire\Volt\{state, form, mount};
 
 form(SettingForm::class);
-
-state(['logoPreview' => null]);
+state(['notification' => null, 'logo' => null]);
 
 mount(function () {
-    $this->form->settings['logo'] = config('settings.logo');
     $this->form->settings['business_name'] = config('settings.business_name');
-    $this->form->settings['business_owner'] = config('settings.business_owner');
-    $this->form->settings['business_contact'] = config('settings.business_contact');
-    $this->form->settings['business_address'] = config('settings.business_address');
+    $this->form->settings['address'] = config('settings.address');
+    $this->form->settings['contact_number'] = config('settings.contact_number');
+    $this->form->settings['email'] = config('settings.email');
 });
-
-$updatedFormSettingsLogo = function () {
-    if ($this->form->settings['logo']) {
-        $this->logoPreview = $this->form->settings['logo']->temporaryUrl();
-    }
-};
 
 $store = function () {
     try {
         $this->form->store();
         $this->dispatch('refresh');
-        $this->dispatch('notify', [
+        $this->notification = [
             'type' => 'success',
-            'message' => 'Business settings updated successfully'
-        ]);
+            'message' => 'Business details updated successfully'
+        ];
     } catch (\Exception $e) {
-        $this->dispatch('notify', [
+        $this->notification = [
             'type' => 'error',
-            'message' => 'Failed to update settings'
-        ]);
+            'message' => 'Failed to update business details'
+        ];
     }
 };
 
 ?>
 
-<div>
-    <form wire:submit="store" class="space-y-6 p-6">
-        <div class="md:flex items-start p-4 shadow rounded-lg" 
-             x-data="{ uploading: false }" 
-             x-on:livewire-upload-start="uploading = true" 
-             x-on:livewire-upload-finish="uploading = false">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="logo" :value="__('Logo')" class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
+<div class="max-w-4xl mx-auto">
+    <!-- Notification Banner -->
+    @if ($notification)
+        <div x-data="{ show: true }"
+             x-show="show"
+             x-init="setTimeout(() => show = false, 3000)"
+             class="fixed bottom-4 right-4 z-50 rounded-lg shadow-lg {{ $notification['type'] === 'success' ? 'bg-emerald-500' : 'bg-red-500' }} text-white"
+             role="alert">
+            <div class="flex items-center p-3">
+                @if ($notification['type'] === 'success')
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                @else
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                @endif
+                <span class="font-medium text-sm">{{ $notification['message'] }}</span>
             </div>
-            <div class="flex flex-col space-y-4 md:w-3/4">
-                <div class="w-48">
-                    @if ($logoPreview)
-                        <img src="{{ $logoPreview }}" class="rounded-lg">
-                    @elseif (config('settings.logo'))
-                        <img src="{{ asset('storage/' . config('settings.logo')) }}" class="rounded-lg">
-                    @else
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    @endif
+        </div>
+    @endif
+
+    <!-- Main Form -->
+    <form wire:submit="store" class="bg-white rounded-xl shadow-md divide-y divide-gray-100">
+        <!-- Logo Section -->
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+                <x-input-label
+                    for="logo"
+                    :value="__('Business Logo')"
+                    class="font-medium text-gray-700 md:text-right" />
+
+                <div class="md:col-span-3 space-y-4">
+                    <div class="flex items-center gap-4">
+                        <!-- Logo Preview -->
+                        <div class="relative w-24 h-24 rounded-lg bg-gray-50 border border-gray-200 overflow-hidden">
+                            @if ($form->settings['logo'] ?? false)
+                                <img src="{{ Storage::url($form->settings['logo']) }}"
+                                     alt="Business Logo"
+                                     class="w-full h-full object-cover">
+                                <!-- Remove Logo Button -->
+                                <button type="button"
+                                        wire:click="removeLogo"
+                                        class="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white hover:bg-red-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            @else
+                                <div class="flex items-center justify-center w-full h-full text-gray-400">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Upload Button -->
+                        <div class="flex-1">
+                            <input type="file"
+                                   wire:model="logo"
+                                   id="logo"
+                                   class="hidden"
+                                   accept="image/*" />
+                            <label for="logo"
+                                   class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150 cursor-pointer">
+                                {{ __('Upload New Logo') }}
+                            </label>
+                            <p class="mt-2 text-sm text-gray-500">
+                                {{ __('Recommended size: 200x200px. Max file size: 1MB') }}
+                            </p>
+                        </div>
+                    </div>
+                    <x-input-error :messages="$errors->get('logo')" class="mt-2" />
                 </div>
-                <div class="flex items-center space-x-2">
-                    <input type="file" 
-                           wire:model="form.settings.logo" 
-                           accept="image/*"
-                           aria-label="{{ __('Choose logo file') }}"
-                           class="block w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
-                                file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700
-                                hover:file:bg-purple-100" />
-                    
-                    <div x-show="uploading">
-                        <svg class="animate-spin h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+            </div>
+        </div>
+
+        <!-- Business Details Fields -->
+        @foreach([
+            'business_name' => 'Business Name',
+            'address' => 'Business Address',
+            'contact_number' => 'Contact Number',
+            'email' => 'Email Address'
+        ] as $field => $label)
+            <div class="p-6 transition duration-150 hover:bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                    <x-input-label
+                        for="{{ $field }}"
+                        :value="__($label)"
+                        class="font-medium text-gray-700 md:text-right" />
+
+                    <div class="md:col-span-3">
+                        @if ($field === 'address')
+                            <x-textarea
+                                wire:model.blur="form.settings.{{ $field }}"
+                                id="{{ $field }}"
+                                :placeholder="__('Enter complete business address')"
+                                class="w-full rounded-lg"
+                                rows="3" />
+                        @else
+                            <x-text-input
+                                wire:model.blur="form.settings.{{ $field }}"
+                                id="{{ $field }}"
+                                :placeholder="__('Enter ' . strtolower($label))"
+                                class="w-full rounded-lg"
+                                type="{{ $field === 'email' ? 'email' : 'text' }}" />
+                        @endif
+                        <x-input-error :messages="$errors->get('form.settings.' . $field)" class="mt-2" />
                     </div>
                 </div>
-                <x-input-error :messages="$errors->get('form.settings.logo')" class="mt-2" />
-                <p class="text-sm text-gray-500">Recommended size: 200x200px. Max size: 1MB</p>
             </div>
-        </div>
+        @endforeach
 
-        <div class="md:flex p-4 shadow rounded-lg hover:bg-gray-50 transition-colors">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="business_name" :value="__('Business Name')" class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
-            </div>
-            <div class="md:w-3/4">
-                <x-text-input 
-                    wire:model.blur="form.settings.business_name" 
-                    id="business_name"
-                    aria-label="{{ __('Business Name') }}"
-                    class="w-full" 
-                    type="text" 
-                    required />
-                <x-input-error :messages="$errors->get('form.settings.business_name')" class="mt-2" />
-            </div>
-        </div>
-
-        <div class="md:flex p-4 shadow rounded-lg">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="business_owner" :value="__('Business Owner')" class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
-            </div>
-            <div class="md:w-3/4">
-                <x-text-input wire:model.blur="form.settings.business_owner" id="business_owner"
-                    class="w-full" type="text" />
-                <x-input-error :messages="$errors->get('form.settings.business_owner')" class="mt-2" />
-            </div>
-        </div>
-
-        <div class="md:flex p-4 shadow rounded-lg">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="business_contact" :value="__('Contact')" class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
-            </div>
-            <div class="md:w-3/4">
-                <x-text-input wire:model.blur="form.settings.business_contact" id="business_contact"
-                    class="w-full" type="text" />
-                <x-input-error :messages="$errors->get('form.settings.business_contact')" class="mt-2" />
-            </div>
-        </div>
-
-        <div class="md:flex p-4 shadow rounded-lg">
-            <div class="flex items-center md:w-1/4">
-                <x-input-label for="business_address" :value="__('Address')" class="block text-gray-500 md:text-right mb-1 md:mb-0 pr-4" />
-            </div>
-            <div class="md:w-3/4">
-                <x-textarea wire:model.blur="form.settings.business_address" id="business_address" 
-                    class="w-full"></x-textarea>
-                <x-input-error :messages="$errors->get('form.settings.business_address')" class="mt-2" />
-            </div>
-        </div>
-
-        <div class="md:flex justify-end pt-4">
-            <x-primary-button 
-                class="mb-2" 
+        <!-- Action Buttons -->
+        <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end">
+            <x-primary-button
                 wire:loading.attr="disabled"
                 wire:target="store">
-                <span wire:loading.remove wire:target="store">{{ __('Save') }}</span>
+                <span wire:loading.remove wire:target="store">
+                    {{ __('Save Changes') }}
+                </span>
                 <span wire:loading wire:target="store" class="inline-flex items-center">
-                    <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>

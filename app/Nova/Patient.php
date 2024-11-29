@@ -155,7 +155,7 @@ class Patient extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [new Filters\BirthdayFilter];
     }
 
     /**

@@ -30,17 +30,17 @@ class Prescription extends Controller
             's2' => config('settings.s2')
         ]);
 
-        $patient_address = PatientAddress::with('address')->where('patient_id', $encounter->patient->id)->first();
+        $patient_address = $encounter->patient->address->line_1 . ',' . $encounter->patient->address->district . ', ' . $encounter->patient->address->city->name;
         $patientObj = Patient::findOrFail($encounter->patient_id);
         $patient = new Party([
             'id' => $patientObj->id,
             'name' => $patientObj->full_name,
             'age' => $patientObj->age,
-            'address' => $patient_address ? $patient_address->address->line_1 . ',' . $patient_address->address->district . ', ' . $patient_address->address->city->name : '--',
+            'address' => $patient_address,
             'birthdate' => $patientObj->date_of_birth,
             'gender' => $patientObj->gender
         ]);
-        // dd($patient->name);
+
         $medications = Medication::where('encounter_id', $encounter->id)->get();
         foreach ($medications as $medication) {
             $prescriptions[] = (new PrescriptionItem())

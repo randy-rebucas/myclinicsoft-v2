@@ -26,6 +26,22 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('/settings', 'setting.index')->name('settings');
 
     Route::get('/patient/encounter/{encounterId}', Prescription::class)->name('prescription');
+
+    // // Admin routes
+    // Route::middleware(['can:manage-system'])->group(function () {
+    //     Route::resource('doctors', DoctorController::class);
+    //     Route::get('/system-settings', [SettingsController::class, 'index']);
+    // });
+
+    // // Doctor routes
+    // Route::middleware(['can:manage-prescriptions'])->group(function () {
+    //     Route::resource('prescriptions', PrescriptionController::class);
+    // });
+
+    // // Med Representative routes
+    // Route::middleware(['can:access-med-inventory'])->group(function () {
+    //     Route::resource('inventory', InventoryController::class);
+    // });
 });
 
 Route::get('/dump', DatabaseDumper::class)->name('dump');

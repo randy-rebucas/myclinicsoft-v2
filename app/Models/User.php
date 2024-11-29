@@ -62,4 +62,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Receptionist::class);
     }
+
+    // public function hasAnyRole($roles): bool
+    // {
+    //     return $this->roles()->whereIn('name', (array) $roles)->exists();
+    // }
 }
