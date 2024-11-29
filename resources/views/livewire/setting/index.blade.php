@@ -8,17 +8,8 @@ state(['activeTab' => 'business']);
 
 ?>
 
-<section class="min-h-screen bg-gray-50/30 py-12">
+<section class="min-h-screen bg-gray-50/30 py-4">
     <div class="max-w-7xl mx-auto">
-        <!-- Page Header -->
-        <div class="mb-10">
-            <h2 class="text-3xl font-semibold text-gray-900">
-                Settings
-                <span class="ml-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">Beta</span>
-            </h2>
-            <p class="mt-2 text-base text-gray-600">Configure your workspace settings and manage integrations</p>
-        </div>
-
         <!-- Tab Navigation -->
         <div class="border-b border-gray-200 mb-8">
             <nav class="-mb-px flex space-x-8" aria-label="Tabs">

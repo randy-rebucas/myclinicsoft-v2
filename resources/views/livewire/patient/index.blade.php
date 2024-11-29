@@ -70,17 +70,8 @@ on([
 ]);
 
 ?>
-<section class="min-h-screen bg-gray-50/30 py-12">
+<section class="min-h-screen bg-gray-50/30 py-6">
     <div class="max-w-7xl mx-auto">
-        <!-- Page Header -->
-        <div class="mb-10">
-            <h2 class="text-3xl font-semibold text-gray-900 dark:text-white">
-                {{ __('Patients') }}
-            </h2>
-            <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
-                {{ __('Manage and view all patient records in your practice') }}
-            </p>
-        </div>
         <div class="space-y-6">
             <div class="flex justify-between">
                 <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />
