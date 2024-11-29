@@ -99,9 +99,6 @@ new class extends Component
                         </div>
 
                         <div class="py-1">
-                            <x-dropdown-link :href="route('profile')" wire:navigate>
-                                {{ __('Profile') }}
-                            </x-dropdown-link>
                             <x-dropdown-link :href="route('settings')" wire:navigate>
                                 {{ __('Settings') }}
                             </x-dropdown-link>
@@ -167,9 +164,6 @@ new class extends Component
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('settings')" wire:navigate>
                     {{ __('Settings') }}
                 </x-responsive-nav-link>
