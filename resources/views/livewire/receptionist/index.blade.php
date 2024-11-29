@@ -64,90 +64,91 @@ $save = function () {
 };
 ?>
 
-<section>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Med Representatives') }}
-        </h2>
-    </x-slot>
+<div class="py-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
+            <!-- Search and Create Button -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <x-text-input wire:model.live="search" class="pl-10 py-2" type="search"
+                        placeholder="Search receptionists..." />
+                </div>
+                <x-primary-button wire:click="create" class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ __('Add New') }}
+                </x-primary-button>
+            </div>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="min-w-full">
-                    <div class="space-y-6">
-                        <div class="flex justify-between">
-                            <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Med Rep...')" />
-                            <x-secondary-button wire:click="create">
-                                {{ __('Create New') }}
-                            </x-secondary-button>
-                        </div>
+            <!-- Receptionist Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse ($receptionists as $receptionist)
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-200 group relative"
+                        wire:loading.class="opacity-50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-900">{{ $receptionist->full_name }}</h3>
+                                <div class="mt-2 space-y-1">
+                                    <p class="text-sm text-gray-600 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                        {{ $receptionist->phone_number }}
+                                    </p>
+                                    <p class="text-sm text-gray-600 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span class="uppercase">{{ $receptionist->gender }}</span>
+                                    </p>
+                                </div>
+                            </div>
 
-                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-                            <x-table for="med-representative">
-                                <x-table.thead>
-                                    <x-table.row class="">
-                                        <x-table.thead-cell :title="__('Full Name')" class="text-left" />
-                                        <x-table.thead-cell :title="__('Phone Number')" class="text-center" />
-                                        <x-table.thead-cell :title="__('Gender')" class="text-center" />
-                                        <x-table.thead-cell title="" class="text-right" />
-                                    </x-table.row>
-                                </x-table.thead>
-                                <x-table.tbody class="">
-                                    @forelse ($receptionists as $receptionist)
-                                        <x-table.row class="bg-white "
-                                            wire:loading.class="opacity-50">
-                                            <x-table.tbody-cell :item="$receptionist->full_name" />
-                                            <x-table.tbody-cell :item="$receptionist->phone_number" class="text-center" />
-                                            <x-table.tbody-cell :item="$receptionist->gender" class="text-center uppercase" />
-                                            <x-table.tbody-cell :item="$receptionist->id" class="text-right" :action="true">
-                                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="detail({{ $receptionist }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="w-6 h-6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
-                                                    </svg>
-
-                                                </button>
-                                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="edit({{ $receptionist->id }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path
-                                                            d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button"
-                                                    class="btn btn-info m-1 text-red-600 font-medium underline"
-                                                    wire:click="delete({{ $receptionist }})"
-                                                    wire:confirm="Are you sure you want to delete this patient?">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path fill-rule="evenodd"
-                                                            d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                            </x-table.tbody-cell>
-                                        </x-table.row>
-                                    @empty
-                                        <x-table.row class="bg-white ">
-                                            <x-table.tbody-cell colspan="6" :item="__('No med receptionist found!!')" />
-                                        </x-table.row>
-                                    @endforelse
-                                </x-table.tbody>
-                            </x-table>
-                        </div>
-                        <div>
-                            {{ $receptionists->links() }}
+                            <!-- Action Buttons -->
+                            <div
+                                class="flex gap-1 absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <button wire:click="edit({{ $receptionist->id }})"
+                                    class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-full transition-colors duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                <button wire:click="delete({{ $receptionist }})"
+                                    wire:confirm="Are you sure you want to delete this receptionist?"
+                                    class="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @empty
+                    <div
+                        class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-900">No receptionist found!!</h3>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
             </div>
+
         </div>
     </div>
+
 
     <x-modal name="form-receptionist" :show="$errors->isNotEmpty()" focusable>
         <form wire:submit="save" class="p-6">
@@ -228,4 +229,4 @@ $save = function () {
             </div>
         </form>
     </x-modal>
-</section>
+</div>

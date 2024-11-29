@@ -64,8 +64,8 @@ $save = function () {
 };
 ?>
 
-<div class="py-6">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<section class="min-h-screen bg-gray-50/30 py-6">
+    <div class="max-w-7xl mx-auto">
         <div class="bg-white overflow-hidden shadow-xl rounded-xl">
             <!-- Modern Top Bar -->
             <div class="border-b bg-gray-50">
@@ -230,4 +230,4 @@ $save = function () {
         </form>
     </x-modal>
 
-</div>
+</section>
