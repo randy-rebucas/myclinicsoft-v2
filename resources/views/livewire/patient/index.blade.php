@@ -55,7 +55,6 @@ $create = function () {
     $this->dispatch('open-modal', 'form-patient');
 };
 
-
 $save = function () {
     $this->form->store($this->patient);
 
@@ -64,13 +63,24 @@ $save = function () {
     $this->dispatch('refresh');
 };
 
-on(['set-date' => function ($date) {
-    $this->form->date_of_birth = $date['date'];
-}]);
+on([
+    'set-date' => function ($date) {
+        $this->form->date_of_birth = $date['date'];
+    },
+]);
 
 ?>
-<section>
+<section class="min-h-screen bg-gray-50/30 py-12">
     <div class="max-w-7xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-10">
+            <h2 class="text-3xl font-semibold text-gray-900 dark:text-white">
+                {{ __('Patients') }}
+            </h2>
+            <p class="mt-2 text-base text-gray-600 dark:text-gray-400">
+                {{ __('Manage and view all patient records in your practice') }}
+            </p>
+        </div>
         <div class="space-y-6">
             <div class="flex justify-between">
                 <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />
@@ -82,12 +92,13 @@ on(['set-date' => function ($date) {
             <div class="overflow-hidden">
                 <div class="grid grid-cols-1 gap-2">
                     @forelse ($patients as $patient)
-                        <div class="cursor-pointer bg-white p-2 rounded-lg shadow hover:shadow-md transition-shadow group" wire:click="detail({{ $patient }})">
+                        <div class="cursor-pointer bg-white p-2 rounded-lg shadow hover:shadow-md transition-shadow group"
+                            wire:click="detail({{ $patient }})">
                             <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0">
                                     <img class="h-12 w-12 rounded-full object-cover"
-                                         src="{{ $patient->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($patient->full_name) }}"
-                                         alt="{{ $patient->full_name }}">
+                                        src="{{ $patient->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($patient->full_name) }}"
+                                        alt="{{ $patient->full_name }}">
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center justify-between">
@@ -95,31 +106,30 @@ on(['set-date' => function ($date) {
                                             <p class="text-sm font-medium text-gray-900 truncate">
                                                 {{ $patient->full_name }}
                                             </p>
-                                            @if($patient->height || $patient->weight)
+                                            @if ($patient->height || $patient->weight)
                                                 <span class="text-sm text-gray-500">
-                                                    ({{ $patient->height ? 'H: '.$patient->height . 'cm' : '' }}{{ $patient->height && $patient->weight ? ' / ' : '' }}{{ $patient->weight ? 'W: '.$patient->weight . 'kg' : '' }})
+                                                    ({{ $patient->height ? 'H: ' . $patient->height . 'cm' : '' }}{{ $patient->height && $patient->weight ? ' / ' : '' }}{{ $patient->weight ? 'W: ' . $patient->weight . 'kg' : '' }})
                                                 </span>
                                             @endif
                                         </div>
                                         <div x-data="{ open: false }" class="relative">
-                                            <button type="button"
-                                                @click.stop="open = !open"
+                                            <button type="button" @click.stop="open = !open"
                                                 class="text-gray-600 hover:text-gray-900">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                    class="w-6 h-6">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
                                                 </svg>
                                             </button>
 
-                                            <div x-show="open"
-                                                @click.away="open = false"
+                                            <div x-show="open" @click.away="open = false"
                                                 class="absolute -top-2 right-8 w-48 bg-white rounded-md shadow-lg z-50 border border-gray-200">
-                                                <button type="button"
-                                                    wire:click="edit({{ $patient->id }})"
+                                                <button type="button" wire:click="edit({{ $patient->id }})"
                                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                                                     Edit
                                                 </button>
-                                                <button type="button"
-                                                    wire:click="delete({{ $patient }})"
+                                                <button type="button" wire:click="delete({{ $patient }})"
                                                     wire:confirm="Are you sure you want to delete this patient?"
                                                     class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">
                                                     Delete
@@ -135,7 +145,8 @@ on(['set-date' => function ($date) {
                                             <span class="font-medium">Gender:</span> {{ strtoupper($patient->gender) }}
                                         </div>
                                         <div>
-                                            <span class="font-medium">Birthdate:</span> {{ $patient->date_of_birth ? $patient->date_of_birth->format('M d, Y') : 'N/A' }}
+                                            <span class="font-medium">Birthdate:</span>
+                                            {{ $patient->date_of_birth ? $patient->date_of_birth->format('M d, Y') : 'N/A' }}
                                         </div>
                                         <div>
                                             <span class="font-medium">Age:</span> {{ $patient->age }}
@@ -184,14 +195,14 @@ on(['set-date' => function ($date) {
                 <div class="flex justify-between gap-4 mt-4">
                     <div class="w-1/2">
                         <x-input-label for="height" :value="__('Height (cm)')" />
-                        <x-text-input wire:model="form.height" id="height" class="block mt-1 w-full"
-                            type="number" name="height" />
+                        <x-text-input wire:model="form.height" id="height" class="block mt-1 w-full" type="number"
+                            name="height" />
                         <x-input-error :messages="$errors->get('form.height')" class="mt-2" />
                     </div>
                     <div class="w-1/2">
                         <x-input-label for="weight" :value="__('Weight (kg)')" />
-                        <x-text-input wire:model="form.weight" id="weight" class="block mt-1 w-full"
-                            type="number" name="weight" />
+                        <x-text-input wire:model="form.weight" id="weight" class="block mt-1 w-full" type="number"
+                            name="weight" />
                         <x-input-error :messages="$errors->get('form.weight')" class="mt-2" />
                     </div>
                 </div>
@@ -251,4 +262,4 @@ on(['set-date' => function ($date) {
             </div>
         </form>
     </x-modal>
-
+</section>
