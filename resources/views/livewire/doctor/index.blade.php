@@ -23,7 +23,16 @@ layout('layouts.app');
 
 usesPagination();
 
-with(fn() => ['doctors' => Doctor::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
+with(
+    fn() => [
+        'doctors' => Doctor::when($this->search, function ($query) {
+            $query
+                ->where('first_name', 'like', '%' . $this->search . '%')
+                ->orWhere('last_name', 'like', '%' . $this->search . '%')
+                ->orWhere('phone_number', 'like', '%' . $this->search . '%');
+        })->paginate(10),
+    ],
+);
 
 mount(function (Faker $faker) {
     $this->form->name = $faker->userName();
@@ -50,7 +59,6 @@ $edit = function ($id) {
 };
 
 $create = function () {
-
     $this->doctor = null;
 
     $this->dispatch('open-modal', 'form-doctor');
@@ -65,88 +73,78 @@ $save = function () {
 };
 ?>
 
-<section>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Doctors') }}
-        </h2>
-    </x-slot>
+<div class="py-6">
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <!-- Action Bar -->
+            <div class="flex items-center justify-between gap-4 p-4 border-b">
+                <div class="flex items-center gap-4">
+                    <x-secondary-button wire:click="create" class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        {{ __('New Doctor') }}
+                    </x-secondary-button>
+                </div>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="min-w-full">
-                    <div class="space-y-6">
-                        <div class="flex justify-between">
-                            <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Doctors...')" />
-                            <x-secondary-button wire:click="create">
-                                {{ __('Create New') }}
-                            </x-secondary-button>
+                <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </div>
+                    <x-text-input wire:model.live="search" class="ps-10" type="search" :placeholder="__('Search Doctors...')" />
+                </div>
+            </div>
+
+            <!-- List -->
+            <div class="divide-y divide-gray-200">
+                @forelse ($doctors as $doctor)
+                    <div class="flex items-center px-4 py-3 hover:bg-gray-50 group">
+
+                        <div class="flex-1 min-w-0 px-4 cursor-pointer" wire:click="detail({{ $doctor }})">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ $doctor->full_name }}</div>
+                                    <div class="text-sm text-gray-500">{{ $doctor->phone_number }}</div>
+                                </div>
+                                <div>
+                                    <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium uppercase"
+                                        style="background-color: {{ $doctor->gender === 'male' ? '#e0e7ff' : ($doctor->gender === 'female' ? '#fce7f3' : '#f3f4f6') }}; color: {{ $doctor->gender === 'male' ? '#4338ca' : ($doctor->gender === 'female' ? '#be185d' : '#374151') }}">
+                                        {{ $doctor->gender }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-                            <x-table for="doctor">
-                                <x-table.thead>
-                                    <x-table.row class="">
-                                        <x-table.thead-cell :title="__('Full Name')" class="text-left" />
-                                        <x-table.thead-cell :title="__('Phone Number')" class="text-center" />
-                                        <x-table.thead-cell :title="__('Gender')" class="text-center" />
-                                        <x-table.thead-cell title="" class="text-right" />
-                                    </x-table.row>
-                                </x-table.thead>
-                                <x-table.tbody class="">
-                                    @forelse ($doctors as $doctor)
-                                        <x-table.row class="bg-white "
-                                            wire:loading.class="opacity-50">
-                                            <x-table.tbody-cell :item="$doctor->full_name" />
-                                            <x-table.tbody-cell :item="$doctor->phone_number" class="text-center" />
-                                            <x-table.tbody-cell :item="$doctor->gender" class="text-center uppercase" />
-                                            <x-table.tbody-cell :item="$doctor->id" class="text-right"
-                                                :action="true">
-                                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="detail({{ $doctor }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="w-6 h-6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
-                                                    </svg>
-
-                                                </button>
-                                                <button type="button" class="btn btn-info m-1 font-medium underline"
-                                                    wire:click="edit({{ $doctor->id }})">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path
-                                                            d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button"
-                                                    class="btn btn-info m-1 text-red-600 font-medium underline"
-                                                    wire:click="delete({{ $doctor }})"
-                                                    wire:confirm="Are you sure you want to delete this patient?">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor" class="w-5 h-5">
-                                                        <path fill-rule="evenodd"
-                                                            d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                            </x-table.tbody-cell>
-                                        </x-table.row>
-                                    @empty
-                                        <x-table.row class="bg-white ">
-                                            <x-table.tbody-cell colspan="6" :item="__('No doctor found!!')" />
-                                        </x-table.row>
-                                    @endforelse
-                                </x-table.tbody>
-                            </x-table>
-                        </div>
-                        <div>
-                            {{ $doctors->links() }}
+                        <div class="flex-none opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                            <div class="flex items-center gap-2">
+                                <button type="button" wire:click="edit({{ $doctor->id }})"
+                                    class="p-1 rounded-full hover:bg-gray-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                    </svg>
+                                </button>
+                                <button type="button" wire:click="delete({{ $doctor }})"
+                                    wire:confirm="Are you sure you want to delete this doctor?"
+                                    class="p-1 rounded-full hover:bg-gray-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @empty
+                    <div class="px-4 py-8 text-center text-sm text-gray-500">
+                        {{ __('No doctors found!!') }}
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-4 py-3 border-t">
+                {{ $doctors->links() }}
             </div>
         </div>
     </div>
@@ -230,4 +228,4 @@ $save = function () {
             </div>
         </form>
     </x-modal>
-</section>
+</div>
