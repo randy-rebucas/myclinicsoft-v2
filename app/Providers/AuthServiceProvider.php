@@ -22,24 +22,24 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         // Define gates for general permissions
-        Gate::define('manage-system', function ($user) {
-            return $user->role === 'admin';
-        });
+        // Gate::define('manage-system', function ($user) {
+        //     return $user->role === 'admin';
+        // });
 
-        Gate::define('manage-appointments', function ($user) {
-            return in_array($user->role, ['doctor', 'receptionist', 'admin']);
-        });
+        // Gate::define('manage-appointments', function ($user) {
+        //     return in_array($user->role, ['doctor', 'receptionist', 'admin']);
+        // });
 
-        Gate::define('view-medical-records', function ($user) {
-            return in_array($user->role, ['doctor', 'admin']);
-        });
+        // Gate::define('view-medical-records', function ($user) {
+        //     return in_array($user->role, ['doctor', 'admin']);
+        // });
 
-        Gate::define('manage-prescriptions', function ($user) {
-            return $user->role === 'doctor';
-        });
+        // Gate::define('manage-prescriptions', function ($user) {
+        //     return $user->role === 'doctor';
+        // });
 
-        Gate::define('access-med-inventory', function ($user) {
-            return in_array($user->role, ['med_representative', 'admin']);
-        });
+        // Gate::define('access-med-inventory', function ($user) {
+        //     return in_array($user->role, ['med_representative', 'admin']);
+        // });
     }
 }
