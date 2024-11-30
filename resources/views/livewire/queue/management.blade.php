@@ -1,3 +1,10 @@
+<?php
+
+use function Livewire\Volt\{state, layout};
+
+layout('layouts.app');
+
+?>
 <div class="space-y-6">
     <!-- Queue Controls -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">

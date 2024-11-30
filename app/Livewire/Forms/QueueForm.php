@@ -2,14 +2,13 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Department;
 use App\Models\Queue;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class QueueForm extends Form
 {
-    public $queue_number;
-
     #[Validate('required')]
     public $priority;
 
@@ -26,15 +25,25 @@ class QueueForm extends Form
     {
         $this->validate();
 
+
+        $lastQueue = Queue::where('department_id', $this->department_id)
+            ->whereDate('created_at', today())
+            ->latest()
+            ->first();
+
+        $queueNumber = $lastQueue ? sprintf('%03d', intval(substr($lastQueue->queue_number, -3)) + 1) : '001';
+
+        $departmentCode = Department::find($this->department_id)->code;
+        $fullQueueNumber = $departmentCode . date('ymd') . $queueNumber;
+
         Queue::create([
             'patient_id' => $this->patient_id,
             'department_id' => $this->department_id,
-            'queue_number' => $this->queue_number,
+            'queue_number' => $fullQueueNumber,
             'priority' => $this->priority,
-            'notes' => $this->notes
+            'notes' => $this->notes,
         ]);
 
         $this->reset();
     }
-
 }

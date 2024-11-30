@@ -22,6 +22,8 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('/med-representatives', 'med-representative.index')->name('med-representatives');
     Volt::route('/receptionists', 'receptionist.index')->name('receptionists');
 
+    Volt::route('/queue', 'queue.index')->name('queue');
+
     Volt::route('/roles', 'role.index')->name('roles');
     Volt::route('/settings', 'setting.index')->name('settings');
 
@@ -43,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
     //     Route::resource('inventory', InventoryController::class);
     // });
 });
-
+Volt::route('/queue-display', 'queue.display')->name('queue-display');
 Route::get('/dump', DatabaseDumper::class)->name('dump');
 
 require __DIR__.'/auth.php';

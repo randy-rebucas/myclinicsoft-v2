@@ -21,8 +21,7 @@ layout('layouts.app');
 title(fn() => 'Patient: ' . $this->patient->full_name);
 
 mount(function () {
-    $this->form->queue_number = $this->generateSequenceNumber('queing', [], 'SQ-', 3);
-    $this->form->department_id = 1; // update this to be dynamic
+    $this->form->department_id = 1;
     $this->form->patient_id = $this->patient->id;
     $this->form->priority = 'normal';
 });
