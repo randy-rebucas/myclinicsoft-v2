@@ -18,6 +18,7 @@ use App\Nova\Receptionist;
 use App\Nova\Setting;
 use App\Nova\User;
 use App\Nova\Vital;
+use App\Nova\Ads;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Nova;
 use Illuminate\Http\Request;
@@ -62,6 +63,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('Modules', [
                     MenuItem::resource(Department::class),
                     MenuItem::resource(Encounter::class),
+                    MenuItem::resource(Ads::class),
                 ])->icon('briefcase')->collapsable(),
 
                 // MenuSection::make('Billing', [
