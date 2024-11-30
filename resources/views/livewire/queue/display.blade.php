@@ -10,6 +10,7 @@ state([
     'filter' => 'all',
     'department_id' => 1,
     'ads' => [],
+    'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
 ]);
 
 layout('layouts.que');
@@ -27,6 +28,10 @@ $queues = computed(function () {
         ->orderBy('created_at', 'asc')
         ->paginate(10);
 });
+
+$refreshQueues = function () {
+    $this->dispatch('$refresh');
+};
 
 ?>
 

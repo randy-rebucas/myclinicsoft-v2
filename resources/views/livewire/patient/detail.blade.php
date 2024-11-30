@@ -3,6 +3,7 @@
 use App\Models\Patient;
 use App\Models\Queue;
 use App\Models\Department;
+use App\Events\QueueUpdated;
 use function Livewire\Volt\{layout, form, computed, state, on, mount, title};
 use App\Livewire\Forms\QueueForm;
 use Illuminate\Support\Str;
@@ -66,6 +67,7 @@ $create = function () {
     $this->dispatch('close-modal', 'add-to-queue');
 
     $this->dispatch('refresh');
+    event(new QueueUpdated());
 };
 ?>
 
