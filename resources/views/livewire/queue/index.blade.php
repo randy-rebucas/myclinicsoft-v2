@@ -2,6 +2,7 @@
 
 use App\Models\Department;
 use App\Models\Queue;
+use App\Events\QueueUpdated;
 use function Livewire\Volt\{state, layout, form, mount, computed, with, usesPagination};
 
 state([
@@ -64,6 +65,7 @@ $callNext = function ($queueId) {
     ]);
 
     $this->dispatch('queue-updated');
+    event(new QueueUpdated());
 };
 
 $complete = function ($queueId) {
@@ -74,13 +76,15 @@ $complete = function ($queueId) {
     ]);
 
     $this->dispatch('queue-updated');
+    event(new QueueUpdated());
 };
 
 $cancel = function ($queueId) {
     $queue = Queue::find($queueId);
     $queue->update(['status' => 'cancelled']);
-
     $this->dispatch('queue-updated');
+
+    event(new QueueUpdated());
 };
 
 ?>
