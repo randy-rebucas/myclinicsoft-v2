@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Patient extends Model
@@ -74,5 +75,38 @@ class Patient extends Model
     public function full_name()
     {
         return $this->first_name . ' ' . $this->last_name;
+    }
+
+    /**
+     * Get all activities for the patient
+     */
+    public function activities()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($patient) {
+            $patient->recordActivity('created');
+        });
+
+        static::updated(function ($patient) {
+            $patient->recordActivity('updated');
+        });
+
+        static::deleted(function ($patient) {
+            $patient->recordActivity('deleted');
+        });
+    }
+
+    public function recordActivity($type, $description = null)
+    {
+        $this->activities()->create([
+            'type' => $type,
+            'description' => $description ?? "Patient record was {$type}",
+            'changes' => $this->getChanges(),
+            'causer_id' => Auth::user()->id
+        ]);
     }
 }

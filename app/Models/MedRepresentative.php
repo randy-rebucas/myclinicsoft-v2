@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class MedRepresentative extends Model
 {
@@ -42,5 +43,38 @@ class MedRepresentative extends Model
     public function doctors()
     {
         return $this->hasMany(Doctor::class);
+    }
+
+    /**
+     * Get all activities for the medRepresentative
+     */
+    public function activities()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($medRepresentative) {
+            $medRepresentative->recordActivity('created');
+        });
+
+        static::updated(function ($medRepresentative) {
+            $medRepresentative->recordActivity('updated');
+        });
+
+        static::deleted(function ($medRepresentative) {
+            $medRepresentative->recordActivity('deleted');
+        });
+    }
+
+    public function recordActivity($type, $description = null)
+    {
+        $this->activities()->create([
+            'type' => $type,
+            'description' => $description ?? "MedRepresentative record was {$type}",
+            'changes' => $this->getChanges(),
+            'causer_id' => Auth::user()->id
+        ]);
     }
 }

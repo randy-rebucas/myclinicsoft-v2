@@ -4,7 +4,7 @@ namespace App\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Actions\ExportAsCsv;
-use Laravel\Nova\Fields\Avatar;
+use Laravel\Nova\Fields\Image;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
@@ -92,7 +92,9 @@ class Patient extends Resource
         return [
             BelongsTo::make('User')->searchable(),
             ID::make()->hideFromIndex()->hideFromDetail(),
-            Avatar::make('Image', 'avatar'),
+            Image::make('Image', 'avatar')
+                ->disk('public')
+                ->path('avatars'),
             Text::make('Name', function () {
                 return $this->full_name;
             })->sortable()->hideFromIndex()->hideWhenCreating(),

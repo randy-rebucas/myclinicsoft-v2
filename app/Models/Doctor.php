@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Doctor extends Model
 {
     use HasFactory;
     use SoftDeletes;
     public $timestamps = FALSE;
-    
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -31,5 +32,38 @@ class Doctor extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get all activities for the doctor
+     */
+    public function activities()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($doctor) {
+            $doctor->recordActivity('created');
+        });
+
+        static::updated(function ($doctor) {
+            $doctor->recordActivity('updated');
+        });
+
+        static::deleted(function ($doctor) {
+            $doctor->recordActivity('deleted');
+        });
+    }
+
+    public function recordActivity($type, $description = null)
+    {
+        $this->activities()->create([
+            'type' => $type,
+            'description' => $description ?? "Doctor record was {$type}",
+            'changes' => $this->getChanges(),
+            'causer_id' => Auth::user()->id
+        ]);
     }
 }

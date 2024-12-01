@@ -14,6 +14,11 @@ new class extends Component
 
         $this->redirect('/', navigate: true);
     }
+
+    public function emailUpdated()
+    {
+        $this->dispatch('refresh');
+    }
 }; ?>
 
 <nav x-data="{ open: false }" class="">
@@ -29,7 +34,7 @@ new class extends Component
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                {{-- <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
@@ -67,7 +72,7 @@ new class extends Component
                         </svg>
                         <span>{{ __('Queue') }}</span>
                     </x-nav-link>
-                </div>
+                </div> --}}
             </div>
 
             <!-- Settings Dropdown -->
@@ -105,9 +110,11 @@ new class extends Component
                         </div>
 
                         <div class="py-1">
-                            <x-dropdown-link :href="route('settings')" wire:navigate>
-                                {{ __('Settings') }}
-                            </x-dropdown-link>
+                            @hasanyrole('doctor|admin')
+                                <x-dropdown-link :href="route('settings')" wire:navigate>
+                                    {{ __('Settings') }}
+                                </x-dropdown-link>
+                            @endhasanyrole
                             <!-- Authentication -->
                             <button wire:click="logout" class="w-full text-start">
                                 <x-dropdown-link>
@@ -133,7 +140,7 @@ new class extends Component
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+        {{-- <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 <span>{{ __('Dashboard') }}</span>
             </x-responsive-nav-link>
@@ -152,7 +159,7 @@ new class extends Component
             <x-responsive-nav-link :href="route('queue')" :active="request()->routeIs('queue.*')" wire:navigate>
                 <span>{{ __('Queue') }}</span>
             </x-responsive-nav-link>
-        </div>
+        </div> --}}
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
@@ -173,9 +180,11 @@ new class extends Component
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('settings')" wire:navigate>
-                    {{ __('Settings') }}
-                </x-responsive-nav-link>
+                @hasanyrole('doctor|admin')
+                    <x-responsive-nav-link :href="route('settings')" wire:navigate>
+                        {{ __('Settings') }}
+                    </x-responsive-nav-link>
+                @endhasanyrole
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">
                     <x-responsive-nav-link>

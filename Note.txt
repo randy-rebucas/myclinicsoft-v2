@@ -19,3 +19,27 @@
         //});
     </script>
     @endpush
+
+receptionist
+    ernest66@example.net
+    password
+
+patient
+    qschiller@example.org
+    password
+
+medrep
+    lbogisich@swift.com
+    password
+
+doctor
+    jaren.rowe@example.org
+    password
+
+
+// Examples of recording different types of activities
+$patient->recordActivity('appointment_created', 'Scheduled appointment for March 15');
+$patient->recordActivity('prescription_added', 'Added prescription for Amoxicillin');
+$patient->recordActivity('lab_result_added', 'Blood work results uploaded');
+$patient->recordActivity('note_added', 'Added consultation notes');
+$patient->recordActivity('billing_updated', 'Updated insurance information');

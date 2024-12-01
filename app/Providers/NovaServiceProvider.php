@@ -38,48 +38,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         parent::boot();
 
-        Nova::mainMenu(function (Request $request) {
-            return [
-                MenuSection::dashboard(Main::class)->icon('chart-bar'),
-
-                MenuSection::make('User Management', [
-                    MenuItem::resource(Doctor::class),
-                    MenuItem::resource(MedRepresentative::class),
-                    MenuItem::resource(Patient::class),
-                    MenuItem::resource(Receptionist::class),
-                    MenuItem::resource(User::class),
-                ])->icon('user')->collapsable(),
-
-                MenuSection::make('Health Records', [
-                    MenuItem::resource(Allergy::class),
-                    MenuItem::resource(DiagnosticTest::class),
-                    MenuItem::resource(FamilyHistory::class),
-                    MenuItem::resource(Immunization::class),
-                    MenuItem::resource(MedicalCondition::class),
-                    MenuItem::resource(Medication::class),
-                    MenuItem::resource(Vital::class),
-                ])->icon('document-text')->collapsable(),
-
-                MenuSection::make('Modules', [
-                    MenuItem::resource(Department::class),
-                    MenuItem::resource(Encounter::class),
-                    MenuItem::resource(Ads::class),
-                ])->icon('briefcase')->collapsable(),
-
-                MenuSection::make('Billing', [
-                    // MenuItem::resource(Billing::class),
-                ])->icon('cash-register')->collapsable(),
-
-                MenuSection::make('Reports', [
-                    // MenuItem::resource(Encounter::class),
-                ])->icon('chart-bar')->collapsable(),
-
-                MenuSection::make('Settings', [
-                    MenuItem::resource(Setting::class),
-                ])->icon('cog')->collapsable(),
-            ];
-        });
-
         Nova::footer(function ($request) {
             return Blade::render('
                 @env(\'prod\')
