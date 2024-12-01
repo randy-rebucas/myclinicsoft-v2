@@ -5,7 +5,9 @@ use App\Models\Patient;
 use App\Models\Queue;
 use App\Models\Receptionist;
 use App\Events\QueueUpdated;
-use function Livewire\Volt\{state, form, mount, computed, with};
+use function Livewire\Volt\{state, form, mount, computed, with, usesPagination};
+
+usesPagination();
 
 state([
     'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
@@ -95,7 +97,10 @@ $cancel = function ($queueId) {
                         d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
                 </svg>
             </div>
-            <span class="ml-3 font-medium text-gray-900">Add Queue</span>
+            <div class="ml-3">
+                <span class="font-medium text-gray-900">Add Queue</span>
+                <p class="text-sm text-gray-500">{{ $todayQueue->count() }} today</p>
+            </div>
         </button>
 
         <button
@@ -106,7 +111,10 @@ $cancel = function ($queueId) {
                         d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
             </div>
-            <span class="ml-3 font-medium text-gray-900">New Patient</span>
+            <div class="ml-3">
+                <span class="font-medium text-gray-900">New Patient</span>
+                <p class="text-sm text-gray-500">{{ $patients->total() }} total</p>
+            </div>
         </button>
     </div>
 
@@ -158,6 +166,9 @@ $cancel = function ($queueId) {
                         @endforelse
                     </div>
                 </div>
+                {{-- <div>
+                    {{ $patients->links() }}
+                </div> --}}
             </div>
 
             <!-- Recent Activity -->
