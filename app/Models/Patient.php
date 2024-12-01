@@ -59,7 +59,7 @@ class Patient extends Model
 
     public function getAgeAttribute()
     {
-        return Carbon::parse($this->attributes['date_of_birth'])->age;
+        return $this->date_of_birth ? Carbon::parse($this->attributes['date_of_birth'])->age : null;
     }
 
     public function getFullNameAttribute()

@@ -8,7 +8,7 @@ use App\Models\Receptionist;
 use App\Models\Department;
 use App\Events\QueueUpdated;
 use App\Livewire\Forms\QueueForm;
-use function Livewire\Volt\{state, form, mount, computed, with, usesPagination};
+use function Livewire\Volt\{state, form, mount, computed, with, usesPagination, on};
 
 usesPagination();
 
@@ -26,9 +26,14 @@ state([
     'editableValue' => '',
     'model' => null,
     'field' => null,
+    'genders' => fn() => [
+        'male' => 'Male',
+        'female' => 'Female',
+        'unknown' => 'Unknown',
+    ],
 ]);
 
-with(fn() => ['patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
+with(fn() => ['patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')->orderBy('created_at', 'asc')->paginate(10)]);
 
 mount(function () {
     $this->refreshQueues();
@@ -61,6 +66,8 @@ mount(function () {
             ];
         });
 });
+
+
 
 $refreshQueues = function () {
     $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
@@ -99,6 +106,10 @@ $cancel = function ($queueId) {
     broadcast(new QueueUpdated("Queue {$queue->queue_number} has been cancelled!", 'cancelled'))->toOthers();
 };
 
+$openCreatePatientModal = function () {
+    $this->dispatch('open-create-patient-modal');
+};
+
 $preview = function ($patientId) {
     $this->selectedPatient = Patient::find($patientId);
     $this->form->department_id = 1;
@@ -116,6 +127,7 @@ $closeModal = function () {
 $createQueue = function () {
     $this->form->store();
     $this->dispatch('close-preview-modal');
+    $this->search = '';
 };
 
 $startEditing = function ($value, $field, $model) {
@@ -150,6 +162,13 @@ $cancelEdit = function () {
     $this->field = null;
     $this->editableValue = '';
 };
+
+on([
+    'set-patient' => function ($patientId) {
+        $this->search = Patient::find($patientId)->first_name;
+        $this->preview($patientId);
+    },
+]);
 ?>
 
 <div class="space-y-6">
@@ -169,7 +188,7 @@ $cancelEdit = function () {
             </div>
         </button>
 
-        <button
+        <button wire:click="openCreatePatientModal"
             class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-green-500 hover:bg-green-50 transition-all">
             <div class="p-2 bg-green-50 rounded-lg">
                 <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -604,12 +623,6 @@ $cancelEdit = function () {
                                     <option value="emergency">Emergency</option>
                                 </select>
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
-                                <textarea wire:model.live="form.notes" name="notes" rows="3"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900"></textarea>
-                            </div>
                         </div>
 
                         <div class="pt-4">
@@ -630,4 +643,38 @@ $cancelEdit = function () {
             @click="show = false; $wire.closeModal()">
         </div>
     </div>
-</div>
+
+    <div x-data="{ show: false }" @open-create-patient-modal.window="show = true"
+        @close-create-patient-modal.window="show = false">
+
+        <!-- Patient Preview Modal -->
+        <div x-show="show" x-on:keydown.escape.window="show = false"
+            x-transition:enter="transform transition ease-in-out duration-500"
+            x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+            x-transition:leave="transform transition ease-in-out duration-500"
+            x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+            class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50">
+
+            <div class="h-full flex flex-col">
+                <!-- Header -->
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Create New Patient</h3>
+                    <button @click="show = false; $wire.closeModal()" class="text-gray-400 hover:text-gray-500">
+                        <x-heroicon-m-x-mark class="w-5 h-5" />
+                    </button>
+                </div>
+                <!-- Content -->
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="space-y-6">
+                        <livewire:patient.form />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div x-show="show" x-transition:enter="transition-opacity ease-linear duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-40"
+            @click="show = false; $wire.closeModal()">
+        </div>
+    </div>

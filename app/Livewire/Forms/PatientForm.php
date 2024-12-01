@@ -9,6 +9,8 @@ use App\Livewire\Forms\UserForm;
 class PatientForm extends UserForm
 {
 
+    public $newPatient;
+
     #[Validate('required')]
     public $first_name;
 
@@ -45,7 +47,7 @@ class PatientForm extends UserForm
         if ($patient) {
             $this->update($patient);
         } else {
-            $this->create();
+            $this->newPatient = $this->create();
         }
 
         $this->reset('first_name', 'last_name', 'phone_number', 'height', 'weight', 'gender');
@@ -65,7 +67,7 @@ class PatientForm extends UserForm
 
     public function create()
     {
-        Patient::create([
+        $patient = Patient::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
@@ -74,6 +76,8 @@ class PatientForm extends UserForm
             'gender' => $this->gender,
             'user_id' => $this->ensureStoreUser()->id,
         ]);
+
+        return $patient;
     }
 
     public function clearInputs()
