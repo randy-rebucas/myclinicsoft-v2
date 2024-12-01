@@ -76,7 +76,7 @@ class PatientForm extends UserForm
             'gender' => $this->gender,
             'user_id' => $this->ensureStoreUser()->id,
         ]);
-        // $patient->recordActivity('patient_created', 'Created new patient');
+
         return $patient;
     }
 

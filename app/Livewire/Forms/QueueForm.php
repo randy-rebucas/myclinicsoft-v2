@@ -46,11 +46,12 @@ class QueueForm extends Form
             'notes' => $this->notes,
         ]);
 
-        $this->reset();
 
         $patient = Patient::find($this->patient_id);
         $patient->recordActivity('queue_created', "Added to queue {$fullQueueNumber} in {$departmentCode} department");
 
         broadcast(new QueueUpdated("Queue {$fullQueueNumber} has been added!", 'new'))->toOthers();
+
+        $this->reset();
     }
 }

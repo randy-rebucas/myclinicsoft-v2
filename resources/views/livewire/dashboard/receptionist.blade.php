@@ -33,7 +33,13 @@ state([
     ],
 ]);
 
-with(fn() => ['patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')->orderBy('created_at', 'asc')->paginate(10)]);
+with(
+    fn() => [
+        'patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')
+            ->orderBy('created_at', 'asc')
+            ->paginate(10),
+    ],
+);
 
 mount(function () {
     $this->refreshQueues();
@@ -67,10 +73,8 @@ mount(function () {
         });
 });
 
-
-
 $refreshQueues = function () {
-    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
+    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->limit(10)->orderBy('created_at')->get();
 };
 
 $departments = computed(function () {
@@ -174,20 +178,6 @@ on([
 <div class="space-y-6">
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <button
-            class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-blue-500 hover:bg-blue-50 transition-all">
-            <div class="p-2 bg-blue-50 rounded-lg">
-                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <span class="font-medium text-gray-900">Add Queue</span>
-                <p class="text-sm text-gray-500">{{ $todayQueue->count() }} today</p>
-            </div>
-        </button>
-
         <button wire:click="openCreatePatientModal"
             class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-green-500 hover:bg-green-50 transition-all">
             <div class="p-2 bg-green-50 rounded-lg">
@@ -201,6 +191,19 @@ on([
                 <p class="text-sm text-gray-500">{{ $patients->total() }} total</p>
             </div>
         </button>
+
+        <div class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-2 bg-blue-50 rounded-lg">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <span class="font-medium text-gray-900">Current Queue</span>
+                <p class="text-sm text-gray-500">{{ $todayQueue->count() }} today</p>
+            </div>
+        </div>
 
         <!-- Now Serving Section -->
         <div class="col-span-2 flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -315,8 +318,8 @@ on([
         </div>
 
         <!-- Queues -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-            <div class="p-4 border-b border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
+            <div class="p-4 border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">Queues</h2>
                     <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700">Today's
@@ -324,85 +327,87 @@ on([
                 </div>
             </div>
 
-            <div class="divide-y divide-gray-100">
-                @forelse($todayQueue as $queue)
-                    <div class="p-4 hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-lg font-semibold text-gray-900">{{ $queue->queue_number }}</span>
-                            <span
-                                class="px-2 py-1 text-xs font-medium rounded-full
-                                @if ($queue->priority === 'urgent') bg-red-50 text-red-700
-                                @elseif($queue->priority === 'medium') bg-yellow-50 text-yellow-700
-                                @else bg-green-50 text-green-700 @endif">
-                                {{ ucfirst($queue->priority) }}
-                            </span>
-                        </div>
-
-                        <div class="flex items-center gap-3 text-sm text-gray-600">
-                            <div class="flex items-center gap-1">
-                                <x-heroicon-m-user class="w-4 h-4" />
-                                <span>{{ $queue->patient->full_name }}</span>
+            <div class="overflow-y-auto flex-1">
+                <div class="flex-1 overflow-y-auto">
+                    @forelse($todayQueue as $queue)
+                        <div class="p-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-lg font-semibold text-gray-900">{{ $queue->queue_number }}</span>
+                                <span
+                                    class="px-2 py-1 text-xs font-medium rounded-full
+                                    @if ($queue->priority === 'urgent') bg-red-50 text-red-700
+                                    @elseif($queue->priority === 'medium') bg-yellow-50 text-yellow-700
+                                    @else bg-green-50 text-green-700 @endif">
+                                    {{ ucfirst($queue->priority) }}
+                                </span>
                             </div>
-                            <div class="flex items-center gap-1">
-                                <x-heroicon-m-building-office class="w-4 h-4" />
-                                <span>{{ $queue->department->name }}</span>
+
+                            <div class="flex items-center gap-3 text-sm text-gray-600">
+                                <div class="flex items-center gap-1">
+                                    <x-heroicon-m-user class="w-4 h-4" />
+                                    <span>{{ $queue->patient->full_name }}</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <x-heroicon-m-building-office class="w-4 h-4" />
+                                    <span>{{ $queue->department->name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 mt-3">
+                                <span
+                                    class="px-2.5 py-1 text-xs font-medium rounded-full
+                                    @switch($queue->status)
+                                        @case('waiting')
+                                            bg-yellow-50 text-yellow-700
+                                            @break
+                                        @case('in_progress')
+                                            bg-blue-50 text-blue-700
+                                            @break
+                                        @case('completed')
+                                            bg-green-50 text-green-700
+                                            @break
+                                        @case('cancelled')
+                                            bg-red-50 text-red-700
+                                            @break
+                                        @default
+                                            bg-gray-50 text-gray-700
+                                    @endswitch">
+                                    {{ ucfirst(str_replace('_', ' ', $queue->status)) }}
+                                </span>
+
+                                @if ($queue->status === 'waiting')
+                                    <button wire:click="callNext({{ $queue->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-full hover:bg-blue-100">
+                                        Start
+                                    </button>
+                                @elseif($queue->status === 'in_progress')
+                                    <button wire:click="complete({{ $queue->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-full hover:bg-green-100">
+                                        Complete
+                                    </button>
+                                @endif
+
+                                @if ($queue->status !== 'completed' && $queue->status !== 'cancelled')
+                                    <button wire:click="cancel({{ $queue->id }})"
+                                        class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 rounded-full hover:bg-gray-100">
+                                        Cancel
+                                    </button>
+                                @endif
                             </div>
                         </div>
-
-                        <div class="flex items-center gap-2 mt-3">
-                            <span
-                                class="px-2.5 py-1 text-xs font-medium rounded-full
-                                @switch($queue->status)
-                                    @case('waiting')
-                                        bg-yellow-50 text-yellow-700
-                                        @break
-                                    @case('in_progress')
-                                        bg-blue-50 text-blue-700
-                                        @break
-                                    @case('completed')
-                                        bg-green-50 text-green-700
-                                        @break
-                                    @case('cancelled')
-                                        bg-red-50 text-red-700
-                                        @break
-                                    @default
-                                        bg-gray-50 text-gray-700
-                                @endswitch">
-                                {{ ucfirst(str_replace('_', ' ', $queue->status)) }}
-                            </span>
-
-                            @if ($queue->status === 'waiting')
-                                <button wire:click="callNext({{ $queue->id }})"
-                                    class="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-full hover:bg-blue-100">
-                                    Start
-                                </button>
-                            @elseif($queue->status === 'in_progress')
-                                <button wire:click="complete({{ $queue->id }})"
-                                    class="px-3 py-1 text-xs font-medium text-green-700 bg-green-50 rounded-full hover:bg-green-100">
-                                    Complete
-                                </button>
-                            @endif
-
-                            @if ($queue->status !== 'completed' && $queue->status !== 'cancelled')
-                                <button wire:click="cancel({{ $queue->id }})"
-                                    class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 rounded-full hover:bg-gray-100">
-                                    Cancel
-                                </button>
-                            @endif
+                    @empty
+                        <div class="p-4 text-center text-gray-500">
+                            <x-heroicon-o-queue-list class="w-8 h-8 mx-auto mb-2" />
+                            <p>No queues available</p>
                         </div>
-                    </div>
-                @empty
-                    <div class="p-4 text-center text-gray-500">
-                        <x-heroicon-o-queue-list class="w-8 h-8 mx-auto mb-2" />
-                        <p>No queues available</p>
-                    </div>
-                @endforelse
+                    @endforelse
+                </div>
             </div>
 
-            @if ($todayQueue->count() > 0)
-                <div class="p-4 border-t border-gray-100">
+            @if (Queue::whereDate('created_at', today())->count() > 0)
+                <div class="p-4 border-t border-gray-100 flex-shrink-0">
                     <div class="flex items-center justify-between text-sm text-gray-600">
-                        <span>Total Queues: {{ $todayQueue->count() }}</span>
+                        <span>Total Queues: {{ Queue::whereDate('created_at', today())->count() }}</span>
                         <button class="text-blue-600 hover:text-blue-700">View All →</button>
                     </div>
                 </div>
