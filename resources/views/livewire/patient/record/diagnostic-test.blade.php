@@ -93,13 +93,13 @@ $delete = function (DiagnosticTest $diagnostic_test) {
             <div class="flex justify-between gap-4">
                 <div class="w-1/2">
                     <x-input-label for="test_name" value="{{ __('Test Name') }}" />
-                    <x-text-input wire:model="form.test_name" id="test_name" name="test_name" type="text"
+                    <x-text-input wire:model.live="form.test_name" id="test_name" name="test_name" type="text"
                         class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.test_name')" class="mt-2" />
                 </div>
                 <div class="w-1/2">
                     <x-input-label for="test_date" value="{{ __('Test Date') }}" />
-                    <x-text-input wire:model="form.test_date" id="test_date" name="test_date" type="date"
+                    <x-text-input wire:model.live="form.test_date" id="test_date" name="test_date" type="date"
                         class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.test_date')" class="mt-2" />
                 </div>
@@ -107,14 +107,14 @@ $delete = function (DiagnosticTest $diagnostic_test) {
 
             <div class="mt-4">
                 <x-input-label for="results" value="{{ __('Results') }}" />
-                <x-textarea wire:model="form.results" id="results" name="results"
+                <x-textarea wire:model.live="form.results" id="results" name="results"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.results')" class="mt-2" />
             </div>
 
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

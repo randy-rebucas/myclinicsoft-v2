@@ -77,7 +77,7 @@ new class extends Component {
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
                 <x-input-label for="name" :value="__('Name')" class="text-sm font-medium text-gray-700 md:pt-2" />
                 <div class="md:col-span-3">
-                    <x-text-input wire:model="name" id="name" name="name" type="text" class="block w-full"
+                    <x-text-input wire:model.live="name" id="name" name="name" type="text" class="block w-full"
                         required autofocus autocomplete="name" />
                     <x-input-error class="mt-2" :messages="$errors->get('name')" />
                 </div>
@@ -86,7 +86,7 @@ new class extends Component {
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
                 <x-input-label for="email" :value="__('Email')" class="text-sm font-medium text-gray-700 md:pt-2" />
                 <div class="md:col-span-3">
-                    <x-text-input wire:model="email" id="email" name="email" type="email" class="block w-full"
+                    <x-text-input wire:model.live="email" id="email" name="email" type="email" class="block w-full"
                         required autocomplete="username" />
                     <x-input-error class="mt-2" :messages="$errors->get('email')" />
 

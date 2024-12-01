@@ -54,7 +54,7 @@ new class extends Component {
                 <x-input-label for="update_password_current_password" :value="__('Current Password')"
                     class="text-sm font-medium text-gray-700 md:pt-2" />
                 <div class="md:col-span-3">
-                    <x-text-input wire:model="current_password" id="update_password_current_password"
+                    <x-text-input wire:model.live="current_password" id="update_password_current_password"
                         name="current_password" type="password" class="block w-full" autocomplete="current-password" />
                     <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
                 </div>
@@ -64,7 +64,7 @@ new class extends Component {
                 <x-input-label for="update_password_password" :value="__('New Password')"
                     class="text-sm font-medium text-gray-700 md:pt-2" />
                 <div class="md:col-span-3">
-                    <x-text-input wire:model="password" id="update_password_password" name="password" type="password"
+                    <x-text-input wire:model.live="password" id="update_password_password" name="password" type="password"
                         class="block w-full" autocomplete="new-password" />
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
@@ -74,7 +74,7 @@ new class extends Component {
                 <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')"
                     class="text-sm font-medium text-gray-700 md:pt-2" />
                 <div class="md:col-span-3">
-                    <x-text-input wire:model="password_confirmation" id="update_password_password_confirmation"
+                    <x-text-input wire:model.live="password_confirmation" id="update_password_password_confirmation"
                         name="password_confirmation" type="password" class="block w-full" autocomplete="new-password" />
                     <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                 </div>

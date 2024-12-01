@@ -52,7 +52,7 @@ $store = function () {
                     <x-input-label for="{{ $field }}" :value="__($label)"
                         class="text-sm font-medium text-gray-700 md:pt-2" />
                     <div class="md:col-span-3">
-                        <x-text-input wire:model.blur="form.settings.{{ $field }}" id="{{ $field }}"
+                        <x-text-input wire:model.live.blur="form.settings.{{ $field }}" id="{{ $field }}"
                             :placeholder="__($label . ' number')" class="w-full" type="text" />
                         <x-input-error :messages="$errors->get('form.settings.' . $field)" class="mt-1" />
                     </div>

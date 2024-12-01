@@ -118,32 +118,32 @@ $delete = function (MedicalCondition $medical_condition) {
             <div class="flex justify-between gap-4">
                 <div class="w-1/3">
                     <x-input-label for="condition_name" value="{{ __('Condition Name') }}" />
-                    <x-text-input wire:model="form.condition_name" id="condition_name" name="condition_name"
+                    <x-text-input wire:model.live="form.condition_name" id="condition_name" name="condition_name"
                         type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.condition_name')" class="mt-2" />
                 </div>
                 <div class="w-1/3">
                     <x-input-label for="diagnosis_date" value="{{ __('Diagnose Date') }}" />
-                    <x-text-input wire:model="form.diagnosis_date" id="diagnosis_date"
+                    <x-text-input wire:model.live="form.diagnosis_date" id="diagnosis_date"
                         name="diagnosis_date" type="date" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.diagnosis_date')" class="mt-2" />
                 </div>
                 <div class="w-1/3">
                     <x-input-label for="status" value="{{ __('Status') }}" />
-                    <x-select wire:model="form.status" id="status" name="status" :options="$statuses"
+                    <x-select wire:model.live="form.status" id="status" name="status" :options="$statuses"
                         class="block mt-1 w-full" />
                     <x-input-error :messages="$errors->get('form.status')" class="mt-2" />
                 </div>
             </div>
             <div class="mt-4">
                 <x-input-label for="treatment_plan" value="{{ __('Treatment Plan') }}" />
-                <x-text-input wire:model="form.treatment_plan" id="treatment_plan" name="treatment_plan" type="text"
+                <x-text-input wire:model.live="form.treatment_plan" id="treatment_plan" name="treatment_plan" type="text"
                     class="mt-1 block w-full" />
                 <x-input-error :messages="$errors->get('form.treatment_plan')" class="mt-2" />
             </div>
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

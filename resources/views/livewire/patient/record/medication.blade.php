@@ -123,26 +123,26 @@ $delete = function (Medication $medication) {
             <div class="flex justify-between gap-4">
                 <div class="w-3/4">
                     <x-input-label for="medication_name" value="{{ __('Medication Name') }}" />
-                    <x-text-input wire:model="form.medication_name" id="medication_name" name="medication_name"
+                    <x-text-input wire:model.live="form.medication_name" id="medication_name" name="medication_name"
                         type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.medication_name')" class="mt-2" />
                 </div>
                 <div class="w-1/4">
                     <x-input-label for="dosage" value="{{ __('Dosage ') }}" />
-                    <x-text-input wire:model="form.dosage" id="dosage" name="dosage" type="text"
+                    <x-text-input wire:model.live="form.dosage" id="dosage" name="dosage" type="text"
                         class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.dosage')" class="mt-2" />
                 </div>
             </div>
             <div class="mt-4">
                 <x-input-label for="frequency" value="{{ __('Frequency') }}" />
-                <x-text-input wire:model="form.frequency" id="frequency" name="frequency" type="text"
+                <x-text-input wire:model.live="form.frequency" id="frequency" name="frequency" type="text"
                     class="mt-1 block w-full" />
                 <x-input-error :messages="$errors->get('form.frequency')" class="mt-2" />
             </div>
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

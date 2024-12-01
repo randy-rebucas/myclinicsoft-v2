@@ -87,19 +87,19 @@ $delete = function (Encounter $encounter) {
             </h2>
             <div class="w-1/3">
                 <x-input-label for="encounter_date" value="{{ __('Encounter Date') }}" />
-                <x-text-input wire:model="form.encounter_date" id="encounter_date" name="encounter_date" type="date"
+                <x-text-input wire:model.live="form.encounter_date" id="encounter_date" name="encounter_date" type="date"
                     class="mt-1 block w-full" />
                 <x-input-error :messages="$errors->get('form.encounter_date')" class="mt-2" />
             </div>
             <div class="mt-4">
                 <x-input-label for="chief_complaint" value="{{ __('Chief Complaint') }}" />
-                <x-textarea wire:model="form.chief_complaint" id="chief_complaint" name="notes"
+                <x-textarea wire:model.live="form.chief_complaint" id="chief_complaint" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.chief_complaint')" class="mt-2" />
             </div>
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

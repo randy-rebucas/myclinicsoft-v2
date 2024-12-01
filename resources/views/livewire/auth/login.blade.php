@@ -40,7 +40,7 @@ new #[Layout('layouts.guest')] class extends Component
                         </svg>
                     </span>
                     <x-text-input 
-                        wire:model="form.email" 
+                        wire:model.live="form.email" 
                         id="email" 
                         class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
                         type="email" 
@@ -63,7 +63,7 @@ new #[Layout('layouts.guest')] class extends Component
                         </svg>
                     </span>
                     <x-text-input 
-                        wire:model="form.password" 
+                        wire:model.live="form.password" 
                         id="password" 
                         class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
                         type="password"
@@ -79,7 +79,7 @@ new #[Layout('layouts.guest')] class extends Component
             <div class="flex items-center justify-between">
                 <label for="remember" class="flex items-center">
                     <input 
-                        wire:model="form.remember" 
+                        wire:model.live="form.remember" 
                         id="remember" 
                         type="checkbox" 
                         class="h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors duration-200" 

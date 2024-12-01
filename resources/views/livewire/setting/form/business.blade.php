@@ -66,7 +66,7 @@ $store = function () {
                             @endif
                         </div>
                         <div>
-                            <input type="file" wire:model="logo" id="logo" class="hidden" accept="image/*" />
+                            <input type="file" wire:model.live="logo" id="logo" class="hidden" accept="image/*" />
                             <label for="logo" class="btn-secondary">{{ __('Upload New Logo') }}</label>
                             <p class="mt-2 text-sm text-gray-500">{{ __('Recommended: 200x200px. Max: 1MB') }}</p>
                         </div>
@@ -83,10 +83,10 @@ $store = function () {
 
                     <div class="md:col-span-3">
                         @if ($field === 'address')
-                            <x-textarea wire:model.blur="form.settings.{{ $field }}" id="{{ $field }}"
+                            <x-textarea wire:model.live.blur="form.settings.{{ $field }}" id="{{ $field }}"
                                 :placeholder="__('Enter ' . strtolower($label))" class="w-full" rows="3" />
                         @else
-                            <x-text-input wire:model.blur="form.settings.{{ $field }}" id="{{ $field }}"
+                            <x-text-input wire:model.live.blur="form.settings.{{ $field }}" id="{{ $field }}"
                                 :placeholder="__('Enter ' . strtolower($label))" class="w-full" :type="$field === 'email' ? 'email' : 'text'" />
                         @endif
                         <x-input-error :messages="$errors->get('form.settings.' . $field)" class="mt-2" />

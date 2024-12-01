@@ -107,14 +107,14 @@ $delete = function (Vital $vital) {
                     <x-input-label for="systolic" :value="__('Blood Pressure (mmHg)')" />
                     <div class="flex gap-2">
                         <div class="w-1/2">
-                            <x-text-input wire:model="form.systolic" type="number" placeholder="Systolic"
+                            <x-text-input wire:model.live="form.systolic" type="number" placeholder="Systolic"
                                 class="w-full" />
                             @error('form.systolic')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
                         <div class="w-1/2">
-                            <x-text-input wire:model="form.diastolic" type="number" placeholder="Diastolic"
+                            <x-text-input wire:model.live="form.diastolic" type="number" placeholder="Diastolic"
                                 class="w-full" />
                             @error('form.diastolic')
                                 <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -126,7 +126,7 @@ $delete = function (Vital $vital) {
                 <!-- Pulse Rate -->
                 <div>
                     <x-input-label for="heart_rate" :value="__('Pulse Rate (bpm)')" />
-                    <x-text-input wire:model="form.heart_rate" type="number" class="w-full" />
+                    <x-text-input wire:model.live="form.heart_rate" type="number" class="w-full" />
                     @error('form.heart_rate')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -135,7 +135,7 @@ $delete = function (Vital $vital) {
                 <!-- Temperature -->
                 <div>
                     <x-input-label for="temperature" :value="__('Temperature (°C)')" />
-                    <x-text-input wire:model="form.temperature" type="number" step="0.1" class="w-full" />
+                    <x-text-input wire:model.live="form.temperature" type="number" step="0.1" class="w-full" />
                     @error('form.temperature')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -144,7 +144,7 @@ $delete = function (Vital $vital) {
                 <!-- Respiratory Rate -->
                 <div>
                     <x-input-label for="respiratory_rate" :value="__('Respiratory Rate (bpm)')" />
-                    <x-text-input wire:model="form.respiratory_rate" type="number" class="w-full" />
+                    <x-text-input wire:model.live="form.respiratory_rate" type="number" class="w-full" />
                     @error('form.respiratory_rate')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -153,7 +153,7 @@ $delete = function (Vital $vital) {
                 <!-- Oxygen Saturation -->
                 <div>
                     <x-input-label for="oxygen_saturation" :value="__('Oxygen Saturation (%)')" />
-                    <x-text-input wire:model="form.oxygen_saturation" type="number" class="w-full" />
+                    <x-text-input wire:model.live="form.oxygen_saturation" type="number" class="w-full" />
                     @error('form.oxygen_saturation')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -162,7 +162,7 @@ $delete = function (Vital $vital) {
                 <!-- Blood Sugar -->
                 <div>
                     <x-input-label for="blood_sugar" :value="__('Blood Sugar (mg/dL)')" />
-                    <x-text-input wire:model="form.blood_sugar" type="number" class="w-full" />
+                    <x-text-input wire:model.live="form.blood_sugar" type="number" class="w-full" />
                     @error('form.blood_sugar')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror

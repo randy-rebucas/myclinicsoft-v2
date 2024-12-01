@@ -425,7 +425,7 @@ $create = function () {
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
-                    <select wire:model="form.department_id" name="department_id"
+                    <select wire:model.live="form.department_id" name="department_id"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
                         <option value="">Select Department</option>
                         @foreach ($this->departments as $department)
@@ -439,7 +439,7 @@ $create = function () {
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
-                    <select wire:model="form.priority" name="priority"
+                    <select wire:model.live="form.priority" name="priority"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
                         <option value="normal">Normal</option>
                         <option value="urgent">Urgent</option>
@@ -449,7 +449,7 @@ $create = function () {
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
-                    <textarea wire:model="form.notes" name="notes" rows="3"
+                    <textarea wire:model.live="form.notes" name="notes" rows="3"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900"></textarea>
                 </div>
             </div>

@@ -94,20 +94,20 @@ $delete = function (FamilyHistory $family_history) {
             <div class="flex justify-between gap-4">
                 <div class="w-1/2">
                     <x-input-label for="relationship" value="{{ __('Relationship') }}" />
-                    <x-select wire:model="form.relationship" id="relationship" name="relationship" :options="$relations"
+                    <x-select wire:model.live="form.relationship" id="relationship" name="relationship" :options="$relations"
                         class="block mt-1 w-full" />
                     <x-input-error :messages="$errors->get('form.relationship')" class="mt-2" />
                 </div>
                 <div class="w-1/2">
                     <x-input-label for="condition" value="{{ __('Condition') }}" />
-                    <x-text-input wire:model="form.condition" id="condition" name="condition" type="text"
+                    <x-text-input wire:model.live="form.condition" id="condition" name="condition" type="text"
                         class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.condition')" class="mt-2" />
                 </div>
             </div>
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

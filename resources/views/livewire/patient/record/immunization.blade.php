@@ -95,26 +95,26 @@ $delete = function (Immunization $immunization) {
             <div class="flex justify-between gap-4">
                 <div class="w-1/3">
                     <x-input-label for="vaccine_name" value="{{ __('Vaccine Name') }}" />
-                    <x-text-input wire:model="form.vaccine_name" id="vaccine_name" name="vaccine_name" type="text"
+                    <x-text-input wire:model.live="form.vaccine_name" id="vaccine_name" name="vaccine_name" type="text"
                         class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.vaccine_name')" class="mt-2" />
                 </div>
                 <div class="w-1/3">
                     <x-input-label for="administrator" value="{{ __('Administrator') }}" />
-                    <x-select wire:model="form.administrator" id="administrator" name="administrator" :options="$administrators"
+                    <x-select wire:model.live="form.administrator" id="administrator" name="administrator" :options="$administrators"
                         class="block mt-1 w-full" />
                     <x-input-error :messages="$errors->get('form.administrator')" class="mt-2" />
                 </div>
                 <div class="w-1/3">
                     <x-input-label for="date_administered" value="{{ __('Date Administered') }}" />
-                    <x-text-input wire:model="form.date_administered" id="date_administered"
+                    <x-text-input wire:model.live="form.date_administered" id="date_administered"
                         name="date_administered" type="date" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.date_administered')" class="mt-2" />
                 </div>
             </div>
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

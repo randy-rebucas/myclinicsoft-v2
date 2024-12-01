@@ -4,18 +4,18 @@ use App\Models\Encounter;
 use App\Models\Queue;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use App\Livewire\Forms\QueForm;
+use App\Livewire\Forms\QueueForm;
 use function Livewire\Volt\{state, form, on, mount, computed};
 
 state(['patient', 'encounterId', 'filter', 'show' => false]);
 
-form(QueForm::class);
+form(QueueForm::class);
 
 mount(function () {
     $this->form->patient_id = $this->patient->id;
 });
 
-$que = computed(function () {
+$queue = computed(function () {
     return Queue::where('patient_id', $this->patient->id)
         ->where('status', 'waiting')
         ->latest()

@@ -110,13 +110,13 @@ $remove = function ($index) {
             <div class="flex justify-between gap-4">
                 <div class="w-1/2">
                     <x-input-label for="general_appearance" value="{{ __('General Apperance') }}" />
-                    <x-text-input wire:model="form.general_appearance" id="general_appearance" name="general_appearance"
+                    <x-text-input wire:model.live="form.general_appearance" id="general_appearance" name="general_appearance"
                         type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.general_appearance')" class="mt-2" />
                 </div>
                 <div class="w-1/2">
                     <x-input-label for="systematic_findings" value="{{ __('Systematic Findings') }}" />
-                    <x-text-input wire:model="form.systematic_findings" id="systematic_findings"
+                    <x-text-input wire:model.live="form.systematic_findings" id="systematic_findings"
                         name="systematic_findings" type="text" class="mt-1 block w-full" />
                     <x-input-error :messages="$errors->get('form.systematic_findings')" class="mt-2" />
                 </div>
@@ -127,13 +127,13 @@ $remove = function ($index) {
                     <div class="flex justify-between items-end gap-4">
                         <div class="w-1/2">
                             <x-input-label for="type" value="{{ __('Type') }}" />
-                            <x-select wire:model="form.vital_signs.{{ $index }}.type" id="type"
+                            <x-select wire:model.live="form.vital_signs.{{ $index }}.type" id="type"
                                 name="type" :options="$types" class="block mt-1 w-full" />
                             <x-input-error :messages="$errors->get('form.vital_signs.{{ $index }}.type')" class="mt-2" />
                         </div>
                         <div class="w-1/2">
                             <x-input-label for="value" value="{{ __('Value') }}" />
-                            <x-text-input wire:model="form.vital_signs.{{ $index }}.value" id="value"
+                            <x-text-input wire:model.live="form.vital_signs.{{ $index }}.value" id="value"
                                 name="value" type="text" class="mt-1 block w-full" />
                             <x-input-error :messages="$errors->get('form.vital_signs.{{ $index }}.value')" class="mt-2" />
                         </div>
@@ -158,7 +158,7 @@ $remove = function ($index) {
             </fieldset>
             <div class="mt-4">
                 <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model="form.notes" id="notes" name="notes"
+                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
                     class="block mt-1 w-full"></x-textarea>
                 <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
             </div>

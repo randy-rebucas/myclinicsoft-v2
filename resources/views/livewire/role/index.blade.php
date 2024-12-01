@@ -126,7 +126,7 @@ $save = function () {
 
             <div class="w-full">
                 <x-input-label for="name" :value="__('Role Name')" />
-                <x-text-input wire:model="form.name" id="name" class="block mt-1 w-full" type="text"
+                <x-text-input wire:model.live="form.name" id="name" class="block mt-1 w-full" type="text"
                     name="name" autofocus />
                 <x-input-error :messages="$errors->get('form.name')" class="mt-2" />
             </div>
@@ -136,7 +136,7 @@ $save = function () {
                     @foreach ($this->form->permissions as $permission)
                         <li>
                             <label class="checkbox-wrap">
-                                <input type="checkbox" wire:model="form.assigned_permissions"
+                                <input type="checkbox" wire:model.live="form.assigned_permissions"
                                     value="{{ $permission }}">
                                 {{ $permission }}
                             </label>

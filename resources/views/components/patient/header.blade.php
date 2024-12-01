@@ -12,7 +12,7 @@
             <div class="flex items-center">
                 <button
                     type="button"
-                    wire:click="$emit('{{ $this->onBack }}')"
+                    wire:click="$dispatch('{{ $this->onBack }}')"
                     class="mr-4 text-gray-400 hover:text-gray-500"
                 >
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +28,7 @@
             <div class="flex space-x-3">
                 <button
                     type="button"
-                    wire:click="$emit('{{ $onEdit }}')"
+                    wire:click="$dispatch('{{ $onEdit }}')"
                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +39,7 @@
 
                 <button
                     type="button"
-                    wire:click="$emit('{{ $onNewEncounter }}')"
+                    wire:click="$dispatch('{{ $onNewEncounter }}')"
                     class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
