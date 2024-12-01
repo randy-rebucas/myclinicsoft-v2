@@ -5,38 +5,48 @@ use Livewire\Attributes\Layout;
 use App\Models\Patient;
 use App\Models\Queue;
 use App\Models\Encounter;
+use function Livewire\Volt\{state, layout, form, mount, computed, with};
 
-new #[Layout('layouts.app')] class extends Component {
-    public function with(): array
-    {
-        return [
-            'stats' => [
-                [
-                    'label' => 'Total Patients',
-                    'value' => Patient::count(),
-                    'icon' => 'heroicon-o-users',
-                ],
-                [
-                    'label' => 'New Patients',
-                    'value' => Patient::whereMonth('created_at', now()->month)->count(),
-                    'icon' => 'heroicon-o-user-plus',
-                ],
-                [
-                    'label' => 'Total Visits',
-                    'value' => Encounter::count(),
-                    'icon' => 'heroicon-o-clipboard',
-                ],
-                [
-                    'label' => 'This Month',
-                    'value' => Encounter::whereMonth('created_at', now()->month)->count(),
-                    'icon' => 'heroicon-o-calendar',
-                ],
-            ],
-            'recentActivity' => Encounter::with('patient')->latest()->take(8)->get(),
-            'todayQueue' => Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get(),
-        ];
-    }
-}; ?>
+state([
+    'stats' => [],
+    'recentActivity' => [],
+    'todayQueue' => [],
+    'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
+]);
+
+layout('layouts.app');
+
+mount(function () {
+    $this->stats = [
+        [
+            'label' => 'Total Patients',
+            'value' => Patient::count(),
+            'icon' => 'heroicon-o-users',
+        ],
+        [
+            'label' => 'New Patients',
+            'value' => Patient::whereMonth('created_at', now()->month)->count(),
+            'icon' => 'heroicon-o-user-plus',
+        ],
+        [
+            'label' => 'Total Visits',
+            'value' => Encounter::count(),
+            'icon' => 'heroicon-o-clipboard',
+        ],
+        [
+            'label' => 'This Month',
+            'value' => Encounter::whereMonth('created_at', now()->month)->count(),
+            'icon' => 'heroicon-o-calendar',
+        ],
+    ];
+    $this->recentActivity = Encounter::with('patient')->latest()->take(8)->get();
+    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
+});
+
+function refreshQueues() {
+    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
+}
+?>
 
 <section>
     <div class="py-12">
@@ -112,8 +122,14 @@ new #[Layout('layouts.app')] class extends Component {
                                             {{ $visit->created_at?->format('h:ia') ?? 'Unscheduled' }}
                                         </p>
                                     </div>
-                                    <div class="text-sm text-gray-500">
-                                        {{ $visit->status }}
+                                    <div @class([
+                                        'px-2 py-1 text-xs font-medium rounded-full',
+                                        'bg-yellow-100 text-yellow-800' => $visit->status === 'waiting',
+                                        'bg-blue-100 text-blue-800' => $visit->status === 'in_progress',
+                                        'bg-green-100 text-green-800' => $visit->status === 'completed',
+                                        'bg-gray-100 text-gray-800' => !in_array($visit->status, ['waiting', 'in_progress', 'completed']),
+                                    ])>
+                                        {{ str($visit->status)->replace('_', ' ')->title() }}
                                     </div>
                                 </div>
                             @empty
