@@ -18,26 +18,38 @@ class PermissionsSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // create permissions
-        Permission::create(['name' => 'menu.staff']);
+        // Create permissions
+        Permission::create(['name' => 'view dashboard']);
+        Permission::create(['name' => 'manage users']);
+        Permission::create(['name' => 'manage roles']);
 
-        // create roles and assign existing permissions
-        $roleSuperAdmin = Role::create(['name' => 'super-admin']);
-        $roleAdmin = Role::create(['name' => 'admin']);
-        $roleDoctor = Role::create(['name' => 'doctor']);
-        $rolePatient = Role::create(['name' => 'patient']);
-        $roleReceptionist = Role::create(['name' => 'receptionist']);
-        $roleMedRep = Role::create(['name' => 'medrep']);
-        // gets all permissions via Gate::before rule; see AuthServiceProvider
+        // Create roles and assign permissions
+        $userRole = Role::create(['name' => 'user']);
+        $userRole->givePermissionTo('view dashboard');
+
+        $doctorRole = Role::create(['name' => 'doctor']);
+        $doctorRole->givePermissionTo('view dashboard');
+
+        $receptionistRole = Role::create(['name' => 'receptionist']);
+        $receptionistRole->givePermissionTo('view dashboard');
+
+        $medrepRole = Role::create(['name' => 'medrep']);
+        $medrepRole->givePermissionTo('view dashboard');
+
+        $patientRole = Role::create(['name' => 'patient']);
+        $patientRole->givePermissionTo('view dashboard');
+
+        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole->givePermissionTo(Permission::all());
 
         // create demo users
-        $user = User::factory()->create([
-            'name' => 'Example User',
-            'email' => 'test@example.com',
+        $admin = User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
             'password' => bcrypt('password'),
         ]);
-        $user->assignRole($roleSuperAdmin);
+        $admin->assignRole($adminRole);
     }
 }

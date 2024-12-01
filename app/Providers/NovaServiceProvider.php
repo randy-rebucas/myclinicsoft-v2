@@ -20,9 +20,9 @@ use App\Nova\User;
 use App\Nova\Vital;
 use App\Nova\Ads;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Nova\Nova;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
+use Laravel\Nova\Nova;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\NovaApplicationServiceProvider;
@@ -66,13 +66,13 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(Ads::class),
                 ])->icon('briefcase')->collapsable(),
 
-                // MenuSection::make('Billing', [
-                //     MenuItem::resource(Billing::class),
-                // ])->icon('cash-register')->collapsable(),
+                MenuSection::make('Billing', [
+                    // MenuItem::resource(Billing::class),
+                ])->icon('cash-register')->collapsable(),
 
-                // MenuSection::make('Reports', [
-                //     MenuItem::resource(Encounter::class),
-                // ])->icon('chart-bar')->collapsable(),
+                MenuSection::make('Reports', [
+                    // MenuItem::resource(Encounter::class),
+                ])->icon('chart-bar')->collapsable(),
 
                 MenuSection::make('Settings', [
                     MenuItem::resource(Setting::class),
@@ -116,7 +116,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     {
         Gate::define('viewNova', function ($user) {
             return in_array($user->email, [
-                'rebucasrandy1986@gmail.com'
+                'admin@example.com'
             ]);
         });
     }
@@ -150,6 +150,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function register()
     {
-        //
+        Nova::report(function ($exception) {
+            if (app()->bound('sentry')) {
+                app('sentry')->captureException($exception);
+            }
+        });
     }
 }
