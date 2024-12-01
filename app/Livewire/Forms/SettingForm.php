@@ -11,19 +11,21 @@ use Livewire\Form;
 class SettingForm extends Form
 {
     #[Validate([
-        'settings.business_address' => ['required', 'string', 'max:255'],
+        'settings.address' => ['required', 'string', 'max:1500'],
     ], message: [
-        'settings.business_address.required' => 'The :attribute are missing.',
-        'settings.business_address.string' => 'The :attribute should be string.',
-        'settings.business_address.max' => 'The :attribute is too long.',
+        'settings.address.required' => 'The :attribute are missing.',
+        'settings.address.string' => 'The :attribute should be string.',
+        'settings.address.max' => 'The :attribute is too long.',
     ], attribute: [
-        'settings.business_address' => 'business address',
+        'settings.address' => 'business address',
     ])]
     public $settings = [];
 
     public function store()
     {
+
         $this->validate();
+        dd($this->validate());
 
         foreach ($this->settings as $key => $value) {
             if ($key == 'logo') {
