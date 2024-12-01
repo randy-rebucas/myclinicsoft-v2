@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Events\QueueUpdated;
 use App\Models\Department;
+use App\Models\Patient;
 use App\Models\Queue;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
@@ -46,6 +47,9 @@ class QueueForm extends Form
         ]);
 
         $this->reset();
+
+        $patient = Patient::find($this->patient_id);
+        $patient->recordActivity('queue_created', "Added to queue {$fullQueueNumber} in {$departmentCode} department");
 
         broadcast(new QueueUpdated("Queue {$fullQueueNumber} has been added!", 'new'))->toOthers();
     }
