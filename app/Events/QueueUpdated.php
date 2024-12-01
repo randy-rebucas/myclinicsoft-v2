@@ -15,8 +15,14 @@ class QueueUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public function __construct()
+    public $message;
+    public $status;
+
+
+    public function __construct($message, $status)
     {
+        $this->message = $message;
+        $this->status = $status;
     }
 
     public function broadcastOn(): array

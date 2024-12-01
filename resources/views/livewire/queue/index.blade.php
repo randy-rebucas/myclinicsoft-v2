@@ -65,7 +65,7 @@ $callNext = function ($queueId) {
     ]);
 
     $this->dispatch('queue-updated');
-    event(new QueueUpdated());
+    broadcast(new QueueUpdated("Queue {$queue->queue_number} is now in progress!", 'in_progress'))->toOthers();
 };
 
 $complete = function ($queueId) {
@@ -76,15 +76,14 @@ $complete = function ($queueId) {
     ]);
 
     $this->dispatch('queue-updated');
-    event(new QueueUpdated());
+    broadcast(new QueueUpdated("Queue {$queue->queue_number} is now completed!", 'completed'))->toOthers();
 };
 
 $cancel = function ($queueId) {
     $queue = Queue::find($queueId);
     $queue->update(['status' => 'cancelled']);
     $this->dispatch('queue-updated');
-
-    event(new QueueUpdated());
+    broadcast(new QueueUpdated("Queue {$queue->queue_number} has been cancelled!", 'cancelled'))->toOthers();
 };
 
 ?>
@@ -125,11 +124,12 @@ $cancel = function ($queueId) {
                     <!-- Queue Display Button -->
                     <div class="ml-4">
                         <label class="block text-sm font-medium text-transparent dark:text-transparent">Display</label>
-                        <a href="{{ route('queue-display') }}"
-                           target="_blank"
-                           class="mt-1 inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        <a href="{{ route('queue-display') }}" target="_blank"
+                            class="mt-1 inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                             </svg>
                         </a>
                     </div>

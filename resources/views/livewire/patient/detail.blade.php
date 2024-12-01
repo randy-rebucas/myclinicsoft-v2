@@ -67,7 +67,6 @@ $create = function () {
     $this->dispatch('close-modal', 'add-to-queue');
 
     $this->dispatch('refresh');
-    event(new QueueUpdated());
 };
 ?>
 

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Events\QueueUpdated;
 use App\Models\Department;
 use App\Models\Queue;
 use Livewire\Attributes\Validate;
@@ -45,5 +46,7 @@ class QueueForm extends Form
         ]);
 
         $this->reset();
+
+        broadcast(new QueueUpdated("Queue {$fullQueueNumber} has been added!", 'new'))->toOthers();
     }
 }
