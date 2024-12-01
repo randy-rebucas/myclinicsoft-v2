@@ -3,11 +3,16 @@
 use Livewire\Volt\Component;
 use App\Models\Patient;
 use App\Models\Queue;
+use App\Models\Vital;
 use App\Models\Receptionist;
+use App\Models\Department;
 use App\Events\QueueUpdated;
+use App\Livewire\Forms\QueueForm;
 use function Livewire\Volt\{state, form, mount, computed, with, usesPagination};
 
 usesPagination();
+
+form(QueueForm::class);
 
 state([
     'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
@@ -15,6 +20,12 @@ state([
     'todayQueue' => [],
     'recentActivities' => [],
     'receptionist' => Receptionist::where('user_id', auth()->id())->first(),
+    'showPreviewModal' => false,
+    'selectedPatient' => null,
+    'isEditing' => false,
+    'editableValue' => '',
+    'model' => null,
+    'field' => null,
 ]);
 
 with(fn() => ['patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
@@ -55,6 +66,10 @@ $refreshQueues = function () {
     $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
 };
 
+$departments = computed(function () {
+    return Department::active()->get();
+});
+
 $callNext = function ($queueId) {
     $queue = Queue::find($queueId);
     $queue->update([
@@ -84,6 +99,57 @@ $cancel = function ($queueId) {
     broadcast(new QueueUpdated("Queue {$queue->queue_number} has been cancelled!", 'cancelled'))->toOthers();
 };
 
+$preview = function ($patientId) {
+    $this->selectedPatient = Patient::find($patientId);
+    $this->form->department_id = 1;
+    $this->form->patient_id = $this->selectedPatient->id;
+    $this->form->priority = 'normal';
+
+    $this->dispatch('open-preview-modal');
+};
+
+$closeModal = function () {
+    $this->selectedPatient = null;
+    $this->dispatch('close-preview-modal');
+};
+
+$createQueue = function () {
+    $this->form->store();
+    $this->dispatch('close-preview-modal');
+};
+
+$startEditing = function ($value, $field, $model) {
+    $this->isEditing = true;
+    $this->editableValue = $value;
+    $this->field = $field;
+    $this->model = $model;
+};
+
+$save = function () {
+    $this->validate([
+        'editableValue' => 'required',
+    ]);
+
+    if ($this->model === 'vitals') {
+        Vital::updateOrCreate(['patient_id' => $this->selectedPatient->id], [$this->field => $this->editableValue]);
+    } else {
+        $this->selectedPatient->update([$this->field => $this->editableValue]);
+    }
+    $this->isEditing = false;
+
+    $this->dispatch('valueUpdated');
+};
+
+$valueUpdated = function () {
+    $this->dispatch('refresh');
+};
+
+$cancelEdit = function () {
+    $this->isEditing = false;
+    $this->model = null;
+    $this->field = null;
+    $this->editableValue = '';
+};
 ?>
 
 <div class="space-y-6">
@@ -116,6 +182,27 @@ $cancel = function ($queueId) {
                 <p class="text-sm text-gray-500">{{ $patients->total() }} total</p>
             </div>
         </button>
+
+        <!-- Now Serving Section -->
+        <div class="col-span-2 flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="p-2 bg-yellow-50 rounded-lg">
+                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <span class="font-medium text-gray-900">Now Serving</span>
+                @php
+                    $currentQueue = $todayQueue->firstWhere('status', 'in_progress');
+                @endphp
+                @if ($currentQueue)
+                    <p class="text-lg font-bold text-yellow-500">{{ $currentQueue->queue_number }}</p>
+                @else
+                    <p class="text-sm text-gray-500">No active queue</p>
+                @endif
+            </div>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -152,7 +239,8 @@ $cancel = function ($queueId) {
                                         <p class="text-sm text-gray-500">ID: PAT-001 • Last Visit: 2 weeks ago</p>
                                     </div>
                                 </div>
-                                <button class="p-2 text-gray-400 hover:text-blue-500">
+                                <button wire:click="preview({{ $patient->id }})"
+                                    class="p-2 text-gray-400 hover:text-blue-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5l7 7-7 7" />
@@ -212,7 +300,8 @@ $cancel = function ($queueId) {
             <div class="p-4 border-b border-gray-100">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">Queues</h2>
-                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700">Today's List</span>
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-700">Today's
+                        List</span>
                 </div>
             </div>
 
@@ -221,8 +310,9 @@ $cancel = function ($queueId) {
                     <div class="p-4 hover:bg-gray-50 transition-colors">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-lg font-semibold text-gray-900">{{ $queue->queue_number }}</span>
-                            <span class="px-2 py-1 text-xs font-medium rounded-full
-                                @if($queue->priority === 'urgent') bg-red-50 text-red-700
+                            <span
+                                class="px-2 py-1 text-xs font-medium rounded-full
+                                @if ($queue->priority === 'urgent') bg-red-50 text-red-700
                                 @elseif($queue->priority === 'medium') bg-yellow-50 text-yellow-700
                                 @else bg-green-50 text-green-700 @endif">
                                 {{ ucfirst($queue->priority) }}
@@ -241,7 +331,8 @@ $cancel = function ($queueId) {
                         </div>
 
                         <div class="flex items-center gap-2 mt-3">
-                            <span class="px-2.5 py-1 text-xs font-medium rounded-full
+                            <span
+                                class="px-2.5 py-1 text-xs font-medium rounded-full
                                 @switch($queue->status)
                                     @case('waiting')
                                         bg-yellow-50 text-yellow-700
@@ -261,7 +352,7 @@ $cancel = function ($queueId) {
                                 {{ ucfirst(str_replace('_', ' ', $queue->status)) }}
                             </span>
 
-                            @if($queue->status === 'waiting')
+                            @if ($queue->status === 'waiting')
                                 <button wire:click="callNext({{ $queue->id }})"
                                     class="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded-full hover:bg-blue-100">
                                     Start
@@ -273,7 +364,7 @@ $cancel = function ($queueId) {
                                 </button>
                             @endif
 
-                            @if($queue->status !== 'completed' && $queue->status !== 'cancelled')
+                            @if ($queue->status !== 'completed' && $queue->status !== 'cancelled')
                                 <button wire:click="cancel({{ $queue->id }})"
                                     class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-50 rounded-full hover:bg-gray-100">
                                     Cancel
@@ -289,7 +380,7 @@ $cancel = function ($queueId) {
                 @endforelse
             </div>
 
-            @if($todayQueue->count() > 0)
+            @if ($todayQueue->count() > 0)
                 <div class="p-4 border-t border-gray-100">
                     <div class="flex items-center justify-between text-sm text-gray-600">
                         <span>Total Queues: {{ $todayQueue->count() }}</span>
@@ -297,6 +388,246 @@ $cancel = function ($queueId) {
                     </div>
                 </div>
             @endif
+        </div>
+    </div>
+
+    <!-- Wrap both modal and backdrop in a parent div with x-data -->
+    <div x-data="{ show: false }" @open-preview-modal.window="show = true" @close-preview-modal.window="show = false">
+
+        <!-- Patient Preview Modal -->
+        <div x-show="show" x-on:keydown.escape.window="show = false"
+            x-transition:enter="transform transition ease-in-out duration-500"
+            x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+            x-transition:leave="transform transition ease-in-out duration-500"
+            x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+            class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50">
+
+            @if ($selectedPatient)
+                @php
+                    $vital = $selectedPatient->vitals->last();
+                @endphp
+                <div class="h-full flex flex-col">
+                    <!-- Header -->
+                    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Patient Details</h3>
+                        <button @click="show = false; $wire.closeModal()" class="text-gray-400 hover:text-gray-500">
+                            <x-heroicon-m-x-mark class="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 overflow-y-auto p-4">
+                        <div class="space-y-6">
+                            <!-- Patient Photo & Basic Info -->
+                            <div class="text-center">
+                                <img class="h-24 w-24 rounded-full mx-auto"
+                                    src="{{ $selectedPatient->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($selectedPatient->full_name) }}"
+                                    alt="{{ $selectedPatient->full_name }}">
+                                <h4 class="mt-2 text-xl font-medium text-gray-900">{{ $selectedPatient->full_name }}
+                                </h4>
+                                <p class="text-sm text-gray-500">Patient ID: {{ $selectedPatient->id }}</p>
+                            </div>
+
+                            <!-- Patient Details -->
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-500">Date of Birth</label>
+                                        <p class="text-gray-900">
+                                            {{ $selectedPatient->date_of_birth?->format('M d, Y') }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-500">Gender</label>
+                                        <p class="text-gray-900">{{ ucfirst($selectedPatient->gender) }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-500">Phone</label>
+                                        <p class="text-gray-900">{{ $selectedPatient->phone ?? '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-500">Email</label>
+                                        <p class="text-gray-900">{{ $selectedPatient->user->email ?? '-' }}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-500">Address</label>
+                                    <p class="text-gray-900">{{ $selectedPatient->address ?? '-' }}</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex items-end justify-between relative">
+                                        @if ($isEditing && $field === 'height')
+                                            <div class="flex items-center space-x-2 w-full">
+                                                <input type="text" wire:model="editableValue"
+                                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                    placeholder="Enter height">
+                                                <button wire:click="save"
+                                                    class="inline-flex items-center p-1 text-green-600 hover:text-green-700">
+                                                    <x-heroicon-m-check class="w-5 h-5" />
+                                                </button>
+                                                <button wire:click="cancelEdit"
+                                                    class="inline-flex items-center p-1 text-red-600 hover:text-red-700">
+                                                    <x-heroicon-m-x-mark class="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        @else
+                                            <div>
+                                                <label class="text-sm font-medium text-gray-500">Height</label>
+                                                <p class="text-gray-900">{{ $selectedPatient->height ?? '-' }} cm</p>
+                                            </div>
+                                            <button
+                                                wire:click="startEditing('{{ $selectedPatient->height }}', 'height', 'patient')"
+                                                class="ml-2 text-blue-600 hover:text-blue-500">
+                                                <x-heroicon-m-pencil class="w-4 h-4" />
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex items-end justify-between relative">
+                                        @if ($isEditing && $field === 'weight')
+                                            <div class="flex items-center space-x-2 w-full">
+                                                <input type="text" wire:model="editableValue"
+                                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                    placeholder="Enter weight">
+                                                <button wire:click="save"
+                                                    class="inline-flex items-center p-1 text-green-600 hover:text-green-700">
+                                                    <x-heroicon-m-check class="w-5 h-5" />
+                                                </button>
+                                                <button wire:click="cancelEdit"
+                                                    class="inline-flex items-center p-1 text-red-600 hover:text-red-700">
+                                                    <x-heroicon-m-x-mark class="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        @else
+                                            <div>
+                                                <label class="text-sm font-medium text-gray-500">Weight</label>
+                                                <p class="text-gray-900">{{ $selectedPatient->weight ?? '-' }} kg</p>
+                                            </div>
+                                            <button
+                                                wire:click="startEditing('{{ $selectedPatient->weight }}', 'weight', 'patient')"
+                                                class="ml-2 text-blue-600 hover:text-blue-500">
+                                                <x-heroicon-m-pencil class="w-4 h-4" />
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex items-end justify-between relative">
+                                        @if ($isEditing && $field === 'temperature')
+                                            <div class="flex items-center space-x-2 w-full">
+                                                <input type="text" wire:model="editableValue"
+                                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                    placeholder="Enter temperature">
+                                                <button wire:click="save"
+                                                    class="inline-flex items-center p-1 text-green-600 hover:text-green-700">
+                                                    <x-heroicon-m-check class="w-5 h-5" />
+                                                </button>
+                                                <button wire:click="cancelEdit"
+                                                    class="inline-flex items-center p-1 text-red-600 hover:text-red-700">
+                                                    <x-heroicon-m-x-mark class="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        @else
+                                            <div>
+                                                <label class="text-sm font-medium text-gray-500">Temperature</label>
+                                                <p class="text-gray-900">{{ $vital ? $vital->temperature : '-' }} °C
+                                                </p>
+                                            </div>
+                                            <button
+                                                wire:click="startEditing('{{ $vital ? $vital->temperature : '' }}', 'temperature', 'vitals')"
+                                                class="ml-2 text-blue-600 hover:text-blue-500">
+                                                <x-heroicon-m-pencil class="w-4 h-4" />
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <div class="flex items-end justify-between relative">
+                                        @if ($isEditing && $field === 'respiratory_rate')
+                                            <div class="flex items-center space-x-2 w-full">
+                                                <input type="text" wire:model="editableValue"
+                                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                                    placeholder="Enter heart rate">
+                                                <button wire:click="save"
+                                                    class="inline-flex items-center p-1 text-green-600 hover:text-green-700">
+                                                    <x-heroicon-m-check class="w-5 h-5" />
+                                                </button>
+                                                <button wire:click="cancelEdit"
+                                                    class="inline-flex items-center p-1 text-red-600 hover:text-red-700">
+                                                    <x-heroicon-m-x-mark class="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        @else
+                                            <div>
+                                                <label class="text-sm font-medium text-gray-500">Heart Rate</label>
+                                                <p class="text-gray-900">{{ $vital ? $vital->respiratory_rate : '-' }}
+                                                    bpm</p>
+                                            </div>
+                                            <button
+                                                wire:click="startEditing('{{ $vital ? $vital->respiratory_rate : '' }}', 'respiratory_rate', 'vitals')"
+                                                class="ml-2 text-blue-600 hover:text-blue-500">
+                                                <x-heroicon-m-pencil class="w-4 h-4" />
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Footer -->
+                    <form wire:submit="createQueue" class="p-6 border-t border-gray-200">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                            Add to Queue
+                        </h2>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
+                                <select wire:model.live="form.department_id" name="department_id"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
+                                    <option value="">Select Department</option>
+                                    @foreach ($this->departments as $department)
+                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('form.department_id')
+                                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
+                                <select wire:model.live="form.priority" name="priority"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
+                                    <option value="normal">Normal</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="emergency">Emergency</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                                <textarea wire:model.live="form.notes" name="notes" rows="3"
+                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <x-primary-button class="w-full justify-center">
+                                {{ __('Add to que') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+        </div>
+
+        <!-- Modal Backdrop -->
+        <div x-show="show" x-transition:enter="transition-opacity ease-linear duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-40"
+            @click="show = false; $wire.closeModal()">
         </div>
     </div>
 </div>

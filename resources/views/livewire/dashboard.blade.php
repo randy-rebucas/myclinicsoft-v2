@@ -17,7 +17,7 @@ state(['user' => auth()->user()]);
                 Welcome back, {{ $user->name }}
             </h1>
             <p class="mt-1 text-sm text-gray-600">
-                Here's what's happening in your medical practice today
+                Logged in as {{ Str::title($user->roles->first()->name) }} on {{ now()->format('l, d F Y') }}
             </p>
         </div>
 
