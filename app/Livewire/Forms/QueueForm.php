@@ -36,7 +36,7 @@ class QueueForm extends Form
         $queueNumber = $lastQueue ? sprintf('%03d', intval(substr($lastQueue->queue_number, -3)) + 1) : '001';
 
         $departmentCode = Department::find($this->department_id)->code;
-        $fullQueueNumber = $departmentCode . date('ymd') . $queueNumber;
+        $fullQueueNumber = $departmentCode . $queueNumber;
 
         Queue::create([
             'patient_id' => $this->patient_id,
