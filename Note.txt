@@ -45,8 +45,8 @@ $patient->recordActivity('note_added', 'Added consultation notes');
 $patient->recordActivity('billing_updated', 'Updated insurance information');
 
 
-#[On('queue-updated')]
-public function updateQueue()
+#[On('echo:queues,QueueUpdated')]
+public function refreshQueues($event)
 {
-    $this->todayQueue = Queue::whereDate('created_at', now()->today())->get();
+    dd($event);
 }
