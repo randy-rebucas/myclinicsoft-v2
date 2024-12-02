@@ -22,9 +22,7 @@
         "spatie/db-dumper": "^3.5",
         "spatie/laravel-backup": "^8.6",
         "spatie/laravel-permission": "^6.10",
-        "wamesk/laravel-nova-tel-input": "^1.0",
-        "spatie/role": "@dev",
-        "acme/color-picker": "@dev"
+        "wamesk/laravel-nova-tel-input": "^1.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.12",
@@ -55,8 +53,7 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan nova:publish"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -87,14 +84,6 @@
         "nova": {
             "type": "composer",
             "url": "https://nova.laravel.com"
-        },
-        "0": {
-            "type": "path",
-            "url": "./nova-components/Role"
-        },
-        "1": {
-            "type": "path",
-            "url": "./nova-components/ColorPicker"
         }
     }
 }

@@ -3,6 +3,7 @@
 use App\Models\Department;
 use App\Models\Queue;
 use App\Models\Ads;
+use Carbon\Carbon;
 use function Livewire\Volt\{state, layout, form, mount, computed, with};
 
 state([
@@ -24,9 +25,9 @@ $queues = computed(function () {
     return Queue::with(['patient', 'department'])
         ->when($this->filter !== 'all', fn($query) => $query->where('status', $this->filter))
         ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+        ->whereDate('created_at', Carbon::today())
         ->orderBy('priority', 'desc')
-        ->orderBy('created_at', 'asc')
-        ->paginate(10);
+        ->orderBy('created_at', 'asc')->get();
 });
 
 $refreshQueues = function () {

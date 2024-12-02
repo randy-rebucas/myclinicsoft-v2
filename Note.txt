@@ -43,3 +43,10 @@ $patient->recordActivity('prescription_added', 'Added prescription for Amoxicill
 $patient->recordActivity('lab_result_added', 'Blood work results uploaded');
 $patient->recordActivity('note_added', 'Added consultation notes');
 $patient->recordActivity('billing_updated', 'Updated insurance information');
+
+
+#[On('queue-updated')]
+public function updateQueue()
+{
+    $this->todayQueue = Queue::whereDate('created_at', now()->today())->get();
+}

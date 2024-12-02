@@ -8,6 +8,7 @@ use App\Models\Receptionist;
 use App\Models\Department;
 use App\Events\QueueUpdated;
 use App\Livewire\Forms\QueueForm;
+use Carbon\Carbon;
 use function Livewire\Volt\{state, form, mount, computed, with, usesPagination, on};
 
 usesPagination();
@@ -15,9 +16,7 @@ usesPagination();
 form(QueueForm::class);
 
 state([
-    'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
     'search',
-    'todayQueue' => [],
     'recentActivities' => [],
     'receptionist' => Receptionist::where('user_id', auth()->id())->first(),
     'showPreviewModal' => false,
@@ -31,6 +30,9 @@ state([
         'female' => 'Female',
         'unknown' => 'Unknown',
     ],
+    'filter' => 'all',
+    'department_id' => 1,
+    // 'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
 ]);
 
 with(
@@ -42,8 +44,6 @@ with(
 );
 
 mount(function () {
-    $this->refreshQueues();
-
     $this->recentActivities = $this->receptionist
         ?->activities()
         ->latest()
@@ -73,8 +73,18 @@ mount(function () {
         });
 });
 
+$todayQueue = computed(function () {
+    return Queue::with(['patient', 'department'])
+        ->when($this->filter !== 'all', fn($query) => $query->where('status', $this->filter))
+        ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+        ->whereDate('created_at', Carbon::today())
+        ->orderBy('priority', 'desc')
+        ->orderBy('created_at', 'asc')
+        ->get();
+});
+
 $refreshQueues = function () {
-    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->limit(10)->orderBy('created_at')->get();
+    $this->dispatch('$refresh');
 };
 
 $departments = computed(function () {
@@ -172,6 +182,7 @@ on([
         $this->search = Patient::find($patientId)->first_name;
         $this->preview($patientId);
     },
+    'echo:queues,QueueUpdated' => $refreshQueues,
 ]);
 ?>
 
@@ -201,7 +212,7 @@ on([
             </div>
             <div class="ml-3">
                 <span class="font-medium text-gray-900">Current Queue</span>
-                <p class="text-sm text-gray-500">{{ $todayQueue->count() }} today</p>
+                <p class="text-sm text-gray-500">{{ $this->todayQueue->count() }} today</p>
             </div>
         </div>
 
@@ -216,7 +227,10 @@ on([
             <div class="ml-3">
                 <span class="font-medium text-gray-900">Now Serving</span>
                 @php
-                    $currentQueue = $todayQueue->firstWhere('status', 'in_progress');
+                    $currentQueue = $this->todayQueue
+                        ->where('department_id', $this->department_id)
+                        ->where('status', 'in_progress')
+                        ->first();
                 @endphp
                 @if ($currentQueue)
                     <p class="text-lg font-bold text-yellow-500">{{ $currentQueue->queue_number }}</p>
@@ -329,7 +343,7 @@ on([
 
             <div class="overflow-y-auto flex-1">
                 <div class="flex-1 overflow-y-auto">
-                    @forelse($todayQueue as $queue)
+                    @forelse($this->todayQueue as $queue)
                         <div class="p-4 hover:bg-gray-50 transition-colors">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-lg font-semibold text-gray-900">{{ $queue->queue_number }}</span>
@@ -404,10 +418,10 @@ on([
                 </div>
             </div>
 
-            @if (Queue::whereDate('created_at', today())->count() > 0)
+            @if ($this->todayQueue->count() > 0)
                 <div class="p-4 border-t border-gray-100 flex-shrink-0">
                     <div class="flex items-center justify-between text-sm text-gray-600">
-                        <span>Total Queues: {{ Queue::whereDate('created_at', today())->count() }}</span>
+                        <span>Total Queues: {{ $this->todayQueue->count() }}</span>
                         <button class="text-blue-600 hover:text-blue-700">View All →</button>
                     </div>
                 </div>
