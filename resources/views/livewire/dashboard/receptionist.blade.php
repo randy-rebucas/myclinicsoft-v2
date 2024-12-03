@@ -33,14 +33,14 @@ state([
         'unknown' => 'Unknown',
     ],
     'filter' => 'all',
-    'clinic_id' => 1,
+    'clinic_id' => null,
     // 'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
 ]);
 
 with(
     fn() => [
         'patients' => PatientDoctor::with('patient')
-        ->whereHas('patient', function ($query) {
+            ->whereHas('patient', function ($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%');
             })
             ->where('doctor_id', auth()->user()->receptionist->doctor->id)
@@ -77,6 +77,11 @@ mount(function () {
                 'icon' => $typeConfig['icon'],
             ];
         });
+
+    $this->clinic_id = ClinicDoctor::with('clinic')
+        ->where('is_primary', true)
+        ->where('doctor_id', auth()->user()->receptionist->doctor->id)
+        ->first()->clinic->id;
 });
 
 $todayQueue = computed(function () {
@@ -92,12 +97,6 @@ $todayQueue = computed(function () {
 $refreshQueues = function () {
     $this->dispatch('$refresh');
 };
-
-$clinics = computed(function () {
-    return ClinicDoctor::with('clinic')
-        ->where('doctor_id', auth()->user()->receptionist->doctor->id)
-        ->get();
-});
 
 $callNext = function ($queueId) {
     $queue = Queue::find($queueId);
@@ -134,7 +133,7 @@ $openCreatePatientModal = function () {
 
 $preview = function ($patientId) {
     $this->selectedPatient = Patient::find($patientId);
-    $this->form->clinic_id = 1;
+    $this->form->clinic_id = $this->clinic_id;
     $this->form->patient_id = $this->selectedPatient->id;
     $this->form->priority = 'normal';
 
@@ -220,7 +219,7 @@ on([
             </div>
             <div class="ml-3">
                 <span class="font-medium text-gray-900">Current Queue</span>
-                <p class="text-sm text-gray-500">{{ $this->todayQueue->count() }} today</p>
+                {{-- <p class="text-sm text-gray-500">{{ $this->todayQueue->count() }} today</p> --}}
             </div>
         </div>
 
@@ -371,7 +370,7 @@ on([
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <x-heroicon-m-building-office class="w-4 h-4" />
-                                    <span>{{ $queue->department->name }}</span>
+                                    <span>{{ $queue->clinic->name }}</span>
                                 </div>
                             </div>
 
@@ -625,21 +624,6 @@ on([
                         </h2>
 
                         <div class="space-y-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Clinic</label>
-                                <select wire:model.live="form.clinic_id" name="clinic_id"
-                                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                                    <option value="">Select Clinic</option>
-                                    @foreach ($this->clinics as $item)
-                                        <option value="{{ $item->clinic->id }}">{{ $item->clinic->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('form.clinic_id')
-                                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                                @enderror
-                            </div>
-
                             <div>
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>

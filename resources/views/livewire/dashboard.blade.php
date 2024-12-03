@@ -34,10 +34,6 @@ state(['user' => auth()->user()]);
                 <livewire:dashboard.patient />
             @break
 
-            @case('admin')
-                <livewire:dashboard.admin />
-            @break
-
             @case('medrep')
                 <livewire:dashboard.med-representative />
             @break
