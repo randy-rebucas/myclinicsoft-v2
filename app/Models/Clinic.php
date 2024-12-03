@@ -18,11 +18,11 @@ class Clinic extends Model
         'phone',
         'email',
         'description',
-        'is_active'
+        'is_primary'
     ];
 
     protected $casts = [
-        'is_active' => 'boolean'
+        'is_primary' => 'boolean'
     ];
 
     public function doctors()
