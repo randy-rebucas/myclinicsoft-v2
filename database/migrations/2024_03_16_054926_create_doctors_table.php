@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('specialty')->nullable();
             $table->boolean('is_active')->default(false);
             $table->foreignId('user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('practice_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

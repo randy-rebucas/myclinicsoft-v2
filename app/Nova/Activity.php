@@ -2,36 +2,28 @@
 
 namespace App\Nova;
 
-use App\Models\Practice;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\HasMany;
-use Laravel\Nova\Fields\HasOne;
-use Wame\TelInput\TelInput;
+use Laravel\Nova\Http\Requests\NovaRequest;
 
-class Doctor extends Resource
+class Activity extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Doctor>
+     * @var class-string<\App\Models\Activity>
      */
-    public static $model = \App\Models\Doctor::class;
+    public static $model = \App\Models\Activity::class;
 
-    public static $displayInNavigation = true;
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'first_name';
+    public static $title = 'id';
 
     /**
      * The columns that should be searched.
@@ -51,40 +43,10 @@ class Doctor extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User')->noPeeking(),
-
-            ID::make()->hideFromIndex()->hideFromDetail(),
-
-            Text::make('First Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
-
-            Text::make('Last Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
-
-            TelInput::make('Phone', 'phone_number')->onlyCountries(['PH'])->help(
-                'International format only e.g. +63'
-            ),
-
-            Select::make('Gender', 'gender')->options([
-                'male' => 'Male',
-                'female' => 'Female',
-                'unknown' => 'Unknown',
-            ]),
-
-            Select::make('Specialty', 'practice_id')
-                ->options(Practice::all()->pluck('title', 'id'))
-                ->rules('required'),
-
-            Boolean::make('Is Active')
-                ->sortable(),
-
-            HasOne::make('Active Subscription', 'activeSubscription'),
-
-            HasMany::make('Clinics'),
-
-            HasMany::make('Activities'),
+            ID::make()->sortable(),
+            Text::make('Type'),
+            Text::make('Description'),
+            DateTime::make('Created At'),
         ];
     }
 

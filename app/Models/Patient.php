@@ -89,21 +89,6 @@ class Patient extends Model
         return $this->morphMany(Activity::class, 'subject');
     }
 
-    protected static function booted()
-    {
-        static::created(function ($patient) {
-            $patient->recordActivity('created');
-        });
-
-        static::updated(function ($patient) {
-            $patient->recordActivity('updated');
-        });
-
-        static::deleted(function ($patient) {
-            $patient->recordActivity('deleted');
-        });
-    }
-
     public function recordActivity($type, $description = null)
     {
         $this->activities()->create([

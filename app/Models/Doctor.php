@@ -11,6 +11,7 @@ class Doctor extends Model
 {
     use HasFactory;
     use SoftDeletes;
+
     public $timestamps = FALSE;
 
     protected $fillable = [
@@ -27,11 +28,17 @@ class Doctor extends Model
 
     public function getFullNameAttribute()
     {
-        return $this->first_name.' '.$this->last_name;
+        return $this->first_name . ' ' . $this->last_name;
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function practice()
+    {
+        return $this->hasOne(Practice::class);
     }
 
     /**
@@ -42,21 +49,6 @@ class Doctor extends Model
         return $this->morphMany(Activity::class, 'subject');
     }
 
-    protected static function booted()
-    {
-        static::created(function ($doctor) {
-            $doctor->recordActivity('created');
-        });
-
-        static::updated(function ($doctor) {
-            $doctor->recordActivity('updated');
-        });
-
-        static::deleted(function ($doctor) {
-            $doctor->recordActivity('deleted');
-        });
-    }
-
     public function recordActivity($type, $description = null)
     {
         $this->activities()->create([
@@ -64,6 +56,42 @@ class Doctor extends Model
             'description' => $description ?? "Doctor record was {$type}",
             'changes' => $this->getChanges(),
             'causer_id' => Auth::user()->id
+        ]);
+    }
+
+    public function clinics()
+    {
+        return $this->belongsToMany(Clinic::class, 'clinic_doctors')
+            ->withTimestamps()
+            ->withPivot('is_primary');
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(DoctorSubscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(DoctorSubscription::class)
+            ->where('status', 'active')
+            ->where('ends_at', '>', now())
+            ->latest();
+    }
+
+    public function subscribe(SubscriptionPlan $plan)
+    {
+        $startDate = now();
+        $endDate = $plan->billing_period === 'monthly'
+            ? $startDate->addMonth()
+            : $startDate->addYear();
+
+        return $this->subscriptions()->create([
+            'subscription_plan_id' => $plan->id,
+            'starts_at' => $startDate,
+            'ends_at' => $endDate,
+            'status' => 'active',
+            'auto_renew' => true
         ]);
     }
 }
