@@ -59,7 +59,7 @@ class Clinic extends Resource
             ),
             Email::make('Email'),
             Markdown::make('Description'),
-            Boolean::make('Is Active'),
+            Boolean::make('Is Primary'),
             BelongsToMany::make('Doctors'),
         ];
     }
