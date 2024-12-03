@@ -59,8 +59,13 @@ class Clinic extends Resource
             ),
             Email::make('Email'),
             Markdown::make('Description'),
-            Boolean::make('Is Primary', 'is_primary'),
-            BelongsToMany::make('Doctors'),
+
+            BelongsToMany::make('Clinic Doctors', 'clinicDoctors')
+                ->fields(function ($request, $relatedModel) {
+                    return [
+                        Boolean::make('Is Primary', 'is_primary'),
+                    ];
+                }),
         ];
     }
 

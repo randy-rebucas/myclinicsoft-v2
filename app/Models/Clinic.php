@@ -17,15 +17,10 @@ class Clinic extends Model
         'zip',
         'phone',
         'email',
-        'description',
-        'is_primary'
+        'description'
     ];
 
-    protected $casts = [
-        'is_primary' => 'boolean'
-    ];
-
-    public function doctors()
+    public function clinicDoctors()
     {
         return $this->belongsToMany(Doctor::class, 'clinic_doctors')
             ->withTimestamps()
