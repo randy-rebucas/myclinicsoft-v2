@@ -1,14 +1,15 @@
 <?php
 
-use App\Models\Department;
 use App\Models\Queue;
 use App\Events\QueueUpdated;
+use App\Models\ClinicDoctor;
+use Illuminate\Support\Str;
 use function Livewire\Volt\{state, layout, form, mount, computed, with, usesPagination};
 
 state([
-    'departments' => [],
+    'clinics' => [],
     'filter' => 'waiting',
-    'department_id' => '',
+    'clinic_id' => '',
 ]);
 
 layout('layouts.app');
@@ -16,16 +17,18 @@ layout('layouts.app');
 usesPagination();
 
 mount(function () {
-    $this->departments = Department::all();
+    $this->clinics = ClinicDoctor::with('clinic')
+        ->where('doctor_id', auth()->user()->doctor->id)
+        ->get();
 });
 
 $queues = computed(function () {
-    return Queue::with(['patient', 'department'])
+    return Queue::with(['patient', 'clinic'])
         ->when($this->filter !== 'all', function ($query) {
             $query->where('status', $this->filter);
         })
-        ->when($this->department_id, function ($query) {
-            $query->where('department_id', $this->department_id);
+        ->when($this->clinic_id, function ($query) {
+            $query->where('clinic_id', $this->clinic_id);
         })
         ->orderBy('priority', 'desc')
         ->orderBy('created_at', 'asc')
@@ -35,19 +38,21 @@ $queues = computed(function () {
 $addToQueue = function ($patientId) {
     $this->validate();
 
-    $lastQueue = Queue::where('department_id', $this->department_id)
+    $lastQueue = Queue::where('clinic_id', $this->clinic_id)
         ->whereDate('created_at', today())
+        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
         ->latest()
         ->first();
 
     $queueNumber = $lastQueue ? sprintf('%03d', intval(substr($lastQueue->queue_number, -3)) + 1) : '001';
 
-    $departmentCode = Department::find($this->department_id)->code;
-    $fullQueueNumber = $departmentCode . date('ymd') . $queueNumber;
+    $clinicDoctor = ClinicDoctor::with('clinic')->where('doctor_id', auth()->user()->doctor->id)->first();
+    $clinicName = $clinicDoctor->clinic->name;
+    $fullQueueNumber = Str::substr($clinicName, 0, 1) . $queueNumber;
 
     Queue::create([
         'patient_id' => $patientId,
-        'department_id' => $this->department_id,
+        'clinic_id' => auth()->user()->doctor->clinics->first()->id,
         'queue_number' => $fullQueueNumber,
         'priority' => $this->priority,
         'notes' => $this->notes,
@@ -95,14 +100,14 @@ $cancel = function ($queueId) {
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
                 <div class="flex justify-between items-center">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
-                        <!-- Department Filter -->
+                        <!-- Clinic Filter -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
-                            <select wire:model.live="department_id"
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Clinic</label>
+                            <select wire:model.live="clinic_id"
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                                <option value="">All Departments</option>
-                                @foreach ($this->departments as $department)
-                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                <option value="">All Clinics</option>
+                                @foreach ($this->clinics as $clinic)
+                                    <option value="{{ $clinic->clinic->id }}">{{ $clinic->clinic->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -176,7 +181,7 @@ $cancel = function ($queueId) {
                                         {{ $queue->patient->full_name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $queue->department->name }}
+                                        {{ $queue->clinic->name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span

@@ -17,4 +17,14 @@ class ClinicDoctor extends Model
     protected $casts = [
         'is_active' => 'boolean'
     ];
+
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
 }

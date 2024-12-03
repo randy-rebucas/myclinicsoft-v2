@@ -23,7 +23,9 @@ layout('layouts.app');
 
 usesPagination();
 
-with(fn() => ['receptionists' => Receptionist::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
+with(fn() => ['receptionists' => Receptionist::orWhere('last_name', 'like', '%' . $this->search . '%')
+    ->where('doctor_id', auth()->user()->doctor->id)
+    ->paginate(10)]);
 
 mount(function (Faker $faker) {
     $this->form->name = $faker->userName();

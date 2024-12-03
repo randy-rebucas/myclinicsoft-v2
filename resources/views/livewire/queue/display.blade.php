@@ -1,15 +1,15 @@
 <?php
 
-use App\Models\Department;
+use App\Models\ClinicDoctor;
 use App\Models\Queue;
 use App\Models\Ads;
 use Carbon\Carbon;
 use function Livewire\Volt\{state, layout, form, mount, computed, with};
 
 state([
-    'departments' => [],
+    'clinics' => [],
     'filter' => 'all',
-    'department_id' => 1,
+    'clinic_id' => 1,
     'ads' => [],
     'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
 ]);
@@ -17,14 +17,16 @@ state([
 layout('layouts.que');
 
 mount(function () {
-    $this->departments = Department::all();
+    $this->clinics = ClinicDoctor::with('clinic')
+        ->where('doctor_id', auth()->user()->doctor->id)
+        ->get();
     $this->ads = Ads::active()->latest()->take(2)->get();
 });
 
 $queues = computed(function () {
-    return Queue::with(['patient', 'department'])
+    return Queue::with(['patient', 'clinic'])
         ->when($this->filter !== 'all', fn($query) => $query->where('status', $this->filter))
-        ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+        ->when($this->clinic_id, fn($query) => $query->where('clinic_id', $this->clinic_id))
         ->whereDate('created_at', Carbon::today())
         ->orderBy('priority', 'desc')
         ->orderBy('created_at', 'asc')->get();
@@ -47,10 +49,10 @@ $refreshQueues = function () {
                         Now Serving
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-1 gap-8">
-                        @foreach ($this->departments as $department)
+                        @foreach ($this->clinics as $item)
                             @php
                                 $currentQueue = $this->queues
-                                    ->where('department_id', $department->id)
+                                    ->where('clinic_id', $item->clinic->id)
                                     ->where('status', 'in_progress')
                                     ->first();
                             @endphp
@@ -61,7 +63,7 @@ $refreshQueues = function () {
                                 <div
                                     class="relative bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-indigo-500">
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                                        {{ $department->name }}</h3>
+                                        {{ $item->clinic->name }}</h3>
                                     <div
                                         class="text-5xl font-bold text-center text-indigo-600 dark:text-indigo-400">
                                         {{ $currentQueue ? $currentQueue->queue_number : '-' }}
@@ -79,13 +81,13 @@ $refreshQueues = function () {
             <div class="p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6 sticky top-0 bg-white dark:bg-gray-800">Next in Line</h2>
                 <div class="space-y-6">
-                    @foreach ($this->departments as $department)
+                    @foreach ($this->clinics as $item)
                         <div class="space-y-3">
                             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider sticky top-14 bg-white dark:bg-gray-800">
-                                {{ $department->name }}
+                                {{ $item->clinic->name }}
                             </h3>
                             <div class="space-y-2">
-                                @foreach ($this->queues->where('department_id', $department->id)->where('status', 'waiting') as $queue)
+                                @foreach ($this->queues->where('clinic_id', $item->clinic->id)->where('status', 'waiting') as $queue)
                                     <div
                                         class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
                                         <span class="text-lg font-semibold text-gray-900 dark:text-white">

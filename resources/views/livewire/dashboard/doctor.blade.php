@@ -3,6 +3,7 @@
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Patient;
+use App\Models\PatientDoctor;
 use App\Models\Queue;
 use App\Models\Doctor;
 use App\Models\Encounter;
@@ -24,28 +25,44 @@ mount(function () {
     $this->stats = [
         [
             'label' => 'Total Patients',
-            'value' => Patient::count(),
+            'value' => PatientDoctor::where('doctor_id', auth()->user()->doctor->id)->count(),
             'icon' => 'heroicon-o-users',
         ],
         [
             'label' => 'New Patients',
-            'value' => Patient::whereMonth('created_at', now()->month)->count(),
+            'value' => PatientDoctor::whereMonth('created_at', now()->month)
+                ->where('doctor_id', auth()->user()->doctor->id)
+                ->count(),
             'icon' => 'heroicon-o-user-plus',
         ],
         [
             'label' => 'Total Visits',
-            'value' => Encounter::count(),
+            'value' => Encounter::where('doctor_id', auth()->user()->doctor->id)->count(),
             'icon' => 'heroicon-o-clipboard',
         ],
         [
             'label' => 'This Month',
-            'value' => Encounter::whereMonth('created_at', now()->month)->count(),
+            'value' => Encounter::whereMonth('created_at', now()->month)
+                ->where('doctor_id', auth()->user()->doctor->id)
+                ->count(),
             'icon' => 'heroicon-o-calendar',
         ],
     ];
-    $this->recentVisits = Encounter::with('patient')->latest()->take(8)->get();
-    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
-    $this->recentPatients = Patient::latest()->take(8)->get();
+    $this->recentVisits = Encounter::with('patient')
+        ->where('doctor_id', auth()->user()->doctor->id)
+        ->latest()
+        ->take(8)
+        ->get();
+    $this->todayQueue = Queue::with('patient')
+        ->whereDate('created_at', now()->toDateString())
+        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
+        ->orderBy('created_at')
+        ->get();
+    $this->recentPatients = PatientDoctor::with('patient')
+        ->where('doctor_id', auth()->user()->doctor->id)
+        ->latest()
+        ->take(8)
+        ->get();
     $this->recentActivities = $this->doctor
         ?->activities()
         ->latest()
@@ -76,8 +93,13 @@ mount(function () {
 });
 
 $refreshQueues = function () {
-    $this->todayQueue = Queue::with('patient')->whereDate('created_at', now()->toDateString())->orderBy('created_at')->get();
+    $this->todayQueue = Queue::with('patient')
+        ->whereDate('created_at', now()->toDateString())
+        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
+        ->orderBy('created_at')
+        ->get();
 };
+
 ?>
 
 <div class="bg-gray-50 min-h-screen py-8">
@@ -85,8 +107,11 @@ $refreshQueues = function () {
         <!-- Stats Cards - Now with gradients and improved visual hierarchy -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             @foreach ($stats as $stat)
-                <div class="relative group overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div
+                    class="relative group overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
                     <div class="p-6 relative">
                         <div class="flex items-center justify-between">
                             <div>
@@ -109,13 +134,16 @@ $refreshQueues = function () {
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-900">Today's Queue</h3>
-                        <span class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-full">{{ $todayQueue->count() }} Patients</span>
+                        <span class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-full">{{ $todayQueue->count() }}
+                            Patients</span>
                     </div>
 
                     <div class="divide-y divide-gray-100">
                         @forelse($todayQueue as $visit)
-                            <div class="py-4 flex items-center gap-4 group hover:bg-gray-50 rounded-lg transition-colors">
-                                <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
+                            <div
+                                class="py-4 flex items-center gap-4 group hover:bg-gray-50 rounded-lg transition-colors">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
                                     {{ $loop->iteration }}
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -130,14 +158,19 @@ $refreshQueues = function () {
                                     'bg-yellow-100 text-yellow-800' => $visit->status === 'waiting',
                                     'bg-blue-100 text-blue-800' => $visit->status === 'in_progress',
                                     'bg-green-100 text-green-800' => $visit->status === 'completed',
-                                    'bg-gray-100 text-gray-800' => !in_array($visit->status, ['waiting', 'in_progress', 'completed']),
+                                    'bg-gray-100 text-gray-800' => !in_array($visit->status, [
+                                        'waiting',
+                                        'in_progress',
+                                        'completed',
+                                    ]),
                                 ])>
                                     {{ str($visit->status)->replace('_', ' ')->title() }}
                                 </div>
                             </div>
                         @empty
                             <div class="py-12 text-center">
-                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                                <div
+                                    class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
                                     @svg('heroicon-o-queue-list', 'w-8 h-8 text-gray-400')
                                 </div>
                                 <p class="text-gray-500">No visits scheduled for today</p>
@@ -211,7 +244,8 @@ $refreshQueues = function () {
                                             </span>
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <div class="text-sm font-medium text-gray-900">{{ $activity['title'] }}</div>
+                                            <div class="text-sm font-medium text-gray-900">{{ $activity['title'] }}
+                                            </div>
                                             <div class="mt-1 text-sm text-gray-500">{{ $activity['description'] }}</div>
                                             <div class="mt-1 text-sm text-gray-500">{{ $activity['timestamp'] }}</div>
                                         </div>
@@ -264,19 +298,19 @@ $refreshQueues = function () {
                         </button>
                     </div>
                     <div class="divide-y divide-gray-200">
-                        @forelse($recentPatients as $patient)
+                        @forelse($recentPatients as $item)
                             <div class="py-4 flex items-center space-x-4">
                                 <div class="flex-shrink-0 w-2 h-2 rounded-full bg-green-500"></div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-gray-900 truncate">
-                                        {{ $patient->full_name }}
+                                        {{ $item->patient->full_name }}
                                     </p>
                                     <p class="text-xs text-gray-500">
-                                        Added {{ $patient->user->created_at->diffForHumans() }}
+                                        Added {{ $item->patient->user->created_at->diffForHumans() }}
                                     </p>
                                 </div>
                                 <div class="text-sm text-gray-500">
-                                    {{ $patient->phone }}
+                                    {{ $item->patient->phone }}
                                 </div>
                             </div>
                         @empty

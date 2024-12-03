@@ -10,7 +10,7 @@ class Queue extends Model
 {
     protected $fillable = [
         'patient_id',
-        'department_id',
+        'clinic_id',
         'queue_number',
         'status',
         'priority',
@@ -29,8 +29,8 @@ class Queue extends Model
         return $this->belongsTo(Patient::class);
     }
 
-    public function department(): BelongsTo
+    public function clinic(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Clinic::class);
     }
 }

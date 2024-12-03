@@ -2,6 +2,8 @@
 
 use Livewire\Volt\Component;
 use App\Models\Patient;
+use App\Models\PatientDoctor;
+use App\Models\ClinicDoctor;
 use App\Models\Queue;
 use App\Models\Vital;
 use App\Models\Receptionist;
@@ -31,13 +33,17 @@ state([
         'unknown' => 'Unknown',
     ],
     'filter' => 'all',
-    'department_id' => 1,
+    'clinic_id' => 1,
     // 'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
 ]);
 
 with(
     fn() => [
-        'patients' => Patient::where('first_name', 'like', '%' . $this->search . '%')
+        'patients' => PatientDoctor::with('patient')
+        ->whereHas('patient', function ($query) {
+                $query->where('first_name', 'like', '%' . $this->search . '%');
+            })
+            ->where('doctor_id', auth()->user()->receptionist->doctor->id)
             ->orderBy('created_at', 'asc')
             ->paginate(10),
     ],
@@ -74,9 +80,9 @@ mount(function () {
 });
 
 $todayQueue = computed(function () {
-    return Queue::with(['patient', 'department'])
+    return Queue::with(['patient', 'clinic'])
         ->when($this->filter !== 'all', fn($query) => $query->where('status', $this->filter))
-        ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+        ->when($this->clinic_id, fn($query) => $query->where('clinic_id', $this->clinic_id))
         ->whereDate('created_at', Carbon::today())
         ->orderBy('priority', 'desc')
         ->orderBy('created_at', 'asc')
@@ -87,8 +93,10 @@ $refreshQueues = function () {
     $this->dispatch('$refresh');
 };
 
-$departments = computed(function () {
-    return Department::active()->get();
+$clinics = computed(function () {
+    return ClinicDoctor::with('clinic')
+        ->where('doctor_id', auth()->user()->receptionist->doctor->id)
+        ->get();
 });
 
 $callNext = function ($queueId) {
@@ -126,7 +134,7 @@ $openCreatePatientModal = function () {
 
 $preview = function ($patientId) {
     $this->selectedPatient = Patient::find($patientId);
-    $this->form->department_id = 1;
+    $this->form->clinic_id = 1;
     $this->form->patient_id = $this->selectedPatient->id;
     $this->form->priority = 'normal';
 
@@ -228,7 +236,7 @@ on([
                 <span class="font-medium text-gray-900">Now Serving</span>
                 @php
                     $currentQueue = $this->todayQueue
-                        ->where('department_id', $this->department_id)
+                        ->where('clinic_id', $this->clinic_id)
                         ->where('status', 'in_progress')
                         ->first();
                 @endphp
@@ -261,21 +269,21 @@ on([
                 <div class="p-6">
                     <div class="space-y-4">
                         <!-- Patient items -->
-                        @forelse ($patients as $patient)
+                        @forelse ($patients as $item)
                             <div
                                 class="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                                         <img class="h-10 w-10 rounded-full object-cover"
-                                            src="{{ $patient->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($patient->full_name) }}"
-                                            alt="{{ $patient->full_name }}">
+                                            src="{{ $item->patient->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($item->patient->full_name) }}"
+                                            alt="{{ $item->patient->full_name }}">
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-900">{{ $patient->full_name }}</p>
+                                        <p class="font-medium text-gray-900">{{ $item->patient->full_name }}</p>
                                         <p class="text-sm text-gray-500">ID: PAT-001 • Last Visit: 2 weeks ago</p>
                                     </div>
                                 </div>
-                                <button wire:click="preview({{ $patient->id }})"
+                                <button wire:click="preview({{ $item->patient->id }})"
                                     class="p-2 text-gray-400 hover:text-blue-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -619,15 +627,15 @@ on([
                         <div class="space-y-4">
                             <div>
                                 <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
-                                <select wire:model.live="form.department_id" name="department_id"
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300">Clinic</label>
+                                <select wire:model.live="form.clinic_id" name="clinic_id"
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                                    <option value="">Select Department</option>
-                                    @foreach ($this->departments as $department)
-                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                    <option value="">Select Clinic</option>
+                                    @foreach ($this->clinics as $item)
+                                        <option value="{{ $item->clinic->id }}">{{ $item->clinic->name }}</option>
                                     @endforeach
                                 </select>
-                                @error('form.department_id')
+                                @error('form.clinic_id')
                                     <span class="text-red-500 text-sm">{{ $message }}</span>
                                 @enderror
                             </div>
