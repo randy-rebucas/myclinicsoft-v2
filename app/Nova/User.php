@@ -22,12 +22,7 @@ class User extends Resource
      * @var class-string<\App\Models\User>
      */
     public static $model = \App\Models\User::class;
-    /**
-     * The logical group associated with the resource.
-     *
-     * @var string
-     */
-    public static $group = 'User Management';
+
     /**
      * The single value that should be used to represent the resource when being displayed.
      *

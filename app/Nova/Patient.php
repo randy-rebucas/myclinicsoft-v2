@@ -26,12 +26,7 @@ class Patient extends Resource
      * @var class-string<\App\Models\Patient>
      */
     public static $model = \App\Models\Patient::class;
-    /**
-     * The logical group associated with the resource.
-     *
-     * @var string
-     */
-    public static $group = 'User Management';
+
     /**
      * Indicates whether the resource should automatically poll for new resources.
      *

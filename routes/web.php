@@ -4,6 +4,7 @@ use App\Http\Controllers\DatabaseDumper;
 use App\Http\Controllers\Prescription;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\WebhookController;
 
 Route::middleware('guest')->group(function () {
     Route::view('/', 'welcome');
@@ -47,5 +48,6 @@ Route::middleware(['auth'])->group(function () {
 });
 Volt::route('/queue-display', 'queue.display')->name('queue-display');
 Route::get('/dump', DatabaseDumper::class)->name('dump');
+Route::post('/webhook/stripe', [WebhookController::class, 'handleStripeWebhook']);
 
 require __DIR__.'/auth.php';
