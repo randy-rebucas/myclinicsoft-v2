@@ -29,6 +29,8 @@ mount(function (Faker $faker) {
     $this->form->name = $faker->userName();
     $this->form->email = $faker->unique()->email();
     $this->form->password = Hash::make('password');
+
+    $this->form->doctor_id = auth()->user()->doctor->id;
 });
 
 $delete = function (Receptionist $receptionist) {

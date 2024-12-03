@@ -12,6 +12,7 @@ class ReceptionistObserver
     public function created(Receptionist $receptionist): void
     {
         $receptionist->user->assignRole('receptionist');
+        $receptionist->recordActivity('assigned role receptionist');
     }
 
     /**
@@ -20,6 +21,7 @@ class ReceptionistObserver
     public function updated(Receptionist $receptionist): void
     {
         // $receptionist->user->assignRole('receptionist');
+        $receptionist->recordActivity('updated');
     }
 
     /**
@@ -28,6 +30,7 @@ class ReceptionistObserver
     public function deleted(Receptionist $receptionist): void
     {
         $receptionist->user->removeRole('receptionist');
+        $receptionist->recordActivity('deleted');
     }
 
     /**
@@ -36,6 +39,7 @@ class ReceptionistObserver
     public function restored(Receptionist $receptionist): void
     {
         $receptionist->user->assignRole('receptionist');
+        $receptionist->recordActivity('restored');
     }
 
     /**
@@ -44,5 +48,6 @@ class ReceptionistObserver
     public function forceDeleted(Receptionist $receptionist): void
     {
         $receptionist->user->removeRole('receptionist');
+        $receptionist->recordActivity('force deleted');
     }
 }

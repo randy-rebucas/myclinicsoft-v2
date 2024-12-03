@@ -98,4 +98,11 @@ class Patient extends Model
             'causer_id' => Auth::user()->id
         ]);
     }
+
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class, 'patient_doctors')
+            ->withTimestamps()
+            ->withPivot('is_active');
+    }
 }

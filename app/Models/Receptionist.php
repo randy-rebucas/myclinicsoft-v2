@@ -18,7 +18,8 @@ class Receptionist extends Model
         'last_name',
         'phone_number',
         'gender',
-        'user_id'
+        'user_id',
+        'doctor_id'
     ];
 
     protected $appends = [
@@ -29,9 +30,15 @@ class Receptionist extends Model
     {
         return $this->first_name.' '.$this->last_name;
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
     }
 
     /**
@@ -40,21 +47,6 @@ class Receptionist extends Model
     public function activities()
     {
         return $this->morphMany(Activity::class, 'subject');
-    }
-
-    protected static function booted()
-    {
-        static::created(function ($receptionist) {
-            $receptionist->recordActivity('created');
-        });
-
-        static::updated(function ($receptionist) {
-            $receptionist->recordActivity('updated');
-        });
-
-        static::deleted(function ($receptionist) {
-            $receptionist->recordActivity('deleted');
-        });
     }
 
     public function recordActivity($type, $description = null)

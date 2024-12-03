@@ -66,6 +66,13 @@ class Doctor extends Model
             ->withPivot('is_primary');
     }
 
+    public function patients()
+    {
+        return $this->belongsToMany(Patient::class, 'patient_doctors')
+            ->withTimestamps()
+            ->withPivot('is_active');
+    }
+
     public function subscriptions()
     {
         return $this->hasMany(DoctorSubscription::class);

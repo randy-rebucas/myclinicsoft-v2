@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Patient;
+use Illuminate\Support\Facades\Auth;
 
 class PatientObserver
 {
@@ -12,6 +13,15 @@ class PatientObserver
     public function created(Patient $patient): void
     {
         $patient->user->assignRole('patient');
+
+        if (Auth::user()->hasRole('doctor')) {
+            $doctor = Auth::user()->doctor;
+            $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+        } else {
+            $doctor = Auth::user()->receptionist->doctor;
+            $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+        }
+
         $patient->recordActivity('created');
     }
 

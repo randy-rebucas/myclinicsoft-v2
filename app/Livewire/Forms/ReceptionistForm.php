@@ -7,6 +7,8 @@ use App\Livewire\Forms\UserForm;
 
 class ReceptionistForm extends UserForm
 {
+    public $doctor_id;
+
     public function setReceptionist(?Receptionist $receptionist = null)
     {
         $this->first_name = $receptionist->first_name;
@@ -34,7 +36,8 @@ class ReceptionistForm extends UserForm
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
-            'gender' => $this->gender
+            'gender' => $this->gender,
+            'doctor_id' => $this->doctor_id
         ]);
     }
 
@@ -46,6 +49,7 @@ class ReceptionistForm extends UserForm
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
             'user_id' => $this->ensureStoreUser()->id,
+            'doctor_id' => $this->doctor_id
         ]);
     }
 }
