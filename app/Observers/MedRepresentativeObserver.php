@@ -11,7 +11,8 @@ class MedRepresentativeObserver
      */
     public function created(MedRepresentative $medRepresentative): void
     {
-        $medRepresentative->user->assignRole('med-representative');
+        $medRepresentative->user->assignRole('medrep');
+        $medRepresentative->recordActivity('created');
     }
 
     /**
@@ -19,7 +20,7 @@ class MedRepresentativeObserver
      */
     public function updated(MedRepresentative $medRepresentative): void
     {
-        // $medRepresentative->user->assignRole('med-representative');
+        $medRepresentative->recordActivity('updated');
     }
 
     /**
@@ -27,7 +28,8 @@ class MedRepresentativeObserver
      */
     public function deleted(MedRepresentative $medRepresentative): void
     {
-        $medRepresentative->user->removeRole('med-representative');
+        $medRepresentative->user->removeRole('medrep');
+        $medRepresentative->recordActivity('deleted');
     }
 
     /**
@@ -35,7 +37,8 @@ class MedRepresentativeObserver
      */
     public function restored(MedRepresentative $medRepresentative): void
     {
-        $medRepresentative->user->assignRole('med-representative');
+        $medRepresentative->user->assignRole('medrep');
+        $medRepresentative->recordActivity('restored');
     }
 
     /**
@@ -43,6 +46,7 @@ class MedRepresentativeObserver
      */
     public function forceDeleted(MedRepresentative $medRepresentative): void
     {
-        $medRepresentative->user->removeRole('med-representative');
+        $medRepresentative->user->removeRole('medrep');
+        $medRepresentative->recordActivity('force deleted');
     }
 }

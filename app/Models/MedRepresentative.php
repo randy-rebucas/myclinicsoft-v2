@@ -40,32 +40,12 @@ class MedRepresentative extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function doctors()
-    {
-        return $this->hasMany(Doctor::class);
-    }
-
     /**
      * Get all activities for the medRepresentative
      */
     public function activities()
     {
         return $this->morphMany(Activity::class, 'subject');
-    }
-
-    protected static function booted()
-    {
-        static::created(function ($medRepresentative) {
-            $medRepresentative->recordActivity('created');
-        });
-
-        static::updated(function ($medRepresentative) {
-            $medRepresentative->recordActivity('updated');
-        });
-
-        static::deleted(function ($medRepresentative) {
-            $medRepresentative->recordActivity('deleted');
-        });
     }
 
     public function recordActivity($type, $description = null)
@@ -76,5 +56,12 @@ class MedRepresentative extends Model
             'changes' => $this->getChanges(),
             'causer_id' => Auth::user()->id
         ]);
+    }
+
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class, 'med_representative_doctors')
+            ->withTimestamps()
+            ->withPivot('is_active');
     }
 }

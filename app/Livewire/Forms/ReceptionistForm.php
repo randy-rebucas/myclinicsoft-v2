@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Models\Receptionist;
 use App\Livewire\Forms\UserForm;
+use Illuminate\Support\Facades\Auth;
 
 class ReceptionistForm extends UserForm
 {

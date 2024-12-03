@@ -73,6 +73,13 @@ class Doctor extends Model
             ->withPivot('is_active');
     }
 
+    public function medRepresentatives()
+    {
+        return $this->belongsToMany(MedRepresentative::class, 'med_representative_doctors')
+            ->withTimestamps()
+            ->withPivot('is_active');
+    }
+
     public function subscriptions()
     {
         return $this->hasMany(DoctorSubscription::class);

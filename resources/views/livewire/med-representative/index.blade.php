@@ -2,6 +2,7 @@
 
 use Faker\Generator as Faker;
 use App\Models\MedRepresentative;
+use App\Models\MedRepresentativeDoctor;
 use Illuminate\Support\Facades\Hash;
 use App\Livewire\Forms\MedRepresentativeForm;
 use function Livewire\Volt\{layout, state, on, form, mount, with, usesPagination};
@@ -23,7 +24,15 @@ layout('layouts.app');
 
 usesPagination();
 
-with(fn() => ['medRepresentatives' => MedRepresentative::where('first_name', 'like', '%' . $this->search . '%')->paginate(10)]);
+with(
+    fn() => [
+        'medRepresentatives' => MedRepresentativeDoctor::whereHas('medRepresentative', function ($query) {
+                $query->where('first_name', 'like', '%' . $this->search . '%');
+            })
+            ->where('doctor_id', auth()->user()->doctor->id)
+            ->paginate(10),
+    ],
+);
 
 mount(function (Faker $faker) {
     $this->form->name = $faker->userName();
@@ -38,7 +47,7 @@ $delete = function (MedRepresentative $medRepresentative) {
 };
 
 $detail = function (MedRepresentative $medRepresentative) {
-    $this->redirectRoute('med-representative-detail', ['medRepresentativeId' => $medRepresentative]);
+    $this->redirectRoute('med-representative-detail', ['medRepresentativeId' => $medRepresentative->medRepresentative]);
 };
 
 $edit = function ($id) {
@@ -92,26 +101,26 @@ $save = function () {
 
             <!-- Redesigned Content Area - Card Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @forelse ($medRepresentatives as $medRepresentative)
+                @forelse ($medRepresentatives as $item)
                     <div class="cursor-pointer bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all duration-200 group relative"
                         wire:loading.class="opacity-50">
                         <div class="flex justify-between items-start">
-                            <div class="p-4" wire:click="detail({{ $medRepresentative }})">
-                                <h3 class="font-semibold text-lg text-gray-900">{{ $medRepresentative->full_name }}</h3>
+                            <div class="p-4" wire:click="detail({{ $item->medRepresentative }})">
+                                <h3 class="font-semibold text-lg text-gray-900">{{ $item->medRepresentative->full_name }}</h3>
                                 <div class="mt-2 space-y-1">
                                     <p class="text-sm text-gray-600 flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                         </svg>
-                                        {{ $medRepresentative->phone_number }}
+                                        {{ $item->medRepresentative->phone_number }}
                                     </p>
                                     <p class="text-sm text-gray-600 flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
-                                        <span class="uppercase">{{ $medRepresentative->gender }}</span>
+                                        <span class="uppercase">{{ $item->medRepresentative->gender }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -119,7 +128,7 @@ $save = function () {
                             <!-- Hover Actions -->
                             <div
                                 class="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                <button wire:click.stop="edit({{ $medRepresentative->id }})"
+                                <button wire:click.stop="edit({{ $item->medRepresentative->id }})"
                                     class="p-1.5 hover:bg-gray-100 rounded-full text-gray-500 hover:text-gray-700">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
@@ -127,7 +136,7 @@ $save = function () {
                                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                 </button>
-                                <button wire:click.stop="delete({{ $medRepresentative }})"
+                                <button wire:click.stop="delete({{ $item->medRepresentative->id }})"
                                     wire:confirm="Are you sure you want to delete this representative?"
                                     class="p-1.5 hover:bg-red-50 rounded-full text-gray-500 hover:text-red-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"

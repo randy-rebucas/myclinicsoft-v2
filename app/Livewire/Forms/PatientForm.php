@@ -5,6 +5,8 @@ namespace App\Livewire\Forms;
 use App\Models\Patient;
 use Livewire\Attributes\Validate;
 use App\Livewire\Forms\UserForm;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class PatientForm extends UserForm
 {
@@ -76,6 +78,15 @@ class PatientForm extends UserForm
             'gender' => $this->gender,
             'user_id' => $this->ensureStoreUser()->id,
         ]);
+
+        $user = User::find(Auth::id());
+        if ($user->hasRole('doctor')) {
+            $doctor = Auth::user()->doctor;
+            $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+        } else {
+            $doctor = Auth::user()->receptionist->doctor;
+            $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+        }
 
         return $patient;
     }

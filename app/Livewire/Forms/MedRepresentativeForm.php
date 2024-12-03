@@ -4,9 +4,12 @@ namespace App\Livewire\Forms;
 
 use App\Models\MedRepresentative;
 use App\Livewire\Forms\UserForm;
+use Illuminate\Support\Facades\Auth;
 
 class MedRepresentativeForm extends UserForm
 {
+    public $doctor_id;
+
     public function setMedRepresentative(?MedRepresentative $medRepresentative = null)
     {
         $this->first_name = $medRepresentative->first_name;
@@ -27,7 +30,7 @@ class MedRepresentativeForm extends UserForm
 
         $this->reset('first_name', 'last_name', 'phone_number', 'gender');
     }
-    
+
     public function update(?MedRepresentative $medRepresentative)
     {
         $medRepresentative->update([
@@ -40,12 +43,15 @@ class MedRepresentativeForm extends UserForm
 
     public function create()
     {
-        MedRepresentative::create([
+        $medRepresentative = MedRepresentative::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
             'user_id' => $this->ensureStoreUser()->id,
         ]);
+
+        $doctor = Auth::user()->doctor;
+        $medRepresentative->doctors()->attach($doctor->id, ['is_active' => true]);
     }
 }
