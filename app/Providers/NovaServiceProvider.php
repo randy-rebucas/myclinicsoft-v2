@@ -73,23 +73,23 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             ];
         });
 
-        Nova::userMenu(function (Request $request, Menu $menu) {
-            if ($request->user()->doctor) {
-                $menu->append(
-                    MenuItem::make('My Profile')
-                        ->path("/resources/doctors/{$request->user()->doctor->id}")
-                );
+        // Nova::userMenu(function (Request $request, Menu $menu) {
+        //     if ($request->user()->doctor) {
+        //         $menu->append(
+        //             MenuItem::make('My Profile')
+        //                 ->path("/resources/doctors/{$request->user()->doctor->id}")
+        //         );
 
-                if ($request->user()->doctor->subscribed()) {
-                    $menu->append(
-                        MenuItem::make('Subscriber Dashboard')
-                            ->path('/subscribers/dashboard')
-                    );
-                }
-            }
+        //         if ($request->user()->doctor->subscribed()) {
+        //             $menu->append(
+        //                 MenuItem::make('Subscriber Dashboard')
+        //                     ->path('/subscribers/dashboard')
+        //             );
+        //         }
+        //     }
 
-            return $menu;
-        });
+        //     return $menu;
+        // });
 
         Nova::footer(function ($request) {
             return Blade::render('
