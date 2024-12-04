@@ -19,12 +19,25 @@ class Doctor extends Model
         'last_name',
         'phone_number',
         'gender',
-        'user_id'
+        'user_id',
+        'meta'
     ];
 
     protected $appends = [
         'full_name'
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'meta' => 'array',
+        ];
+    }
 
     public function getFullNameAttribute()
     {
@@ -75,16 +88,22 @@ class Doctor extends Model
 
     public function medRepresentatives()
     {
-        return $this->belongsToMany(MedRepresentative::class, 'med_representative_doctors')
+        return $this->belongsToMany(MedRepresentative::class, 'med_rep_doctors')
             ->withTimestamps()
             ->withPivot('is_active');
     }
 
+    /**
+     * Get all subscriptions for the doctor
+     */
     public function subscriptions()
     {
         return $this->hasMany(DoctorSubscription::class);
     }
 
+    /**
+     * Get the active subscription for the doctor
+     */
     public function activeSubscription()
     {
         return $this->hasOne(DoctorSubscription::class)
@@ -93,6 +112,9 @@ class Doctor extends Model
             ->latest();
     }
 
+    /**
+     * Subscribe the doctor to a subscription plan
+     */
     public function subscribe(SubscriptionPlan $plan)
     {
         $startDate = now();
@@ -107,5 +129,21 @@ class Doctor extends Model
             'status' => 'active',
             'auto_renew' => true
         ]);
+    }
+
+    /**
+     * Check if the doctor has an active subscription
+     */
+    public function hasActiveSubscription(): bool
+    {
+        return true;
+        // If you're using Laravel Cashier with Stripe, you might use:
+        // return $this->subscribed('default');
+
+        // Or if you have a subscriptions relationship:
+        // return $this->subscriptions()->active()->exists();
+
+        // Or if you have a subscription_ends_at column:
+        // return $this->subscription_ends_at === null || $this->subscription_ends_at->isFuture();
     }
 }

@@ -4,12 +4,14 @@ use App\Livewire\Forms\SettingForm;
 use function Livewire\Volt\{state, form, mount};
 
 form(SettingForm::class);
-state(['notification' => null]);
+state([
+    'notification' => null,
+    'doctor' => auth()->user()->doctor
+]);
 
 mount(function () {
-    $settings = ['prc', 'ptr', 's2'];
-    foreach ($settings as $setting) {
-        $this->form->settings[$setting] = config("settings.{$setting}");
+    foreach ($this->doctor->meta as $key => $value) {
+        $this->form->settings[$key] = $value;
     }
 });
 
@@ -53,14 +55,13 @@ $store = function () {
 
         <form wire:submit="store">
             <div class="space-y-4 p-4">
-                @foreach (['prc' => 'PRC License', 'ptr' => 'PTR License', 's2' => 'S2 License'] as $field => $label)
+                @foreach ($this->doctor->meta as $key => $value)
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-                        <x-input-label for="{{ $field }}" :value="__($label)"
+                        <x-input-label for="{{ $key }}" :value="__($key)"
                             class="text-sm font-medium text-gray-700 md:pt-2" />
                         <div class="md:col-span-3">
-                            <x-text-input wire:model.live.blur="form.settings.{{ $field }}" id="{{ $field }}"
-                                :placeholder="__($label . ' number')" class="w-full" type="text" />
-                            <x-input-error :messages="$errors->get('form.settings.' . $field)" class="mt-1" />
+                            <x-text-input wire:model="form.settings.{{ $key }}" id="{{ $key }}" :placeholder="__($key)"
+                                class="w-full" type="text" />
                         </div>
                     </div>
                 @endforeach
@@ -71,8 +72,8 @@ $store = function () {
                     <x-primary-button wire:loading.attr="disabled" wire:target="store">
                         <span wire:loading.remove wire:target="store">{{ __('Save') }}</span>
                         <span wire:loading wire:target="store" class="inline-flex items-center">
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
                                     stroke-width="4" />
                                 <path class="opacity-75" fill="currentColor"

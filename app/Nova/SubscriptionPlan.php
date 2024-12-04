@@ -7,7 +7,10 @@ use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\Markdown;
+use Illuminate\Support\Str;
+use Laravel\Nova\Fields\Repeater;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class SubscriptionPlan extends Resource
@@ -47,9 +50,15 @@ class SubscriptionPlan extends Resource
             ID::make()->sortable(),
             Text::make('Name'),
             Text::make('Description'),
-            Number::make('Price'),
-            Number::make('Billing Period'),
-            // Markdown::make('Features'),
+            Currency::make('Plan Amount')->currency('PHP'),
+            Text::make('Billing Cycle', function () {
+                return Str::title($this->billing_cycle);
+            }),
+            Repeater::make('Features', 'features')
+                ->uniqueField('id')
+                ->repeatables([
+                    \App\Nova\Repeater\SubscriptionFeature::make()->confirmRemoval(),
+                ])->asJson(),
         ];
     }
 

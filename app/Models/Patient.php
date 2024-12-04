@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Patient extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use Searchable;
     public $timestamps = FALSE;
 
     protected $fillable = [
@@ -45,6 +47,14 @@ class Patient extends Model
         return [
             'date_of_birth' => 'date',
         ];
+    }
+
+    /**
+     * Get the name of the index associated with the model.
+     */
+    public function searchableAs(): string
+    {
+        return 'patients_index';
     }
 
     public function address()

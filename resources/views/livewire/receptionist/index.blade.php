@@ -23,9 +23,13 @@ layout('layouts.app');
 
 usesPagination();
 
-with(fn() => ['receptionists' => Receptionist::orWhere('last_name', 'like', '%' . $this->search . '%')
-    ->where('doctor_id', auth()->user()->doctor->id)
-    ->paginate(10)]);
+with(
+    fn() => [
+        'receptionists' => Receptionist::orWhere('last_name', 'like', '%' . $this->search . '%')
+            ->where('doctor_id', auth()->user()->doctor->id)
+            ->paginate(10),
+    ],
+);
 
 mount(function (Faker $faker) {
     $this->form->name = $faker->userName();
@@ -89,7 +93,7 @@ $save = function () {
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    {{ __('Add Receptionist') }}
+                    {{ __('Create New') }}
                 </x-primary-button>
             </div>
 
@@ -150,13 +154,13 @@ $save = function () {
                         </div>
                     </div>
                 @empty
-                    <div
-                        class="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-200">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-semibold text-lg text-gray-900">No receptionist found!!</h3>
-                            </div>
-                        </div>
+                    <div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-300 mb-4" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ __('No receptionists found') }}
                     </div>
                 @endforelse
             </div>
@@ -212,16 +216,17 @@ $save = function () {
                 <div class="flex justify-between gap-4">
                     <div class="w-1/2">
                         <x-input-label for="name" :value="__('Username')" />
-                        <x-text-input wire:model.live="form.name" id="name" class="block mt-1 w-full bg-gray-100"
-                            type="text" name="name" autofocus autocomplete="username" readonly />
+                        <x-text-input wire:model.live="form.name" id="name"
+                            class="block mt-1 w-full bg-gray-100" type="text" name="name" autofocus
+                            autocomplete="username" readonly />
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
                     <!-- Email Address -->
                     <div class="w-1/2">
                         <x-input-label for="email" :value="__('Email')" />
-                        <x-text-input wire:model.live="form.email" id="email" class="block mt-1 w-full bg-gray-100"
-                            type="email" name="email" readonly />
+                        <x-text-input wire:model.live="form.email" id="email"
+                            class="block mt-1 w-full bg-gray-100" type="email" name="email" readonly />
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
                 </div>
@@ -229,8 +234,9 @@ $save = function () {
                 <div class="mt-4">
                     <x-input-label for="password" :value="__('Password')" />
 
-                    <x-text-input wire:model.live="form.password" id="password" class="block mt-1 w-full bg-gray-100"
-                        type="password" name="password" autocomplete="new-password" readonly />
+                    <x-text-input wire:model.live="form.password" id="password"
+                        class="block mt-1 w-full bg-gray-100" type="password" name="password"
+                        autocomplete="new-password" readonly />
 
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>

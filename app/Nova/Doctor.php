@@ -14,6 +14,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\HasOne;
+use Laravel\Nova\Fields\KeyValue;
 use Wame\TelInput\TelInput;
 
 class Doctor extends Resource
@@ -51,7 +52,7 @@ class Doctor extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User')->noPeeking(),
+            BelongsTo::make('User')->searchable(),
 
             ID::make()->hideFromIndex()->hideFromDetail(),
 
@@ -79,6 +80,8 @@ class Doctor extends Resource
 
             Boolean::make('Is Active')
                 ->sortable(),
+
+            KeyValue::make('Meta')->rules('json'),
 
             HasOne::make('Active Subscription', 'activeSubscription'),
 

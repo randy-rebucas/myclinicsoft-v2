@@ -54,7 +54,7 @@ class MedRepresentative extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User')->noPeeking(),
+            BelongsTo::make('User')->searchable(),
             ID::make()->hideFromIndex()->hideFromDetail(),
 
             Text::make('First Name')

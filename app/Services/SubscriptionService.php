@@ -18,6 +18,8 @@ class SubscriptionService
         // Cancel any active subscription
         $this->cancelActiveSubscription($doctor);
 
+        // $doctor->updateDefaultPaymentMethod($paymentMethod);
+
         // Create new subscription
         return $doctor->subscribe($plan);
     }
@@ -64,7 +66,10 @@ class SubscriptionService
 
     public function handlePaymentSuccess(DoctorSubscription $subscription): void
     {
-        $subscription->update(['status' => 'active']);
+        $subscription->update([
+            'status' => 'active',
+            'last_payment_at' => now()
+        ]);
         $subscription->doctor->notify(new PaymentSuccessful($subscription));
     }
 

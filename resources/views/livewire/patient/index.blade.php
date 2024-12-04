@@ -80,14 +80,26 @@ on([
 ]);
 
 ?>
-<section class="min-h-screen bg-gray-50/30 py-6">
+<section class="py-6">
     <div class="max-w-7xl mx-auto">
-        <div class="space-y-6">
-            <div class="flex justify-between">
-                <x-text-input wire:model.live="search" class="py-2" type="search" :placeholder="__('Search Patient...')" />
-                <x-secondary-button wire:click="create">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
+            <div class="flex justify-between items-center mb-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </span>
+                    <x-text-input wire:model.live="search" class="pl-10 w-full py-2.5 bg-white" type="search" :placeholder="__('Search Patient...')" />
+                </div>
+                <x-primary-button wire:click="create" class="flex items-center gap-2 px-4 py-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                            clip-rule="evenodd" />
+                    </svg>
                     {{ __('Create New') }}
-                </x-secondary-button>
+                </x-primary-button>
             </div>
 
             <div class="overflow-hidden">
@@ -151,8 +163,13 @@ on([
                             </div>
                         </div>
                     @empty
-                        <div class="bg-white p-4 rounded-lg shadow text-center text-gray-500">
-                            {{ __('No patient found!!') }}
+                        <div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-300 mb-4" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            {{ __('No patients found') }}
                         </div>
                     @endforelse
                 </div>

@@ -279,7 +279,17 @@ on([
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900">{{ $item->patient->full_name }}</p>
-                                        <p class="text-sm text-gray-500">ID: PAT-001 • Last Visit: 2 weeks ago</p>
+                                        <div class="text-sm text-gray-500 truncate">
+                                            {{ strtoupper($item->patient->gender) }}
+                                            @if ($item->patient->date_of_birth)
+                                                • {{ $item->patient->age }} years
+                                                • Born {{ $item->patient->date_of_birth->format('M d, Y') }}
+                                            @endif
+                                            @if ($item->patient->height || $item->patient->weight)
+                                                •
+                                                {{ $item->patient->height ? 'H: ' . $item->patient->height . 'cm' : '' }}{{ $item->patient->height && $item->patient->weight ? ' / ' : '' }}{{ $item->patient->weight ? 'W: ' . $item->patient->weight . 'kg' : '' }}
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                                 <button wire:click="preview({{ $item->patient->id }})"

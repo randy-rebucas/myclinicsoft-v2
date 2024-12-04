@@ -6,35 +6,23 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\WebhookController;
 
-Route::middleware('guest')->group(function () {
-    Route::view('/', 'welcome');
+Route::middleware(['auth', 'check.subscription'])->group(function () {
 
-    Volt::route('/setup', 'setup.index')->name('setup');
-});
-
-Route::middleware(['auth'])->group(function () {
     Volt::route('/dashboard', 'dashboard')->name('dashboard');
     Volt::route('/profile', 'user.profile')->name('profile');
 
-    Volt::route('/patients', 'patient.index')->name('patients');
-    Volt::route('/patient/detail', 'patient.detail')->name('patient-detail');
+    Route::middleware(['role:doctor'])->group(function () {
+        Volt::route('/patients', 'patient.index')->name('patients');
+        Volt::route('/med-representatives', 'med-representative.index')->name('med-representatives');
+        Volt::route('/receptionists', 'receptionist.index')->name('receptionists');
+        Volt::route('/queue', 'queue.index')->name('queue');
+        Volt::route('/roles', 'role.index')->name('roles');
+        Volt::route('/settings', 'setting.index')->name('settings');
 
-    Volt::route('/doctors', 'doctor.index')->name('doctors');
-    Volt::route('/med-representatives', 'med-representative.index')->name('med-representatives');
-    Volt::route('/receptionists', 'receptionist.index')->name('receptionists');
+        Route::get('/patient/encounter/{encounterId}', Prescription::class)->name('prescription');
+    });
 
-    Volt::route('/queue', 'queue.index')->name('queue');
-
-    Volt::route('/roles', 'role.index')->name('roles');
-    Volt::route('/settings', 'setting.index')->name('settings');
-
-    Route::get('/patient/encounter/{encounterId}', Prescription::class)->name('prescription');
-
-    // // Admin routes
-    // Route::middleware(['can:manage-system'])->group(function () {
-    //     Route::resource('doctors', DoctorController::class);
-    //     Route::get('/system-settings', [SettingsController::class, 'index']);
-    // });
+    Route::get('/dump', DatabaseDumper::class)->name('dump');
 
     // // Doctor routes
     // Route::middleware(['can:manage-prescriptions'])->group(function () {
@@ -46,8 +34,16 @@ Route::middleware(['auth'])->group(function () {
     //     Route::resource('inventory', InventoryController::class);
     // });
 });
-Volt::route('/queue-display', 'queue.display')->name('queue-display');
-Route::get('/dump', DatabaseDumper::class)->name('dump');
-Route::post('/webhook/stripe', [WebhookController::class, 'handleStripeWebhook']);
 
-require __DIR__.'/auth.php';
+Route::middleware('guest')->group(function () {
+    Route::view('/', 'welcome');
+    Volt::route('/queue-display', 'queue.display')->name('queue-display');
+    Route::post('/webhook/stripe', [WebhookController::class, 'handleStripeWebhook']);
+});
+
+// Add this new route group for billing-related routes
+Route::middleware(['auth'])->group(function () {
+    Volt::route('/billing', 'subscription.billing')->name('billing');
+});
+
+require __DIR__ . '/auth.php';

@@ -21,7 +21,7 @@
     @endpush
 
 receptionist
-    evans.schaden@quigley.com
+    eli70@baumbach.info
     password
 
 patient
@@ -55,3 +55,56 @@ public function refreshQueues($event)
 $subscriptionService = new SubscriptionService();
 $plan = SubscriptionPlan::find(1);
 $subscription = $subscriptionService->subscribe($doctor, $plan);
+============
+
+class User
+{
+    use Billable;
+
+    // Other user properties and methods
+}
+
+// Usage example
+$user = new User();
+$user->setPlanAmount(29.99)
+     ->setBillingCycle('monthly')
+     ->startSubscription()
+     ->startTrial(14);
+
+echo $user->hasActiveSubscription(); // true
+echo $user->onTrial(); // true
+echo $user->getDaysUntilExpiration(); // 30
+
+plan_amount DECIMAL(10,2)
+billing_cycle VARCHAR(20)
+subscription_start_date TIMESTAMP
+subscription_end_date TIMESTAMP
+trial_ends_at TIMESTAMP
+--------------
+
+// Example usage
+$doctor = Doctor::find(1);
+
+// Start a subscription with a monthly plan
+$doctor->setPlanAmount(99.99)
+       ->setBillingCycle('monthly')
+       ->startSubscription()
+       ->startTrial(14);
+
+// Check subscription status
+if ($doctor->hasActiveSubscription()) {
+    // Doctor has active subscription
+}
+
+if ($doctor->onTrial()) {
+    // Doctor is on trial period
+}
+
+// Get days until subscription expires
+$daysLeft = $doctor->getDaysUntilExpiration();
+
+// Cancel subscription
+$doctor->cancelSubscription();
+
+// Renew subscription
+$doctor->renewSubscription();

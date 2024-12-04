@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2);
-            $table->enum('billing_period', ['monthly', 'yearly']);
+            $table->decimal('plan_amount', 10, 2)->default(0);
+            $table->enum('billing_cycle', ['monthly', 'yearly'])->default('monthly');
             $table->json('features')->nullable();
             $table->timestamps();
         });

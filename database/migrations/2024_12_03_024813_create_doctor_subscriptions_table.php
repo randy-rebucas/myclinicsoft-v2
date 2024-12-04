@@ -19,6 +19,7 @@ return new class extends Migration
             $table->timestamp('ends_at')->nullable();
             $table->enum('status', ['active', 'cancelled', 'expired'])->default('active');
             $table->timestamp('cancelled_at')->nullable();
+            $table->timestamp('trial_ends_at')->nullable();
             $table->boolean('auto_renew')->default(true);
             $table->timestamps();
         });
