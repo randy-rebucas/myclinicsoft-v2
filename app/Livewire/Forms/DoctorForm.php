@@ -3,10 +3,28 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Doctor;
-use App\Livewire\Forms\UserForm;
+use Livewire\Form;
+use App\Traits\GeneratesUserCredentials;
+use Livewire\Attributes\Validate;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
-class DoctorForm extends UserForm
+class DoctorForm extends Form
 {
+    use GeneratesUserCredentials;
+
+    #[Validate('required|string|max:255')]
+    public $first_name;
+
+    #[Validate('required|string|max:255')]
+    public $last_name;
+
+    #[Validate('required')]
+    public $phone_number;
+
+    #[Validate('required')]
+    public $gender;
+
     public function setDoctor(?Doctor $doctor = null)
     {
         $this->first_name = $doctor->first_name;
@@ -40,12 +58,20 @@ class DoctorForm extends UserForm
 
     public function create()
     {
+        $credentials = $this->generateCredentials($this->first_name, $this->last_name);
+
+        $user = User::create([
+            'name' => $credentials['username'],
+            'email' => $credentials['email'],
+            'password' => Hash::make('password'),
+        ]);
+
         Doctor::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
-            'user_id' => $this->ensureStoreUser()->id,
+            'user_id' => $user->id,
         ]);
     }
 }

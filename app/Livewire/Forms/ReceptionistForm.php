@@ -3,12 +3,30 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Receptionist;
-use App\Livewire\Forms\UserForm;
+use App\Mail\UserCredentialsMail;
+use App\Models\User;
+use App\Traits\GeneratesUserCredentials;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Validate;
+use Livewire\Form;
 
-class ReceptionistForm extends UserForm
+class ReceptionistForm extends Form
 {
-    public $doctor_id;
+    use GeneratesUserCredentials;
+
+    #[Validate('required|string|max:255')]
+    public $first_name;
+
+    #[Validate('required|string|max:255')]
+    public $last_name;
+
+    #[Validate('required')]
+    public $phone_number;
+
+    #[Validate('required')]
+    public $gender;
 
     public function setReceptionist(?Receptionist $receptionist = null)
     {
@@ -38,19 +56,31 @@ class ReceptionistForm extends UserForm
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
-            'doctor_id' => $this->doctor_id
+            'doctor_id' => Auth::user()->doctor->id
         ]);
     }
 
     public function create()
     {
-        Receptionist::create([
+        $credentials = $this->generateCredentials($this->first_name, $this->last_name);
+
+        $user = User::create([
+            'name' => $credentials['username'],
+            'email' => $credentials['email'],
+            'password' => Hash::make('password'),
+        ]);
+
+        $receptionist = Receptionist::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
-            'user_id' => $this->ensureStoreUser()->id,
-            'doctor_id' => $this->doctor_id
+            'user_id' => $user->id,
+            'doctor_id' => Auth::user()->doctor->id
         ]);
+
+        // Mail::to($user->email)->send(new UserCredentialsMail($credentials));
+
+        return $receptionist;
     }
 }

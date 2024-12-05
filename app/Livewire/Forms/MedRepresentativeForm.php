@@ -3,12 +3,28 @@
 namespace App\Livewire\Forms;
 
 use App\Models\MedRepresentative;
-use App\Livewire\Forms\UserForm;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Validate;
+use App\Traits\GeneratesUserCredentials;
+use App\Models\User;
+use Livewire\Form;
 
-class MedRepresentativeForm extends UserForm
+class MedRepresentativeForm extends Form
 {
-    public $doctor_id;
+    use GeneratesUserCredentials;
+
+    #[Validate('required|string|max:255')]
+    public $first_name;
+
+    #[Validate('required|string|max:255')]
+    public $last_name;
+
+    #[Validate('required')]
+    public $phone_number;
+
+    #[Validate('required')]
+    public $gender;
 
     public function setMedRepresentative(?MedRepresentative $medRepresentative = null)
     {
@@ -43,12 +59,20 @@ class MedRepresentativeForm extends UserForm
 
     public function create()
     {
+        $credentials = $this->generateCredentials($this->first_name, $this->last_name);
+
+        $user = User::create([
+            'name' => $credentials['username'],
+            'email' => $credentials['email'],
+            'password' => Hash::make('password'),
+        ]);
+
         $medRepresentative = MedRepresentative::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
-            'user_id' => $this->ensureStoreUser()->id,
+            'user_id' => $user->id,
         ]);
 
         $doctor = Auth::user()->doctor;

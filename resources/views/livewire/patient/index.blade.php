@@ -1,11 +1,10 @@
 <?php
 
-use Faker\Generator as Faker;
 use App\Models\Patient;
 use App\Models\PatientDoctor;
 use Illuminate\Support\Facades\Hash;
 use App\Livewire\Forms\PatientForm;
-use function Livewire\Volt\{layout, state, on, form, mount, with, usesPagination};
+use function Livewire\Volt\{layout, state, form, mount, with, usesPagination};
 
 form(PatientForm::class);
 
@@ -13,6 +12,7 @@ state('patient');
 
 state([
     'search',
+    'notification' => null,
     'genders' => fn() => [
         'male' => 'Male',
         'female' => 'Female',
@@ -35,26 +35,21 @@ with(
     ],
 );
 
-mount(function (Faker $faker) {
-    $this->form->name = $faker->userName();
-    $this->form->email = $faker->unique()->email();
-    $this->form->password = Hash::make('password');
-    $this->form->first_name = $faker->firstName();
-    $this->form->last_name = $faker->lastName();
-});
-
 $delete = function (Patient $patient) {
     $patient->delete();
 
     $this->dispatch('refresh');
+    $this->dispatch('patient-saved');
+    $this->notification = ['type' => 'success', 'message' => 'Patient deleted successfully'];
 };
 
 $detail = function ($patientId) {
-    $this->redirectRoute('patient-detail', ['patientId' => $patientId]);
+    // $this->redirectRoute('patient-detail', ['patientId' => $patientId]);
 };
 
 $edit = function ($id) {
-    $this->patient = Patient::find($id);
+    $this->patient = Patient::findOrFail($id);
+
     $this->form->setPatient($this->patient);
     $this->dispatch('open-modal', 'form-patient');
 };
@@ -66,18 +61,18 @@ $create = function () {
 };
 
 $save = function () {
-    $this->form->store($this->patient);
+    try {
+        $this->form->store($this->patient);
 
-    $this->dispatch('close-modal', 'form-patient');
+        $this->dispatch('close-modal', 'form-patient');
 
-    $this->dispatch('refresh');
+        $this->dispatch('refresh');
+        $this->dispatch('patient-saved');
+        $this->notification = ['type' => 'success', 'message' => 'Patient details updated successfully'];
+    } catch (\Exception $e) {
+        $this->notification = ['type' => 'error', 'message' => 'Failed to update patient details'];
+    }
 };
-
-on([
-    'set-date' => function ($date) {
-        $this->form->date_of_birth = $date['date'];
-    },
-]);
 
 ?>
 <section class="py-6">
@@ -87,10 +82,12 @@ on([
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                         </svg>
                     </span>
-                    <x-text-input wire:model.live="search" class="pl-10 w-full py-2.5 bg-white" type="search" :placeholder="__('Search Patient...')" />
+                    <x-text-input wire:model.live="search" class="pl-10 w-full py-2.5 bg-white" type="search"
+                        :placeholder="__('Search Patient...')" />
                 </div>
                 <x-primary-button wire:click="create" class="flex items-center gap-2 px-4 py-2.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
@@ -234,44 +231,24 @@ on([
                 </div>
             </fieldset>
 
-            <fieldset class="mt-6 border-2 border-double border-gray-200 p-4 rounded-md hidden">
-                <legend class="text-gray-400 px-2">{{ __('Auth Credentials') }}</legend>
-                <div class="flex justify-between gap-4">
-                    <div class="w-1/2">
-                        <x-input-label for="name" :value="__('Username')" />
-                        <x-text-input wire:model.live="form.name" id="name"
-                            class="block mt-1 w-full bg-gray-100" type="text" name="name" autofocus
-                            autocomplete="username" readonly />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                    </div>
-
-                    <!-- Email Address -->
-                    <div class="w-1/2">
-                        <x-input-label for="email" :value="__('Email')" />
-                        <x-text-input wire:model.live="form.email" id="email"
-                            class="block mt-1 w-full bg-gray-100" type="email" name="email" readonly />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                    </div>
-                </div>
-                <!-- Password -->
-                <div class="mt-4">
-                    <x-input-label for="password" :value="__('Password')" />
-
-                    <x-text-input wire:model.live="form.password" id="password"
-                        class="block mt-1 w-full bg-gray-100" type="password" name="password"
-                        autocomplete="new-password" readonly />
-
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
-            </fieldset>
-
             <div class="mt-6 flex justify-end">
                 <x-secondary-button x-on:click="$dispatch('close')">
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-primary-button class="ms-3">
-                    {{ __('Save') }}
+                <x-primary-button wire:loading.attr="disabled" wire:target="save" class="ms-3">
+                    <span wire:loading.remove
+                        wire:target="save">{{ $patient ? __('Update Patient') : __('Create Patient') }}</span>
+                    <span wire:loading wire:target="save" class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                    </span>
                 </x-primary-button>
             </div>
         </form>

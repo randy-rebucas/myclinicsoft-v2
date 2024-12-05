@@ -4,12 +4,16 @@ namespace App\Livewire\Forms;
 
 use App\Models\Patient;
 use Livewire\Attributes\Validate;
-use App\Livewire\Forms\UserForm;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Form;
+use App\Traits\GeneratesUserCredentials;
+use Illuminate\Support\Facades\Hash;
 
-class PatientForm extends UserForm
+
+class PatientForm extends Form
 {
+    use GeneratesUserCredentials;
 
     public $newPatient;
 
@@ -69,6 +73,14 @@ class PatientForm extends UserForm
 
     public function create()
     {
+        $credentials = $this->generateCredentials($this->first_name, $this->last_name);
+
+        $user = User::create([
+            'name' => $credentials['username'],
+            'email' => $credentials['email'],
+            'password' => Hash::make('password'),
+        ]);
+
         $patient = Patient::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
@@ -76,7 +88,7 @@ class PatientForm extends UserForm
             'height' => $this->height,
             'weight' => $this->weight,
             'gender' => $this->gender,
-            'user_id' => $this->ensureStoreUser()->id,
+            'user_id' => $user->id,
         ]);
 
         $user = User::find(Auth::id());

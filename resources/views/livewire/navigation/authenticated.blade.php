@@ -161,16 +161,16 @@ new class extends Component {
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                     <span>{{ __('Dashboard') }}</span>
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('patients')" :active="request()->routeIs('patients.*')" wire:navigate>
+                <x-responsive-nav-link :href="route('patients')" :active="request()->routeIs('patients')" wire:navigate>
                     <span>{{ __('Patients') }}</span>
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('med-representatives')" :active="request()->routeIs('med-representatives.*')" wire:navigate>
+                <x-responsive-nav-link :href="route('med-representatives')" :active="request()->routeIs('med-representatives.')" wire:navigate>
                     <span>{{ __('Med Representatives') }}</span>
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('receptionists')" :active="request()->routeIs('receptionists.*')" wire:navigate>
+                <x-responsive-nav-link :href="route('receptionists')" :active="request()->routeIs('receptionists')" wire:navigate>
                     <span>{{ __('Receptionists') }}</span>
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('queue')" :active="request()->routeIs('queue.*')" wire:navigate>
+                <x-responsive-nav-link :href="route('queue')" :active="request()->routeIs('queue')" wire:navigate>
                     <span>{{ __('Queue') }}</span>
                 </x-responsive-nav-link>
             </div>
