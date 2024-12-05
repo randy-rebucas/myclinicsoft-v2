@@ -427,7 +427,7 @@ on([
                             </div>
                         </div>
                     @empty
-                        <div class="p-4 text-center text-gray-500">
+                        <div class="align-middle flex flex-col h-screen justify-center p-4 text-center text-gray-500">
                             <x-heroicon-o-queue-list class="w-8 h-8 mx-auto mb-2" />
                             <p>No queues available</p>
                         </div>
