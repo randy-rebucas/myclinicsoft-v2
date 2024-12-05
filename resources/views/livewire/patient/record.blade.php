@@ -34,7 +34,12 @@ mount(function () {
     $this->vitalSigns = Vital::where('patient_id', $this->patient->id)->get();
 });
 ?>
-<div x-data="{ activeTab: 'allergies' }" class="w-full mx-auto p-8">
+<div x-data="{
+    activeTab: 'allergies',
+    showModal: false,
+    modalType: null,
+    modalTitle: ''
+}" class="w-full mx-auto p-8">
     <!-- Patient Information Section - Moved to top -->
     <div id="patient-info" class="bg-white shadow-lg rounded-lg mb-8">
         <div class="flex items-start gap-4 px-4 py-4">
@@ -117,10 +122,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Allergies</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Allergies'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Allergies'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -138,10 +145,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Family History</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Family History'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -160,10 +169,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Diagnostic Tests</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Tests'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Diagnostic Tests'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -182,10 +193,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Immunizations</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunizations'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Immunizations'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -204,10 +217,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Medical Conditions</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Conditions'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Medical Conditions'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -226,10 +241,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Medications</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medications'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Medications'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -248,10 +265,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Physical Examinations</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Physical Examinations'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Physical Examinations'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -270,10 +289,12 @@ mount(function () {
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-sm font-semibold text-gray-900">Vital Signs</h3>
                     <div class="flex space-x-2">
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-plus class="w-4 h-4" />
                         </button>
-                        <button class="text-gray-500 hover:text-gray-700">
+                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Vital Signs'"
+                                class="text-gray-500 hover:text-gray-700">
                             <x-heroicon-o-eye class="w-4 h-4" />
                         </button>
                     </div>
@@ -293,5 +314,330 @@ mount(function () {
             </div>
 
         </div>
+    </div>
+
+    <!-- Modal Backdrop -->
+    <div x-show="showModal"
+         class="fixed inset-0 bg-black bg-opacity-50 z-40"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+    </div>
+
+    <!-- Sliding Modal -->
+    <div x-show="showModal"
+         x-transition:enter="transform transition ease-in-out duration-300"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-300"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="fixed inset-y-0 right-0 w-96 bg-white shadow-xl z-50">
+
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900" x-text="modalTitle"></h3>
+                <button @click="showModal = false" class="text-gray-400 hover:text-gray-500">
+                    <x-heroicon-o-x-mark class="w-5 h-5" />
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="px-6 py-4">
+            <!-- Add Form -->
+            <div x-show="modalType === 'add'">
+                <template x-if="activeTab === 'allergies'">
+                    <!-- Allergies Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Allergen</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Reaction</label>
+                            <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Allergy
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'family-history'">
+                    <!-- Family History Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Condition</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Family History
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'diagnostic-tests'">
+                    <!-- Diagnostic Tests Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Test Name</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Result</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Diagnostic Test
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'immunizations'">
+                    <!-- Immunizations Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Vaccine</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Date</label>
+                            <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Immunization
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'medical-conditions'">
+                    <!-- Medical Conditions Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Condition Name</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Diagnosis Date</label>
+                            <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Medical Condition
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'medications'">
+                    <!-- Medications Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Medication Name</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Dosage</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Medication
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'physical-examinations'">
+                    <!-- Physical Examinations Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Date</label>
+                            <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Findings</label>
+                            <textarea class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Examination
+                        </button>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'vital-signs'">
+                    <!-- Vital Signs Form -->
+                    <div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Date</label>
+                            <input type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Blood Pressure</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Heart Rate</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700">Temperature</label>
+                            <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Save Vital Signs
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <!-- View Details -->
+            <div x-show="modalType === 'view'">
+                <template x-if="activeTab === 'allergies'">
+                    <!-- Allergies Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Allergen</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Allergen</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Reaction</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Reaction</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'family-history'">
+                    <!-- Family History Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Condition</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Condition</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'diagnostic-tests'">
+                    <!-- Diagnostic Tests Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Test Name</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Test</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Result</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Result</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'immunizations'">
+                    <!-- Immunizations Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Vaccine</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Vaccine</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Date</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'medical-conditions'">
+                    <!-- Medical Conditions Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Condition Name</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Condition</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Diagnosis Date</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'medications'">
+                    <!-- Medications Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Medication Name</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Medication</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Dosage</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Dosage</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'physical-examinations'">
+                    <!-- Physical Examinations Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Date</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Findings</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Findings</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+
+                <template x-if="activeTab === 'vital-signs'">
+                    <!-- Vital Signs Details -->
+                    <div>
+                        <dl class="divide-y divide-gray-200">
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Date</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Blood Pressure</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample BP</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Heart Rate</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample HR</dd>
+                            </div>
+                            <div class="py-4">
+                                <dt class="text-sm font-medium text-gray-500">Temperature</dt>
+                                <dd class="mt-1 text-sm text-gray-900">Sample Temp</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update the buttons in each tab section -->
+    <div class="flex space-x-2">
+        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New ' + '{{ $label }}'"
+                class="text-gray-500 hover:text-gray-700">
+            <x-heroicon-o-plus class="w-4 h-4" />
+        </button>
+        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View ' + '{{ $label }}'"
+                class="text-gray-500 hover:text-gray-700">
+            <x-heroicon-o-eye class="w-4 h-4" />
+        </button>
     </div>
 </div>
