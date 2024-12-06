@@ -6,10 +6,10 @@ use function Livewire\Volt\{state, mount, rules};
 state([
     'patient',
     'record' => null,
-    'name' => '',
+    'condition_name' => '',
     'diagnosis_date' => '',
     'status' => '',
-    'treatment' => '',
+    'treatment_plan' => '',
     'notes' => '',
 ]);
 
@@ -17,19 +17,19 @@ mount(function ($patient, $record = null) {
     $this->patient = $patient;
     if ($record) {
         $this->record = $record;
-        $this->name = $record->name;
+        $this->condition_name = $record->condition_name;
         $this->diagnosis_date = $record->diagnosis_date;
         $this->status = $record->status;
-        $this->treatment = $record->treatment;
+        $this->treatment_plan = $record->treatment_plan;
         $this->notes = $record->notes;
     }
 });
 
 rules([
-    'name' => 'required|string|max:255',
+    'condition_name' => 'required|string|max:255',
     'diagnosis_date' => 'required|date',
     'status' => 'required|string|max:255',
-    'treatment' => 'nullable|string',
+    'treatment_plan' => 'nullable|string',
     'notes' => 'nullable|string',
 ]);
 
@@ -37,10 +37,10 @@ $save = function () {
     $this->validate();
 
     $data = [
-        'name' => $this->name,
+        'condition_name' => $this->condition_name,
         'diagnosis_date' => $this->diagnosis_date,
         'status' => $this->status,
-        'treatment' => $this->treatment,
+        'treatment_plan' => $this->treatment_plan,
         'notes' => $this->notes,
     ];
 
@@ -53,17 +53,17 @@ $save = function () {
         ]);
     }
 
-    $this->dispatch('close-modal', 'medical-conditions');
+    $this->dispatch('close-modal', ['record_type' => 'medical-conditions']);
 };
 
 ?>
 
 <form wire:submit="save" class="space-y-4">
     <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">Condition Name</label>
-        <input type="text" wire:model="name" id="name"
+        <label for="condition_name" class="block text-sm font-medium text-gray-700">Condition Name</label>
+        <input type="text" wire:model="condition_name" id="condition_name"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-        @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        @error('condition_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
     </div>
 
     <div>
@@ -87,10 +87,10 @@ $save = function () {
     </div>
 
     <div>
-        <label for="treatment" class="block text-sm font-medium text-gray-700">Treatment</label>
-        <textarea wire:model="treatment" id="treatment" rows="2"
+        <label for="treatment_plan" class="block text-sm font-medium text-gray-700">Treatment Plan</label>
+        <textarea wire:model="treatment_plan" id="treatment_plan" rows="2"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-        @error('treatment') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        @error('treatment_plan') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
     </div>
 
     <div>

@@ -3,17 +3,12 @@
 use App\Models\Immunization;
 use function Livewire\Volt\{state, mount, rules};
 
-state([
-    'patient',
-    'record' => null,
-    'vaccine_name' => '',
-    'date_administered' => '',
-    'administrator' => '',
-    'notes' => '',
-]);
+state(['patient', 'record' => null, 'vaccine_name' => '', 'date_administered' => '', 'administrator' => '', 'notes' => '', 'administrators' => []]);
 
 mount(function ($patient, $record = null) {
     $this->patient = $patient;
+    $this->administrators = ['Physician', 'Nurse', 'Nurse Practitioner', 'Physician Assistant', 'Medical Assistant', 'Pharmacist', 'Public Health Official', 'Other Healthcare Provider', 'Other'];
+
     if ($record) {
         $this->record = $record;
         $this->vaccine_name = $record->vaccine_name;
@@ -45,11 +40,11 @@ $save = function () {
     } else {
         Immunization::create([
             'patient_id' => $this->patient->id,
-            ...$data
+            ...$data,
         ]);
     }
 
-    $this->dispatch('close-modal', 'immunizations');
+    $this->dispatch('close-modal', ['record_type' => 'immunizations']);
 };
 
 ?>
@@ -59,28 +54,41 @@ $save = function () {
         <label for="vaccine_name" class="block text-sm font-medium text-gray-700">Vaccine Name</label>
         <input type="text" wire:model="vaccine_name" id="vaccine_name"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-        @error('vaccine_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        @error('vaccine_name')
+            <span class="text-red-500 text-xs">{{ $message }}</span>
+        @enderror
     </div>
 
     <div>
         <label for="date_administered" class="block text-sm font-medium text-gray-700">Date Administered</label>
         <input type="date" wire:model="date_administered" id="date_administered"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-        @error('date_administered') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        @error('date_administered')
+            <span class="text-red-500 text-xs">{{ $message }}</span>
+        @enderror
     </div>
 
     <div>
         <label for="administrator" class="block text-sm font-medium text-gray-700">Administrator</label>
-        <input type="text" wire:model="administrator" id="administrator"
+        <select wire:model="administrator" id="administrator"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-        @error('administrator') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            <option value="">Select Administrator</option>
+            @foreach ($administrators as $admin)
+                <option value="{{ $admin }}">{{ $admin }}</option>
+            @endforeach
+        </select>
+        @error('administrator')
+            <span class="text-red-500 text-xs">{{ $message }}</span>
+        @enderror
     </div>
 
     <div>
         <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
         <textarea wire:model="notes" id="notes" rows="3"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-        @error('notes') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+        @error('notes')
+            <span class="text-red-500 text-xs">{{ $message }}</span>
+        @enderror
     </div>
 
     <div class="flex justify-end gap-2">

@@ -15,7 +15,8 @@ class Encounter extends Model
         'chief_complaint',
         'encounter_date',
         'notes',
-        'patient_id'
+        'patient_id',
+        'doctor_id',
     ];
 
     /**
@@ -35,13 +36,9 @@ class Encounter extends Model
         return $this->belongsTo(Patient::class);
     }
 
-    public function vitals()
+    public function doctor()
     {
-        return $this->hasMany(Vital::class);
+        return $this->belongsTo(Doctor::class);
     }
 
-    public function medications()
-    {
-        return $this->hasMany(Medication::class);
-    }
 }
