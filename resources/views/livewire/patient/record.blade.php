@@ -199,151 +199,344 @@ on([
             </div>
 
             <div x-show="activeTab === 'family-history'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-900">Family History</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Family History</h3>
                     <div class="flex space-x-2">
                         <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-plus class="w-4 h-4" />
-                        </button>
-                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Family History'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-eye class="w-4 h-4" />
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add New
                         </button>
                     </div>
                 </div>
-                <ul class="list-disc pl-5 text-gray-700">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($this->familyHistories as $history)
-                        <li>{{ $history->condition }}</li>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $history->condition }}</h4>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Relation:</span>
+                                            <span class="text-gray-900">{{ $history->relation }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
+                                            <span class="text-gray-900">{{ $history->notes }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Family History'"
+                                        class="text-gray-400 hover:text-gray-500">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <li>No family history recorded.</li>
+                        <div class="col-span-2 text-center py-8">
+                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Family History</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new family history record.</p>
+                            <div class="mt-6">
+                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
+                                    Add Family History
+                                </button>
+                            </div>
+                        </div>
                     @endforelse
-                </ul>
+                </div>
             </div>
 
-            <!-- Example for diagnostic-tests -->
+            <!-- Diagnostic Tests -->
             <div x-show="activeTab === 'diagnostic-tests'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-900">Diagnostic Tests</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Diagnostic Tests</h3>
                     <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Tests'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-plus class="w-4 h-4" />
-                        </button>
-                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Diagnostic Tests'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-eye class="w-4 h-4" />
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'"
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add New
                         </button>
                     </div>
                 </div>
-                <ul class="list-disc pl-5 text-gray-700">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($this->diagnosticTests as $test)
-                        <li>{{ $test->name }} - {{ $test->result }}</li>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $test->name }}</h4>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Result:</span>
+                                            <span class="text-gray-900">{{ $test->result }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Date:</span>
+                                            <span class="text-gray-900">{{ $test->date }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Diagnostic Test'"
+                                        class="text-gray-400 hover:text-gray-500">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <li>No diagnostic tests recorded.</li>
+                        <div class="col-span-2 text-center py-8">
+                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Diagnostic Tests</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new diagnostic test record.</p>
+                            <div class="mt-6">
+                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
+                                    Add Diagnostic Test
+                                </button>
+                            </div>
+                        </div>
                     @endforelse
-                </ul>
+                </div>
             </div>
 
             <!-- Immunizations -->
             <div x-show="activeTab === 'immunizations'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-900">Immunizations</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Immunizations</h3>
                     <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunizations'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-plus class="w-4 h-4" />
-                        </button>
-                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Immunizations'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-eye class="w-4 h-4" />
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'"
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add New
                         </button>
                     </div>
                 </div>
-                <ul class="list-disc pl-5 text-gray-700">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($this->immunizations as $immunization)
-                        <li>{{ $immunization->vaccine }} - {{ $immunization->date }}</li>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $immunization->vaccine }}</h4>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Date:</span>
+                                            <span class="text-gray-900">{{ $immunization->date }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Provider:</span>
+                                            <span class="text-gray-900">{{ $immunization->provider }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Immunization'"
+                                        class="text-gray-400 hover:text-gray-500">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <li>No immunizations recorded.</li>
+                        <div class="col-span-2 text-center py-8">
+                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Immunizations</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new immunization record.</p>
+                            <div class="mt-6">
+                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
+                                    Add Immunization
+                                </button>
+                            </div>
+                        </div>
                     @endforelse
-                </ul>
+                </div>
             </div>
 
             <!-- Medical Conditions -->
             <div x-show="activeTab === 'medical-conditions'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-900">Medical Conditions</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Medical Conditions</h3>
                     <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Conditions'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-plus class="w-4 h-4" />
-                        </button>
-                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Medical Conditions'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-eye class="w-4 h-4" />
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'"
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add New
                         </button>
                     </div>
                 </div>
-                <ul class="list-disc pl-5 text-gray-700">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($this->medicalConditions as $condition)
-                        <li>{{ $condition->name }} - {{ $condition->diagnosis_date }}</li>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $condition->name }}</h4>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Diagnosed:</span>
+                                            <span class="text-gray-900">{{ $condition->diagnosis_date }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Status:</span>
+                                            <span class="text-gray-900">{{ $condition->status }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Medical Condition'"
+                                        class="text-gray-400 hover:text-gray-500">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <li>No medical conditions recorded.</li>
+                        <div class="col-span-2 text-center py-8">
+                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Medical Conditions</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medical condition record.</p>
+                            <div class="mt-6">
+                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
+                                    Add Medical Condition
+                                </button>
+                            </div>
+                        </div>
                     @endforelse
-                </ul>
+                </div>
             </div>
 
             <!-- Medications -->
             <div x-show="activeTab === 'medications'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-900">Medications</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Medications</h3>
                     <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medications'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-plus class="w-4 h-4" />
-                        </button>
-                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Medications'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-eye class="w-4 h-4" />
+                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medication'"
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add New
                         </button>
                     </div>
                 </div>
-                <ul class="list-disc pl-5 text-gray-700">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($this->medications as $medication)
-                        <li>{{ $medication->name }} - {{ $medication->dosage }}</li>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $medication->name }}</h4>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Dosage:</span>
+                                            <span class="text-gray-900">{{ $medication->dosage }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Frequency:</span>
+                                            <span class="text-gray-900">{{ $medication->frequency }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Start Date:</span>
+                                            <span class="text-gray-900">{{ $medication->start_date }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Medication'"
+                                        class="text-gray-400 hover:text-gray-500">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <li>No medications recorded.</li>
+                        <div class="col-span-2 text-center py-8">
+                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Medications</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medication record.</p>
+                            <div class="mt-6">
+                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medication'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
+                                    Add Medication
+                                </button>
+                            </div>
+                        </div>
                     @endforelse
-                </ul>
+                </div>
             </div>
 
             <!-- Vital Signs -->
             <div x-show="activeTab === 'vital-signs'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-semibold text-gray-900">Vital Signs</h3>
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Vital Signs</h3>
                     <div class="flex space-x-2">
                         <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-plus class="w-4 h-4" />
-                        </button>
-                        <button @click="showModal = true; modalType = 'view'; modalTitle = 'View Vital Signs'"
-                            class="text-gray-500 hover:text-gray-700">
-                            <x-heroicon-o-eye class="w-4 h-4" />
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add New
                         </button>
                     </div>
                 </div>
-                <ul class="list-disc pl-5 text-gray-700">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @forelse($this->vitalSigns as $vital)
-                        <li>
-                            {{ $vital->date }} -
-                            BP: {{ $vital->blood_pressure }},
-                            HR: {{ $vital->heart_rate }},
-                            Temp: {{ $vital->temperature }}°C
-                        </li>
+                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $vital->date }}</h4>
+                                    <div class="mt-2 space-y-2">
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-32">Blood Pressure:</span>
+                                            <span class="text-gray-900">{{ $vital->blood_pressure }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-32">Heart Rate:</span>
+                                            <span class="text-gray-900">{{ $vital->heart_rate }} bpm</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-32">Temperature:</span>
+                                            <span class="text-gray-900">{{ $vital->temperature }}°C</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-32">Respiratory Rate:</span>
+                                            <span class="text-gray-900">{{ $vital->respiratory_rate }} /min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Vital Signs'"
+                                        class="text-gray-400 hover:text-gray-500">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     @empty
-                        <li>No vital signs recorded.</li>
+                        <div class="col-span-2 text-center py-8">
+                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Vital Signs</h3>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new vital signs record.</p>
+                            <div class="mt-6">
+                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
+                                    Add Vital Signs
+                                </button>
+                            </div>
+                        </div>
                     @endforelse
-                </ul>
+                </div>
             </div>
 
         </div>
