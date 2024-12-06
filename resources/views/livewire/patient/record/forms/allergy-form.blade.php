@@ -8,7 +8,8 @@ state([
     'record' => null,
     'allergen' => '',
     'reaction' => '',
-    'severity' => ''
+    'severity' => '',
+    'isSubmitting' => false
 ]);
 
 mount(function ($patient, $record = null) {
@@ -29,18 +30,26 @@ rules([
 ]);
 
 $save = function () {
-    $validated = $this->validate();
+    $this->isSubmitting = true;
 
-    if ($this->record) {
-        $this->record->update($validated);
-    } else {
-        Allergy::create([
-            'patient_id' => $this->patient->id,
-            ...$validated
-        ]);
+    try {
+        $validated = $this->validate();
+
+        if ($this->record) {
+            $this->record->update($validated);
+        } else {
+            Allergy::create([
+                'patient_id' => $this->patient->id,
+                ...$validated
+            ]);
+        }
+
+        $this->dispatch('close-modal', ['type' => 'allergy']);
+    } catch (\Exception $e) {
+        $this->addError('save', 'Failed to save allergy record.');
+    } finally {
+        $this->isSubmitting = false;
     }
-
-    $this->dispatch('close-modal');
 };
 
 ?>
@@ -65,9 +74,9 @@ $save = function () {
         <select wire:model="severity" id="severity"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
             <option value="">Select Severity</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
         </select>
         @error('severity') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
     </div>
@@ -78,8 +87,10 @@ $save = function () {
             Cancel
         </button>
         <button type="submit"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-            Save
+            wire:loading.attr="disabled"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+            <span wire:loading.remove>Save</span>
+            <span wire:loading>Saving...</span>
         </button>
     </div>
 </form>
