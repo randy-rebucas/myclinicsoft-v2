@@ -27,22 +27,12 @@ mount(function () {
     $this->form->setPatientId($this->patient->id);
 });
 
-$medications = computed(function () {
-    $query = Medication::query();
-    if ($this->form->encounter_id) {
-        $query->where('encounter_id', $this->form->encounter_id);
-    }
-    return $query->where('patient_id', $this->patient->id)->get();
-});
-
 $create = function () {
     $this->form->store();
 
     $this->form->empty();
 
-    $this->dispatch('close-modal', 'create-new-medication');
-
-    $this->dispatch('refresh');
+    $this->dispatch('close-modal', ['record_type' => 'medication']);
 };
 
 $delete = function (Medication $medication) {
@@ -54,108 +44,39 @@ $delete = function (Medication $medication) {
 ?>
 
 <div>
-    <x-table for="medication">
-        <x-table.thead>
-            <x-table.row class="">
-                <x-table.thead-cell :title="__('Medication Name')" class="text-left" />
-                <x-table.thead-cell :title="__('Dosage')" class="text-left" />
-                <x-table.thead-cell :title="__('Frequency')" class="text-left" />
-                <x-table.thead-cell title="" :action="true" class="text-right">
-                    @if ($this->form->encounter_id)
-                        <div class="flex gap-6 justify-end">
-                            <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
-                                x-on:click="$dispatch('open-modal', 'create-new-medication')">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                    class="w-5 h-5">
-                                    <path
-                                        d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                                </svg>
-                            </button>
-                            @if ($this->medications->count())
-                                <a href="{{ route('prescription', $this->form->encounter_id) }}"
-                                    class="btn btn-info m-1 font-medium underline" target="_blank">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="m9 14.25 6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0c1.1.128 1.907 1.077 1.907 2.185ZM9.75 9h.008v.008H9.75V9Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm4.125 4.5h.008v.008h-.008V13.5Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                    </svg>
-                                </a>
-                            @endif
-                        </div>
-                    @endif
-                </x-table.thead-cell>
-            </x-table.row>
-        </x-table.thead>
-        <x-table.tbody class="">
-            @forelse ($this->medications as $medication)
-                <x-table.row class="bg-white " wire:loading.class="opacity-50">
-                    <x-table.tbody-cell :item="$medication->medication_name" />
-                    <x-table.tbody-cell :item="$medication->dosage" />
-                    <x-table.tbody-cell :item="$medication->frequency" />
-                    <x-table.tbody-cell :item="$medication->id" class="text-right md:py-1" :action="true">
-                        <button type="button" class="btn btn-info m-1 text-red-600 font-medium underline"
-                            wire:click="delete('{{ $medication->id }}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="w-5 h-5">
-                                <path
-                                    d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                            </svg>
-                        </button>
-                    </x-table.tbody-cell>
-                </x-table.row>
-                <x-table.row class="bg-white " wire:loading.class="opacity-50">
-                    <x-table.thead-cell :title="__('Notes')" class="text-left" />
-                    <x-table.tbody-cell :item="$medication->notes ?? '--'" colspan="3" />
-                </x-table.row>
-            @empty
-                <x-table.row class="bg-white  text-center">
-                    <x-table.tbody-cell colspan="7" :item="__('No medication record')" />
-                </x-table.row>
-            @endforelse
-        </x-table.tbody>
-    </x-table>
-    <x-modal name="create-new-medication" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="create" class="p-6">
+    <form wire:submit="create">
+        <div class="mb-4">
+            <x-input-label for="medication_name" value="{{ __('Medication Name') }}"
+                class="block text-sm font-medium text-gray-700" />
+            <x-text-input wire:model.live="form.medication_name" id="medication_name" name="medication_name" type="text"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+            <x-input-error :messages="$errors->get('form.medication_name')" class="mt-2" />
+        </div>
+        <div class="mb-4">
+            <x-input-label for="dosage" value="{{ __('Dosage ') }}"
+                class="block text-sm font-medium text-gray-700" />
+            <x-text-input wire:model.live="form.dosage" id="dosage" name="dosage" type="text"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+            <x-input-error :messages="$errors->get('form.dosage')" class="mt-2" />
+        </div>
 
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Create New') }}
-            </h2>
-            <div class="flex justify-between gap-4">
-                <div class="w-3/4">
-                    <x-input-label for="medication_name" value="{{ __('Medication Name') }}" />
-                    <x-text-input wire:model.live="form.medication_name" id="medication_name" name="medication_name"
-                        type="text" class="mt-1 block w-full" />
-                    <x-input-error :messages="$errors->get('form.medication_name')" class="mt-2" />
-                </div>
-                <div class="w-1/4">
-                    <x-input-label for="dosage" value="{{ __('Dosage ') }}" />
-                    <x-text-input wire:model.live="form.dosage" id="dosage" name="dosage" type="text"
-                        class="mt-1 block w-full" />
-                    <x-input-error :messages="$errors->get('form.dosage')" class="mt-2" />
-                </div>
-            </div>
-            <div class="mt-4">
-                <x-input-label for="frequency" value="{{ __('Frequency') }}" />
-                <x-text-input wire:model.live="form.frequency" id="frequency" name="frequency" type="text"
-                    class="mt-1 block w-full" />
-                <x-input-error :messages="$errors->get('form.frequency')" class="mt-2" />
-            </div>
-            <div class="mt-4">
-                <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
-                    class="block mt-1 w-full"></x-textarea>
-                <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
-            </div>
+        <div class="mb-4">
+            <x-input-label for="frequency" value="{{ __('Frequency') }}"
+                class="block text-sm font-medium text-gray-700" />
+            <x-text-input wire:model.live="form.frequency" id="frequency" name="frequency" type="text"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+            <x-input-error :messages="$errors->get('form.frequency')" class="mt-2" />
+        </div>
+        <div class="mb-4">
+            <x-input-label for="notes" value="{{ __('Notes') }}"
+                class="block text-sm font-medium text-gray-700" />
+            <x-textarea wire:model.live="form.notes" id="notes" name="notes"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></x-textarea>
+            <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
+        </div>
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
-
-                <x-primary-button class="ms-3">
-                    {{ __('Save') }}
-                </x-primary-button>
-            </div>
-        </form>
-    </x-modal>
+        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            {{ __('Save') }}
+        </button>
+    </form>
 </div>

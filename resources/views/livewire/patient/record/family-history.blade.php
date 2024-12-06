@@ -19,18 +19,12 @@ mount(function () {
     $this->form->patient_id = $this->patient->id;
 });
 
-$family_histories = computed(function () {
-    return FamilyHistory::where('patient_id', $this->patient->id)->get();
-});
-
 $create = function () {
     $this->form->store();
 
     $this->form->empty();
 
-    $this->dispatch('close-modal', 'create-new-family-history');
-
-    $this->dispatch('refresh');
+    $this->dispatch('close-modal', ['record_type' => 'family-history']);
 };
 
 $delete = function (FamilyHistory $family_history) {
@@ -42,85 +36,32 @@ $delete = function (FamilyHistory $family_history) {
 ?>
 
 <div>
-    <x-table for="family-histories">
-        <x-table.thead>
-            <x-table.row class="">
-                <x-table.thead-cell :title="__('Relationship')" class="text-left" />
-                <x-table.thead-cell :title="__('Condition')" class="text-left" />
-                <x-table.thead-cell title="" :action="true" class="text-right">
-                    <button type="button" class="btn btn-info m-1 font-medium underline" x-data=""
-                        x-on:click="$dispatch('open-modal', 'create-new-family-history')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path
-                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                        </svg>
-                    </button>
-                </x-table.thead-cell>
-            </x-table.row>
-        </x-table.thead>
-        <x-table.tbody class="">
-            @forelse ($this->family_histories as $family_history)
-                <x-table.row class="bg-white " wire:loading.class="opacity-50">
-                    <x-table.tbody-cell :item="$family_history->relationship" />
-                    <x-table.tbody-cell :item="$family_history->condition" />
-                    <x-table.tbody-cell :item="$family_history->id" class="text-right md:py-1" :action="true">
-                        <button type="button" class="btn btn-info m-1 text-red-600 font-medium underline"
-                            wire:click="delete('{{ $family_history->id }}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                                class="w-5 h-5">
-                                <path
-                                    d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                            </svg>
-                        </button>
-                    </x-table.tbody-cell>
-                </x-table.row>
-                <x-table.row class="bg-white " wire:loading.class="opacity-50">
-                    <x-table.thead-cell :title="__('Notes')" class="text-left" />
-                    <x-table.tbody-cell :item="$family_history->notes ?? '--'" colspan="3" />
-                </x-table.row>
-            @empty
-                <x-table.row class="bg-white  text-center">
-                    <x-table.tbody-cell colspan="7" :item="__('No family history record')" />
-                </x-table.row>
-            @endforelse
-        </x-table.tbody>
-    </x-table>
-    <x-modal name="create-new-family-history" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="create" class="p-6">
 
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Create New') }}
-            </h2>
-            <div class="flex justify-between gap-4">
-                <div class="w-1/2">
-                    <x-input-label for="relationship" value="{{ __('Relationship') }}" />
-                    <x-select wire:model.live="form.relationship" id="relationship" name="relationship" :options="$relations"
-                        class="block mt-1 w-full" />
-                    <x-input-error :messages="$errors->get('form.relationship')" class="mt-2" />
-                </div>
-                <div class="w-1/2">
-                    <x-input-label for="condition" value="{{ __('Condition') }}" />
-                    <x-text-input wire:model.live="form.condition" id="condition" name="condition" type="text"
-                        class="mt-1 block w-full" />
-                    <x-input-error :messages="$errors->get('form.condition')" class="mt-2" />
-                </div>
-            </div>
-            <div class="mt-4">
-                <x-input-label for="notes" value="{{ __('Notes') }}" />
-                <x-textarea wire:model.live="form.notes" id="notes" name="notes"
-                    class="block mt-1 w-full"></x-textarea>
-                <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
-            </div>
+    <form wire:submit="create">
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
+        <div class="mb-4">
+            <x-input-label for="relationship" value="{{ __('Relationship') }}"
+                class="block text-sm font-medium text-gray-700" />
+            <x-select wire:model.live="form.relationship" id="relationship" name="relationship" :options="$relations"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+            <x-input-error :messages="$errors->get('form.relationship')" class="mt-2" />
+        </div>
+        <div class="mb-4">
+            <x-input-label for="condition" value="{{ __('Condition') }}"
+                class="block text-sm font-medium text-gray-700" />
+            <x-text-input wire:model.live="form.condition" id="condition" name="condition" type="text"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+            <x-input-error :messages="$errors->get('form.condition')" class="mt-2" />
+        </div>
+        <div class="mb-4">
+            <x-input-label for="notes" value="{{ __('Notes') }}" class="block text-sm font-medium text-gray-700" />
+            <x-textarea wire:model.live="form.notes" id="notes" name="notes"
+                class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></x-textarea>
+            <x-input-error :messages="$errors->get('form.notes')" class="mt-2" />
+        </div>
 
-                <x-primary-button class="ms-3">
-                    {{ __('Save') }}
-                </x-primary-button>
-            </div>
-        </form>
-    </x-modal>
+        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            {{ __('Save') }}
+        </button>
+    </form>
 </div>
