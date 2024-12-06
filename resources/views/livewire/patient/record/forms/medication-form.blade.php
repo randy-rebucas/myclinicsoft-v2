@@ -3,10 +3,11 @@
 use App\Models\Medication;
 use function Livewire\Volt\{state, mount, rules};
 
-state(['patient', 'record' => null, 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '']);
+state(['patient', 'record' => null, 'encounter', 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '']);
 
-mount(function ($patient, $record = null) {
+mount(function ($patient, $record = null, $encounter = null) {
     $this->patient = $patient;
+    $this->encounter = $encounter;
     if ($record) {
         $this->record = $record;
         $this->prescription_items = $record->prescription_items ?: [['medication_name' => '', 'dosage' => '', 'frequency' => '']];
@@ -45,11 +46,12 @@ $save = function () {
     } else {
         Medication::create([
             'patient_id' => $this->patient->id,
+            'encounter_id' => $this->encounter->id,
             ...$data,
         ]);
     }
 
-    $this->dispatch('close-modal', 'medications');
+    $this->dispatch('close-modal');
 };
 
 ?>
@@ -81,7 +83,7 @@ $save = function () {
         }
     </style>
 
-    <form wire:submit="save" class="flex flex-col h-full overflow-y-auto custom-scrollbar">
+    <form wire:submit.prevent="save" class="flex flex-col h-full overflow-y-auto custom-scrollbar">
         <div class="flex-1 py-4 space-y-4 ">
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Prescription Items</label>

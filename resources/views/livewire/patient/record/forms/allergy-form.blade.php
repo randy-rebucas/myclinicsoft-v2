@@ -40,12 +40,12 @@ $save = function () {
         ]);
     }
 
-    $this->dispatch('close-modal', ['record_type' => 'allergies']);
+    $this->dispatch('close-modal');
 };
 
 ?>
 
-<form wire:submit="save" class="space-y-4">
+<form wire:submit.prevent="save" class="space-y-4">
     <div>
         <label for="allergen" class="block text-sm font-medium text-gray-700">Allergen</label>
         <input type="text" wire:model="allergen" id="allergen"

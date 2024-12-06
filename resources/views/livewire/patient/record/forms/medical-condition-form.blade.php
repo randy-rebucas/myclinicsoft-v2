@@ -53,12 +53,12 @@ $save = function () {
         ]);
     }
 
-    $this->dispatch('close-modal', ['record_type' => 'medical-conditions']);
+    $this->dispatch('close-modal');
 };
 
 ?>
 
-<form wire:submit="save" class="space-y-4">
+<form wire:submit.prevent="save" class="space-y-4">
     <div>
         <label for="condition_name" class="block text-sm font-medium text-gray-700">Condition Name</label>
         <input type="text" wire:model="condition_name" id="condition_name"
