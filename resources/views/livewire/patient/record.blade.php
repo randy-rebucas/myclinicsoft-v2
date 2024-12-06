@@ -56,7 +56,7 @@ $vitals = computed(function () {
     return Vital::where('patient_id', $this->patient->id)->get() ?? collect();
 });
 
-$delete = function ($id, $modelType) {
+$delete = function ($id, $modelType = 'allergy') {
     $modelClass = match ($modelType) {
         'allergy' => Allergy::class,
         'family-history' => FamilyHistory::class,
@@ -71,9 +71,8 @@ $delete = function ($id, $modelType) {
 
     if ($modelClass) {
         $modelClass::find($id)?->delete();
+        $this->dispatch('refresh')->self();
     }
-
-    $this->dispatch('refresh');
 };
 
 on([
@@ -85,7 +84,6 @@ on([
 ?>
 
 <div x-data="{
-    activeTab: @entangle('activeTab'),
     showModal: @entangle('showModal'),
     modalType: @entangle('modalType'),
     modalForm: @entangle('modalForm'),
@@ -142,7 +140,7 @@ on([
                                         <p class="text-sm text-gray-600">Dr. {{ $this->encounter->doctor->name }}</p>
                                     </div>
                                     <button
-                                        @click="showModal = true; modalType = 'detail'; modalTitle = 'Edit Encounter'; modalForm = 'encounter'; selectedRecord = {{ $this->encounter->id }}"
+                                        @click="showModal = true; modalType = 'detail'; modalTitle = 'View Encounter'; modalForm = 'encounter'; selectedRecord = {{ $this->encounter->id }}"
                                         class="text-blue-600 hover:text-blue-700 text-sm">
                                         View Details
                                     </button>
@@ -207,25 +205,28 @@ on([
                         <div x-show="open" class="px-4 py-2 bg-gray-50">
                             <div class="space-y-2">
                                 @foreach ($this->allergies as $allergy)
-                                    <div class="text-sm flex justify-between items-start">
+                                    <div
+                                        class="text-sm flex justify-between items-start border-l-4 pl-2 {{ match ($allergy->severity) {
+                                            'low' => 'border-green-500',
+                                            'medium' => 'border-yellow-500',
+                                            'high' => 'border-red-500',
+                                            default => 'border-gray-500',
+                                        } }}">
                                         <div>
-                                            <div class="flex items-center gap-2">
-                                                <span
-                                                    class="inline-block w-2 h-2 rounded-full {{ match ($allergy->severity) {
-                                                        'major' => 'bg-orange-500',
-                                                        'critical' => 'bg-red-500',
-                                                        default => 'bg-gray-500',
-                                                    } }}"></span>
-                                                <p class="font-medium">{{ $allergy->allergen }}</p>
-                                            </div>
+                                            <p class="font-medium">{{ $allergy->allergen }}</p>
                                             <p class="text-gray-600">{{ $allergy->reaction }}</p>
                                         </div>
                                         <button wire:click="delete({{ $allergy->id }}, 'allergy')"
+                                            wire:confirm="Are you sure you want to delete this allergy record?"
                                             class="text-red-500 hover:text-red-700">
                                             <x-heroicon-o-trash class="w-4 h-4" />
                                         </button>
                                     </div>
+                                    @unless ($loop->last)
+                                        <div class="my-2 border-b border-gray-200"></div>
+                                    @endunless
                                 @endforeach
+
                                 <button
                                     @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Allergy'; modalForm = 'allergies'"
                                     class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
@@ -253,6 +254,7 @@ on([
                                             <p class="text-gray-600">{{ $history->relation }}</p>
                                         </div>
                                         <button wire:click="delete({{ $history->id }}, 'family-history')"
+                                            wire:confirm="Are you sure you want to delete this family history record?"
                                             class="text-red-500 hover:text-red-700">
                                             <x-heroicon-o-trash class="w-4 h-4" />
                                         </button>
@@ -286,6 +288,7 @@ on([
                                                 {{ $test->date ? $test->date->format('M d, Y') : 'N/A' }}</p>
                                         </div>
                                         <button wire:click="delete({{ $test->id }}, 'diagnostic-test')"
+                                            wire:confirm="Are you sure you want to delete this diagnostic test record?"
                                             class="text-red-500 hover:text-red-700">
                                             <x-heroicon-o-trash class="w-4 h-4" />
                                         </button>
@@ -320,6 +323,7 @@ on([
                                             </p>
                                         </div>
                                         <button wire:click="delete({{ $immunization->id }}, 'immunization')"
+                                            wire:confirm="Are you sure you want to delete this immunization record?"
                                             class="text-red-500 hover:text-red-700">
                                             <x-heroicon-o-trash class="w-4 h-4" />
                                         </button>
@@ -354,6 +358,7 @@ on([
                                             </p>
                                         </div>
                                         <button wire:click="delete({{ $condition->id }}, 'medical-condition')"
+                                            wire:confirm="Are you sure you want to delete this medical condition record?"
                                             class="text-red-500 hover:text-red-700">
                                             <x-heroicon-o-trash class="w-4 h-4" />
                                         </button>
@@ -388,6 +393,7 @@ on([
                                             </p>
                                         </div>
                                         <button wire:click="delete({{ $vital->id }}, 'vital')"
+                                            wire:confirm="Are you sure you want to delete this vitals record?"
                                             class="text-red-500 hover:text-red-700">
                                             <x-heroicon-o-trash class="w-4 h-4" />
                                         </button>
@@ -431,6 +437,11 @@ on([
 
         <!-- Modal Content -->
         <div class="px-6 py-4">
+            <div x-show="modalType === 'detail'">
+                <template x-if="modalForm === 'encounter'">
+                    <livewire:patient.record.views.encounter-view :record="$encounter" />
+                </template>
+            </div>
             <!-- Add/Edit Forms -->
             <div x-show="modalType === 'add' || modalType === 'edit'">
                 <template x-if="modalForm === 'allergies'">
