@@ -11,7 +11,7 @@ use App\Models\PhysicalExamination;
 use App\Models\Vital;
 use function Livewire\Volt\{state, mount, on, computed};
 
-state(['patient', 'showModal' => false, 'activeTab' => 'allergies']);
+state(['patient', 'showModal' => false, 'activeTab' => 'allergies', 'modalType' => null, 'selectedRecord' => null]);
 
 mount(function () {});
 
@@ -46,19 +46,22 @@ $vitalSigns = computed(function () {
 on([
     'close-modal' => function ($record_type = null) {
         $this->showModal = false;
-        $this->dispatch('refresh');
+
         if ($record_type) {
             $this->activeTab = $record_type;
         }
+
+        $this->dispatch('refresh');
     },
 ]);
 ?>
 <div x-data="{
     activeTab: @entangle('activeTab'),
     showModal: @entangle('showModal'),
-    modalType: null,
+    modalType: @entangle('modalType'),
+    selectedRecord: @entangle('selectedRecord'),
     modalTitle: ''
-}" class="w-full mx-auto p-8">
+}" @close-modal.window="showModal = false" class="w-full mx-auto p-8">
     <!-- Patient Information Section - Moved to top -->
     <div id="patient-info" class="bg-white shadow-lg rounded-lg mb-8">
         <div class="flex items-start gap-4 px-4 py-4">
@@ -219,7 +222,7 @@ on([
                                     <div class="mt-2 space-y-2">
                                         <div class="flex items-center text-sm">
                                             <span class="font-medium text-gray-500 w-20">Relation:</span>
-                                            <span class="text-gray-900">{{ $history->relation }}</span>
+                                            <span class="text-gray-900">{{ $history->relationship }}</span>
                                         </div>
                                         <div class="flex items-center text-sm">
                                             <span class="font-medium text-gray-500 w-20">Notes:</span>
@@ -228,7 +231,7 @@ on([
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Family History'"
+                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $history->id }}; modalTitle = 'Edit Family History'"
                                         class="text-gray-400 hover:text-gray-500">
                                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     </button>
@@ -239,9 +242,11 @@ on([
                         <div class="col-span-2 text-center py-8">
                             <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No Family History</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new family history record.</p>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new family history record.
+                            </p>
                             <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
+                                <button
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <x-heroicon-o-plus class="w-5 h-5 mr-2" />
                                     Add Family History
@@ -270,20 +275,24 @@ on([
                         <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $test->name }}</h4>
+                                    <h4 class="text-base font-semibold text-gray-900">{{ $test->test_name }}</h4>
                                     <div class="mt-2 space-y-2">
                                         <div class="flex items-center text-sm">
                                             <span class="font-medium text-gray-500 w-20">Result:</span>
-                                            <span class="text-gray-900">{{ $test->result }}</span>
+                                            <span class="text-gray-900">{{ $test->results }}</span>
                                         </div>
                                         <div class="flex items-center text-sm">
                                             <span class="font-medium text-gray-500 w-20">Date:</span>
-                                            <span class="text-gray-900">{{ $test->date }}</span>
+                                            <span class="text-gray-900">{{ $test->test_date }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
+                                            <span class="text-gray-900">{{ $test->notes }}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Diagnostic Test'"
+                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $test->id }}; modalTitle = 'Edit Diagnostic Test'"
                                         class="text-gray-400 hover:text-gray-500">
                                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     </button>
@@ -294,9 +303,11 @@ on([
                         <div class="col-span-2 text-center py-8">
                             <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No Diagnostic Tests</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new diagnostic test record.</p>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new diagnostic test record.
+                            </p>
                             <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'"
+                                <button
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'"
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <x-heroicon-o-plus class="w-5 h-5 mr-2" />
                                     Add Diagnostic Test
@@ -335,10 +346,14 @@ on([
                                             <span class="font-medium text-gray-500 w-20">Provider:</span>
                                             <span class="text-gray-900">{{ $immunization->provider }}</span>
                                         </div>
+                                        <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
+                                            <span class="text-gray-900">{{ $immunization->notes }}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Immunization'"
+                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $immunization->id }}; modalTitle = 'Edit Immunization'"
                                         class="text-gray-400 hover:text-gray-500">
                                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     </button>
@@ -349,9 +364,11 @@ on([
                         <div class="col-span-2 text-center py-8">
                             <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No Immunizations</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new immunization record.</p>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new immunization record.
+                            </p>
                             <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'"
+                                <button
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'"
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <x-heroicon-o-plus class="w-5 h-5 mr-2" />
                                     Add Immunization
@@ -383,17 +400,21 @@ on([
                                     <h4 class="text-base font-semibold text-gray-900">{{ $condition->name }}</h4>
                                     <div class="mt-2 space-y-2">
                                         <div class="flex items-center text-sm">
+                                            <span class="font-medium text-gray-500 w-20">Status:</span>
+                                            <span class="text-gray-900">{{ $condition->status }}</span>
+                                        </div>
+                                        <div class="flex items-center text-sm">
                                             <span class="font-medium text-gray-500 w-20">Diagnosed:</span>
                                             <span class="text-gray-900">{{ $condition->diagnosis_date }}</span>
                                         </div>
                                         <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Status:</span>
-                                            <span class="text-gray-900">{{ $condition->status }}</span>
+                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
+                                            <span class="text-gray-900">{{ $condition->notes }}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Medical Condition'"
+                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $condition->id }}; modalTitle = 'Edit Medical Condition'"
                                         class="text-gray-400 hover:text-gray-500">
                                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     </button>
@@ -404,9 +425,11 @@ on([
                         <div class="col-span-2 text-center py-8">
                             <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No Medical Conditions</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medical condition record.</p>
+                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medical condition
+                                record.</p>
                             <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'"
+                                <button
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'"
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <x-heroicon-o-plus class="w-5 h-5 mr-2" />
                                     Add Medical Condition
@@ -452,7 +475,7 @@ on([
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Medication'"
+                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $medication->id }}; modalTitle = 'Edit Medication'"
                                         class="text-gray-400 hover:text-gray-500">
                                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     </button>
@@ -515,7 +538,7 @@ on([
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Vital Signs'"
+                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $vital->id }}; modalTitle = 'Edit Vital Signs'"
                                         class="text-gray-400 hover:text-gray-500">
                                         <x-heroicon-o-pencil-square class="w-5 h-5" />
                                     </button>
@@ -528,7 +551,8 @@ on([
                             <h3 class="mt-2 text-sm font-medium text-gray-900">No Vital Signs</h3>
                             <p class="mt-1 text-sm text-gray-500">Get started by creating a new vital signs record.</p>
                             <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
+                                <button
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
                                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     <x-heroicon-o-plus class="w-5 h-5 mr-2" />
                                     Add Vital Signs
@@ -567,41 +591,40 @@ on([
 
         <!-- Modal Content -->
         <div class="px-6 py-4">
-            <!-- Add Form -->
-            <div x-show="modalType === 'add'">
+            <!-- Add/Edit Forms -->
+            <div x-show="modalType === 'add' || modalType === 'edit'">
                 <template x-if="activeTab === 'allergies'">
-                    <!-- Allergies Form -->
-                    <livewire:patient.record.allergy :patient="$patient" />
+                    <livewire:patient.record.forms.allergy-form :patient="$patient" :record="null" :key="'allergy-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
                 <template x-if="activeTab === 'family-history'">
-                    <!-- Family History Form -->
-                    <livewire:patient.record.family-history :patient="$patient" />
+                    <livewire:patient.record.forms.family-history-form :patient="$patient" :record="null"
+                        :key="'family-history-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
                 <template x-if="activeTab === 'diagnostic-tests'">
-                    <!-- Diagnostic Tests Form -->
-                    <livewire:patient.record.diagnostic-test :patient="$patient" />
+                    <livewire:patient.record.forms.diagnostic-test-form :patient="$patient" :record="null"
+                        :key="'diagnostic-test-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
                 <template x-if="activeTab === 'immunizations'">
-                    <!-- Immunizations Form -->
-                    <livewire:patient.record.immunization :patient="$patient" />
+                    <livewire:patient.record.forms.immunization-form :patient="$patient" :record="null"
+                        :key="'immunization-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
                 <template x-if="activeTab === 'medical-conditions'">
-                    <!-- Medical Conditions Form -->
-                    <livewire:patient.record.medical-condition :patient="$patient" />
+                    <livewire:patient.record.forms.medical-condition-form :patient="$patient" :record="null"
+                        :key="'medical-condition-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
                 <template x-if="activeTab === 'medications'">
-                    <!-- Medications Form -->
-                    <livewire:patient.record.medication :patient="$patient" />
+                    <livewire:patient.record.forms.medication-form :patient="$patient" :record="null"
+                        :key="'medication-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
                 <template x-if="activeTab === 'vital-signs'">
-                    <!-- Vital Signs Form -->
-                    <livewire:patient.record.vital-sign :patient="$patient" />
+                    <livewire:patient.record.forms.vital-sign-form :patient="$patient" :record="null"
+                        :key="'vital-sign-form-' . $patient->id . '-' . $modalType" />
                 </template>
             </div>
 
