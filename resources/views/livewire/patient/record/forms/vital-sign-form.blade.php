@@ -61,12 +61,12 @@ $save = function () {
         ]);
     }
 
-    $this->dispatch('close-modal', 'vital-signs');
+    $this->dispatch('close-modal');
 };
 
 ?>
 
-<form wire:submit="save" class="space-y-4">
+<form wire:submit.prevent="save" class="space-y-4">
     <div>
         <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
         <input type="datetime-local" wire:model="date" id="date"

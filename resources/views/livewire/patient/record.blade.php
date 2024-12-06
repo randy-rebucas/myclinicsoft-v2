@@ -9,560 +9,400 @@ use App\Models\MedicalCondition;
 use App\Models\Medication;
 use App\Models\PhysicalExamination;
 use App\Models\Vital;
-use function Livewire\Volt\{state, mount, on, computed};
+use App\Models\Encounter;
 
-state(['patient', 'showModal' => false, 'activeTab' => 'allergies', 'modalType' => null, 'selectedRecord' => null]);
+use function Livewire\Volt\{state, mount, computed, on};
 
-mount(function () {});
+state(['patient', 'encounter', 'showModal' => false, 'modalType' => null, 'selectedRecord' => null, 'modalForm' => null]);
+
+mount(function ($patient) {
+    $this->patient = $patient;
+
+    $this->encounter = Encounter::where('patient_id', $this->patient->id)
+        ->with('doctor')
+        ->orderBy('encounter_date', 'desc')
+        ->first();
+});
 
 $allergies = computed(function () {
-    return Allergy::where('patient_id', $this->patient->id)->get();
+    return Allergy::where('patient_id', $this->patient->id)->get() ?? collect();
 });
 
 $familyHistories = computed(function () {
-    return FamilyHistory::where('patient_id', $this->patient->id)->get();
+    return FamilyHistory::where('patient_id', $this->patient->id)->get() ?? collect();
 });
 
 $diagnosticTests = computed(function () {
-    return DiagnosticTest::where('patient_id', $this->patient->id)->get();
-});
-
-$immunizations = computed(function () {
-    return Immunization::where('patient_id', $this->patient->id)->get();
-});
-
-$medicalConditions = computed(function () {
-    return MedicalCondition::where('patient_id', $this->patient->id)->get();
+    return DiagnosticTest::where('patient_id', $this->patient->id)->get() ?? collect();
 });
 
 $medications = computed(function () {
-    return Medication::where('patient_id', $this->patient->id)->get();
+    return Medication::where('patient_id', $this->patient->id)->get() ?? collect();
 });
 
-$vitalSigns = computed(function () {
-    return Vital::where('patient_id', $this->patient->id)->get();
+$immunizations = computed(function () {
+    return Immunization::where('patient_id', $this->patient->id)->get() ?? collect();
 });
+
+$medicalConditions = computed(function () {
+    return MedicalCondition::where('patient_id', $this->patient->id)->get() ?? collect();
+});
+
+$physicalExaminations = computed(function () {
+    return PhysicalExamination::where('patient_id', $this->patient->id)->get() ?? collect();
+});
+
+$vitals = computed(function () {
+    return Vital::where('patient_id', $this->patient->id)->get() ?? collect();
+});
+
+$delete = function ($id, $modelType) {
+    $modelClass = match ($modelType) {
+        'allergy' => Allergy::class,
+        'family-history' => FamilyHistory::class,
+        'diagnostic-test' => DiagnosticTest::class,
+        'immunization' => Immunization::class,
+        'medical-condition' => MedicalCondition::class,
+        'medication' => Medication::class,
+        'physical-examination' => PhysicalExamination::class,
+        'vital' => Vital::class,
+        default => null,
+    };
+
+    if ($modelClass) {
+        $modelClass::find($id)?->delete();
+    }
+
+    $this->dispatch('refresh');
+};
 
 on([
-    'close-modal' => function ($record_type = null) {
+    'close-modal' => function () {
         $this->showModal = false;
-
-        if ($record_type) {
-            $this->activeTab = $record_type;
-        }
-
         $this->dispatch('refresh');
     },
 ]);
 ?>
+
 <div x-data="{
     activeTab: @entangle('activeTab'),
     showModal: @entangle('showModal'),
     modalType: @entangle('modalType'),
+    modalForm: @entangle('modalForm'),
     selectedRecord: @entangle('selectedRecord'),
     modalTitle: ''
 }" @close-modal.window="showModal = false" class="w-full mx-auto p-8">
-    <!-- Patient Information Section - Moved to top -->
-    <div id="patient-info" class="bg-white shadow-lg rounded-lg mb-8">
-        <div class="flex items-start gap-4 px-4 py-4">
-            <!-- Avatar Column -->
-            <div class="flex-shrink-0">
-                <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-100">
-                    @if ($patient->avatar)
-                        <img src="{{ $patient->avatar }}" alt="{{ $patient->full_name }}"
-                            class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center text-gray-400">
-                            <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
-                    @endif
+    <!-- Patient Information Section -->
+    <div class="bg-white shadow-lg rounded-lg mb-8">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold mb-4">Patient Information</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Name</p>
+                    <p class="font-medium">{{ $patient->full_name }}</p>
                 </div>
-            </div>
-
-            <!-- Patient Details -->
-            <div class="flex-grow grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                @php
-                    $details = [
-                        'Full Name' => $patient->full_name,
-                        'DOB' => $patient->date_of_birth,
-                        'Gender' => $patient->gender,
-                        'Blood Type' => $patient->blood_type,
-                        'Height' => $patient->height . ' cm',
-                        'Weight' => $patient->weight . ' kg',
-                        'Contact' => $patient->phone_number,
-                        'Email' => $patient->user->email,
-                    ];
-                @endphp
-
-                @foreach ($details as $label => $value)
-                    <div>
-                        <dt class="text-sm font-medium text-gray-500">{{ $label }}</dt>
-                        <dd class="mt-1 text-sm font-semibold text-gray-900">{{ $value }}</dd>
-                    </div>
-                @endforeach
+                <div>
+                    <p class="text-sm text-gray-600">Date of Birth</p>
+                    <p class="font-medium">
+                        {{ $patient->date_of_birth ? $patient->date_of_birth->format('M d, Y') : 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Patient ID</p>
+                    <p class="font-medium">{{ $patient->id }}</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="flex gap-8">
-        <!-- Left Tab Navigation -->
-        <div class="w-64 flex-shrink-0">
-            <div class="bg-white shadow-lg rounded-lg p-4">
-                <nav class="space-y-2">
-                    @php
-                        $navItems = [
-                            'allergies' => 'Allergies',
-                            'family-history' => 'Family History',
-                            'diagnostic-tests' => 'Diagnostic Tests',
-                            'immunizations' => 'Immunizations',
-                            'medical-conditions' => 'Medical Conditions',
-                            'medications' => 'Medications',
-                            'vital-signs' => 'Vital Signs',
-                        ];
-                    @endphp
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-4 gap-8">
+        <!-- Left Column (col-span-3) -->
+        <div class="col-span-3 space-y-8">
+            <!-- Encounter Section -->
+            <div class="bg-white shadow-lg rounded-lg">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Recent Encounters</h3>
+                        <button
+                            @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Encounter'; modalForm = 'encounter'"
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            New Encounter
+                        </button>
+                    </div>
 
-                    @foreach ($navItems as $id => $label)
-                        <a href="javascript:void(0)" @click="activeTab = '{{ $id }}'"
-                            :class="{ 'bg-gray-50 text-gray-900 border-l-4 border-blue-500': activeTab === '{{ $id }}' }"
-                            class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                            <x-heroicon-o-clipboard-document-list class="w-5 h-5 mr-3 text-gray-400" />
-                            {{ $label }}
-                        </a>
-                    @endforeach
-                </nav>
+                    <div class="space-y-4">
+                        @if ($this->encounter)
+                            <div class="border rounded-lg p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium">
+                                            {{ $this->encounter->encounter_date ? $this->encounter->encounter_date->format('M d, Y') : 'N/A' }}
+                                        </p>
+                                        <p class="text-sm text-gray-600">Dr. {{ $this->encounter->doctor->name }}</p>
+                                    </div>
+                                    <button
+                                        @click="showModal = true; modalType = 'detail'; modalTitle = 'Edit Encounter'; modalForm = 'encounter'; selectedRecord = {{ $this->encounter->id }}"
+                                        class="text-blue-600 hover:text-blue-700 text-sm">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medication Section -->
+            <div class="bg-white shadow-lg rounded-lg">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Current Medications</h3>
+                        <button
+                            @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medication'; modalForm = 'medications'"
+                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                            Add Medication
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        @if ($this->medications->isEmpty())
+                            <div class="text-center py-4 text-gray-500">
+                                No medications recorded
+                            </div>
+                        @else
+                            @foreach ($this->medications as $medication)
+                                <div class="border rounded-lg p-4">
+                                    @foreach ($medication->prescription_items as $item)
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p class="font-medium">{{ $item['medication_name'] }}</p>
+                                                <p class="text-sm text-gray-600">{{ $item['dosage'] }} -
+                                                    {{ $item['frequency'] }}</p>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <div class="flex-1">
-            <!-- Tab Content -->
-            <div x-show="activeTab === 'allergies'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Allergies</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Allergies'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
+        <!-- Right Column (col-span-1) -->
+        <div class="col-span-1">
+            <div class="bg-white shadow-lg rounded-lg p-4">
+                <nav class="space-y-2">
+                    <!-- Allergies -->
+                    <div x-data="{ open: false }" class="border rounded-md">
+                        <button @click="open = !open"
+                            class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <span>Allergies ({{ $this->allergies->count() }})</span>
+                            <span class="transform transition-transform duration-200" :class="{ 'rotate-180': open }">
+                                <x-heroicon-o-chevron-down class="w-4 h-4" />
+                            </span>
                         </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->allergies as $allergy)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $allergy->allergen }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Reaction:</span>
-                                            <span class="text-gray-900">{{ $allergy->reaction }}</span>
+                        <div x-show="open" class="px-4 py-2 bg-gray-50">
+                            <div class="space-y-2">
+                                @foreach ($this->allergies as $allergy)
+                                    <div class="text-sm flex justify-between items-start">
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="inline-block w-2 h-2 rounded-full {{ match ($allergy->severity) {
+                                                        'major' => 'bg-orange-500',
+                                                        'critical' => 'bg-red-500',
+                                                        default => 'bg-gray-500',
+                                                    } }}"></span>
+                                                <p class="font-medium">{{ $allergy->allergen }}</p>
+                                            </div>
+                                            <p class="text-gray-600">{{ $allergy->reaction }}</p>
                                         </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Severity:</span>
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                {{ $allergy->severity === 'High'
-                                                    ? 'bg-red-100 text-red-800'
-                                                    : ($allergy->severity === 'Medium'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-green-100 text-green-800') }}">
-                                                {{ $allergy->severity }}
-                                            </span>
-                                        </div>
+                                        <button wire:click="delete({{ $allergy->id }}, 'allergy')"
+                                            class="text-red-500 hover:text-red-700">
+                                            <x-heroicon-o-trash class="w-4 h-4" />
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; modalTitle = 'Edit Allergies'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Allergies</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new allergy record.</p>
-                            <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Allergies'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Allergy
-                                </button>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <div x-show="activeTab === 'family-history'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Family History</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->familyHistories as $history)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $history->condition }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Relation:</span>
-                                            <span class="text-gray-900">{{ $history->relationship }}</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
-                                            <span class="text-gray-900">{{ $history->notes }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $history->id }}; modalTitle = 'Edit Family History'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Family History</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new family history record.
-                            </p>
-                            <div class="mt-6">
+                                @endforeach
                                 <button
-                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Family History
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Allergy'; modalForm = 'allergies'"
+                                    class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
+                                    + Add Allergy
                                 </button>
                             </div>
                         </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Diagnostic Tests -->
-            <div x-show="activeTab === 'diagnostic-tests'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Diagnostic Tests</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
-                        </button>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->diagnosticTests as $test)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $test->test_name }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Result:</span>
-                                            <span class="text-gray-900">{{ $test->results }}</span>
+                    <!-- Family History -->
+                    <div x-data="{ open: false }" class="border rounded-md">
+                        <button @click="open = !open"
+                            class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <span>Family History ({{ $this->familyHistories->count() }})</span>
+                            <span class="transform transition-transform duration-200" :class="{ 'rotate-180': open }">
+                                <x-heroicon-o-chevron-down class="w-4 h-4" />
+                            </span>
+                        </button>
+                        <div x-show="open" class="px-4 py-2 bg-gray-50">
+                            <div class="space-y-2">
+                                @foreach ($this->familyHistories as $history)
+                                    <div class="text-sm flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">{{ $history->condition }}</p>
+                                            <p class="text-gray-600">{{ $history->relation }}</p>
                                         </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Date:</span>
-                                            <span class="text-gray-900">{{ $test->test_date }}</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
-                                            <span class="text-gray-900">{{ $test->notes }}</span>
-                                        </div>
+                                        <button wire:click="delete({{ $history->id }}, 'family-history')"
+                                            class="text-red-500 hover:text-red-700">
+                                            <x-heroicon-o-trash class="w-4 h-4" />
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $test->id }}; modalTitle = 'Edit Diagnostic Test'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Diagnostic Tests</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new diagnostic test record.
-                            </p>
-                            <div class="mt-6">
+                                @endforeach
                                 <button
-                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Diagnostic Test
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Family History'; modalForm = 'family-history'"
+                                    class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
+                                    + Add Family History
                                 </button>
                             </div>
                         </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Immunizations -->
-            <div x-show="activeTab === 'immunizations'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Immunizations</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
-                        </button>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->immunizations as $immunization)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $immunization->vaccine }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Date:</span>
-                                            <span class="text-gray-900">{{ $immunization->date }}</span>
+                    <!-- Diagnostic Tests -->
+                    <div x-data="{ open: false }" class="border rounded-md">
+                        <button @click="open = !open"
+                            class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <span>Diagnostic Tests ({{ $this->diagnosticTests->count() }})</span>
+                            <span class="transform transition-transform duration-200" :class="{ 'rotate-180': open }">
+                                <x-heroicon-o-chevron-down class="w-4 h-4" />
+                            </span>
+                        </button>
+                        <div x-show="open" class="px-4 py-2 bg-gray-50">
+                            <div class="space-y-2">
+                                @foreach ($this->diagnosticTests as $test)
+                                    <div class="text-sm flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">{{ $test->test_name }}</p>
+                                            <p class="text-gray-600">
+                                                {{ $test->date ? $test->date->format('M d, Y') : 'N/A' }}</p>
                                         </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Provider:</span>
-                                            <span class="text-gray-900">{{ $immunization->provider }}</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
-                                            <span class="text-gray-900">{{ $immunization->notes }}</span>
-                                        </div>
+                                        <button wire:click="delete({{ $test->id }}, 'diagnostic-test')"
+                                            class="text-red-500 hover:text-red-700">
+                                            <x-heroicon-o-trash class="w-4 h-4" />
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $immunization->id }}; modalTitle = 'Edit Immunization'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Immunizations</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new immunization record.
-                            </p>
-                            <div class="mt-6">
+                                @endforeach
                                 <button
-                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Immunization
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Diagnostic Test'; modalForm = 'diagnostic-test'"
+                                    class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
+                                    + Add Diagnostic Test
                                 </button>
                             </div>
                         </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Medical Conditions -->
-            <div x-show="activeTab === 'medical-conditions'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Medical Conditions</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
-                        </button>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->medicalConditions as $condition)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $condition->name }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Status:</span>
-                                            <span class="text-gray-900">{{ $condition->status }}</span>
+                    <!-- Immunizations -->
+                    <div x-data="{ open: false }" class="border rounded-md">
+                        <button @click="open = !open"
+                            class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <span>Immunizations ({{ $this->immunizations->count() }})</span>
+                            <span class="transform transition-transform duration-200" :class="{ 'rotate-180': open }">
+                                <x-heroicon-o-chevron-down class="w-4 h-4" />
+                            </span>
+                        </button>
+                        <div x-show="open" class="px-4 py-2 bg-gray-50">
+                            <div class="space-y-2">
+                                @foreach ($this->immunizations as $immunization)
+                                    <div class="text-sm flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">{{ $immunization->vaccine_name }}</p>
+                                            <p class="text-gray-600">
+                                                {{ $immunization->date ? $immunization->date->format('M d, Y') : 'N/A' }}
+                                            </p>
                                         </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Diagnosed:</span>
-                                            <span class="text-gray-900">{{ $condition->diagnosis_date }}</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Notes:</span>
-                                            <span class="text-gray-900">{{ $condition->notes }}</span>
-                                        </div>
+                                        <button wire:click="delete({{ $immunization->id }}, 'immunization')"
+                                            class="text-red-500 hover:text-red-700">
+                                            <x-heroicon-o-trash class="w-4 h-4" />
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $condition->id }}; modalTitle = 'Edit Medical Condition'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Medical Conditions</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medical condition
-                                record.</p>
-                            <div class="mt-6">
+                                @endforeach
                                 <button
-                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Medical Condition
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Immunization'; modalForm = 'immunization'"
+                                    class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
+                                    + Add Immunization
                                 </button>
                             </div>
                         </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Medications -->
-            <div x-show="activeTab === 'medications'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Medications</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medication'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
-                        </button>
                     </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->medications as $medication)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $medication->name }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Dosage:</span>
-                                            <span class="text-gray-900">{{ $medication->dosage }}</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Frequency:</span>
-                                            <span class="text-gray-900">{{ $medication->frequency }}</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-20">Start Date:</span>
-                                            <span class="text-gray-900">{{ $medication->start_date }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $medication->id }}; modalTitle = 'Edit Medication'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Medications</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new medication record.</p>
-                            <div class="mt-6">
-                                <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medication'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Medication
-                                </button>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Vital Signs -->
-            <div x-show="activeTab === 'vital-signs'" class="bg-white shadow-lg rounded-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Vital Signs</h3>
-                    <div class="flex space-x-2">
-                        <button @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
-                            class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                            Add New
+                    <!-- Medical Conditions -->
+                    <div x-data="{ open: false }" class="border rounded-md">
+                        <button @click="open = !open"
+                            class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <span>Medical Conditions ({{ $this->medicalConditions->count() }})</span>
+                            <span class="transform transition-transform duration-200" :class="{ 'rotate-180': open }">
+                                <x-heroicon-o-chevron-down class="w-4 h-4" />
+                            </span>
                         </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @forelse($this->vitalSigns as $vital)
-                        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow bg-gray-50">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <h4 class="text-base font-semibold text-gray-900">{{ $vital->date }}</h4>
-                                    <div class="mt-2 space-y-2">
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-32">Blood Pressure:</span>
-                                            <span class="text-gray-900">{{ $vital->blood_pressure }}</span>
+                        <div x-show="open" class="px-4 py-2 bg-gray-50">
+                            <div class="space-y-2">
+                                @foreach ($this->medicalConditions as $condition)
+                                    <div class="text-sm flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">{{ $condition->condition_name }}</p>
+                                            <p class="text-gray-600">
+                                                {{ $condition->diagnosis_date ? $condition->diagnosis_date->format('M d, Y') : 'N/A' }}
+                                            </p>
                                         </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-32">Heart Rate:</span>
-                                            <span class="text-gray-900">{{ $vital->heart_rate }} bpm</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-32">Temperature:</span>
-                                            <span class="text-gray-900">{{ $vital->temperature }}°C</span>
-                                        </div>
-                                        <div class="flex items-center text-sm">
-                                            <span class="font-medium text-gray-500 w-32">Respiratory Rate:</span>
-                                            <span class="text-gray-900">{{ $vital->respiratory_rate }} /min</span>
-                                        </div>
+                                        <button wire:click="delete({{ $condition->id }}, 'medical-condition')"
+                                            class="text-red-500 hover:text-red-700">
+                                            <x-heroicon-o-trash class="w-4 h-4" />
+                                        </button>
                                     </div>
-                                </div>
-                                <div class="ml-4">
-                                    <button @click="showModal = true; modalType = 'edit'; selectedRecord = {{ $vital->id }}; modalTitle = 'Edit Vital Signs'"
-                                        class="text-gray-400 hover:text-gray-500">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-2 text-center py-8">
-                            <x-heroicon-o-exclamation-circle class="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No Vital Signs</h3>
-                            <p class="mt-1 text-sm text-gray-500">Get started by creating a new vital signs record.</p>
-                            <div class="mt-6">
+                                @endforeach
                                 <button
-                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vital Signs'"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <x-heroicon-o-plus class="w-5 h-5 mr-2" />
-                                    Add Vital Signs
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medical Condition'; modalForm = 'medical-condition'"
+                                    class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
+                                    + Add Medical Condition
                                 </button>
                             </div>
                         </div>
-                    @endforelse
-                </div>
-            </div>
+                    </div>
 
+                    <!-- Vitals -->
+                    <div x-data="{ open: false }" class="border rounded-md">
+                        <button @click="open = !open"
+                            class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <span>Vitals ({{ $this->vitals->count() }})</span>
+                            <span class="transform transition-transform duration-200" :class="{ 'rotate-180': open }">
+                                <x-heroicon-o-chevron-down class="w-4 h-4" />
+                            </span>
+                        </button>
+                        <div x-show="open" class="px-4 py-2 bg-gray-50">
+                            <div class="space-y-2">
+                                @foreach ($this->vitals as $vital)
+                                    <div class="text-sm flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium">Vitals Check</p>
+                                            <p class="text-gray-600">
+                                                {{ $vital->recorded_at ? $vital->recorded_at->format('M d, Y') : 'N/A' }}
+                                            </p>
+                                        </div>
+                                        <button wire:click="delete({{ $vital->id }}, 'vital')"
+                                            class="text-red-500 hover:text-red-700">
+                                            <x-heroicon-o-trash class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                @endforeach
+                                <button
+                                    @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Vitals'; modalForm = 'vital'"
+                                    class="w-full text-left text-sm text-blue-600 hover:text-blue-700">
+                                    + Add Vitals
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
         </div>
     </div>
 
@@ -593,186 +433,45 @@ on([
         <div class="px-6 py-4">
             <!-- Add/Edit Forms -->
             <div x-show="modalType === 'add' || modalType === 'edit'">
-                <template x-if="activeTab === 'allergies'">
+                <template x-if="modalForm === 'allergies'">
                     <livewire:patient.record.forms.allergy-form :patient="$patient" :record="null" :key="'allergy-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
-                <template x-if="activeTab === 'family-history'">
+                <template x-if="modalForm === 'family-history'">
                     <livewire:patient.record.forms.family-history-form :patient="$patient" :record="null"
                         :key="'family-history-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
-                <template x-if="activeTab === 'diagnostic-tests'">
+                <template x-if="modalForm === 'diagnostic-test'">
                     <livewire:patient.record.forms.diagnostic-test-form :patient="$patient" :record="null"
                         :key="'diagnostic-test-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
-                <template x-if="activeTab === 'immunizations'">
+                <template x-if="modalForm === 'immunization'">
                     <livewire:patient.record.forms.immunization-form :patient="$patient" :record="null"
                         :key="'immunization-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
-                <template x-if="activeTab === 'medical-conditions'">
+                <template x-if="modalForm === 'medical-condition'">
                     <livewire:patient.record.forms.medical-condition-form :patient="$patient" :record="null"
                         :key="'medical-condition-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
-                <template x-if="activeTab === 'medications'">
+                <template x-if="modalForm === 'medications'">
                     <livewire:patient.record.forms.medication-form :patient="$patient" :record="null"
-                        :key="'medication-form-' . $patient->id . '-' . $modalType" />
+                        :encounter="$this->encounter" :key="'medication-form-' . $patient->id . '-' . $modalType" />
                 </template>
 
-                <template x-if="activeTab === 'vital-signs'">
+                <template x-if="modalForm === 'vital'">
                     <livewire:patient.record.forms.vital-sign-form :patient="$patient" :record="null"
                         :key="'vital-sign-form-' . $patient->id . '-' . $modalType" />
                 </template>
-            </div>
 
-            <!-- View Details -->
-            <div x-show="modalType === 'view'">
-                <template x-if="activeTab === 'allergies'">
-                    <!-- Allergies Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            @foreach ($this->allergies as $allergy)
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Allergen</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $allergy->allergen }}</dd>
-                                </div>
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Reaction</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $allergy->reaction }}</dd>
-                                </div>
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Severity</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $allergy->severity }}</dd>
-                                </div>
-                                <div class="border-t border-gray-200"></div>
-                            @endforeach
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'family-history'">
-                    <!-- Family History Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Condition</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Condition</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'diagnostic-tests'">
-                    <!-- Diagnostic Tests Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Test Name</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Test</dd>
-                            </div>
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Result</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Result</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'immunizations'">
-                    <!-- Immunizations Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Vaccine</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Vaccine</dd>
-                            </div>
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Date</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'medical-conditions'">
-                    <!-- Medical Conditions Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Condition Name</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Condition</dd>
-                            </div>
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Diagnosis Date</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'medications'">
-                    <!-- Medications Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Medication Name</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Medication</dd>
-                            </div>
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Dosage</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Dosage</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'physical-examinations'">
-                    <!-- Physical Examinations Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Date</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Date</dd>
-                            </div>
-                            <div class="py-4">
-                                <dt class="text-sm font-medium text-gray-500">Findings</dt>
-                                <dd class="mt-1 text-sm text-gray-900">Sample Findings</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </template>
-
-                <template x-if="activeTab === 'vital-signs'">
-                    <!-- Vital Signs Details -->
-                    <div>
-                        <dl class="divide-y divide-gray-200">
-                            @foreach ($this->vitalSigns as $vital)
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Date</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $vital->date }}</dd>
-                                </div>
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Blood Pressure</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $vital->blood_pressure }}</dd>
-                                </div>
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Heart Rate</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $vital->heart_rate }} bpm</dd>
-                                </div>
-                                <div class="py-4">
-                                    <dt class="text-sm font-medium text-gray-500">Temperature</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $vital->temperature }}°C</dd>
-                                </div>
-                                <div class="border-t border-gray-200"></div>
-                            @endforeach
-                        </dl>
-                    </div>
+                <template x-if="modalForm === 'encounter'">
+                    <livewire:patient.record.forms.encounter-form :patient="$patient" :record="null"
+                        :key="'encounter-form-' . $patient->id . '-' . $modalType" />
                 </template>
             </div>
         </div>
     </div>
-
 </div>

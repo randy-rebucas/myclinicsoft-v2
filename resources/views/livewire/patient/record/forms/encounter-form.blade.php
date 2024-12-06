@@ -49,12 +49,12 @@ $save = function () {
         ]);
     }
 
-    $this->dispatch('close-modal', ['record_type' => 'encounter']);
+    $this->dispatch('close-modal');
 };
 
 ?>
 
-<form wire:submit="save" class="space-y-4">
+<form wire:submit.prevent="save" class="space-y-4">
     <div>
         <label for="encounter_date" class="block text-sm font-medium text-gray-700">Date</label>
         <input type="date" wire:model="encounter_date" id="encounter_date"
