@@ -18,7 +18,7 @@ Route::middleware(['auth'])->group(function () {
         Volt::route('/roles', 'role.index')->name('roles');
         Volt::route('/settings', 'setting.index')->name('settings');
 
-        Route::get('/patient/encounter/{encounterId}', Prescription::class)->name('prescription');
+        Route::get('/patient/medication/{medicationId}', Prescription::class)->name('prescription');
     });
 
     Route::get('/dump', DatabaseDumper::class)->name('dump');

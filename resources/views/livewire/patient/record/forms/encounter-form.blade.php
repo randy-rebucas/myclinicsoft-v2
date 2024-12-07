@@ -42,11 +42,12 @@ $save = function () {
     if ($this->record) {
         $this->record->update($data);
     } else {
-        Encounter::create([
+        $encounter = Encounter::create([
             'patient_id' => $this->patient->id,
             'doctor_id' => auth()->user()->doctor->id,
             ...$data
         ]);
+        $this->dispatch('encounter-refreshed', ['encounter' => $encounter]);
     }
 
     $this->dispatch('close-modal');
@@ -54,7 +55,7 @@ $save = function () {
 
 ?>
 
-<form wire:submit.prevent="save" class="space-y-4">
+<form wire:submit="save" class="space-y-4">
     <div>
         <label for="encounter_date" class="block text-sm font-medium text-gray-700">Date</label>
         <input type="date" wire:model="encounter_date" id="encounter_date"

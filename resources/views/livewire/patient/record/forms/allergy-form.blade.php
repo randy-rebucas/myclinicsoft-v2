@@ -26,7 +26,7 @@ mount(function ($patient, $record = null) {
 rules([
     'allergen' => 'required|string',
     'reaction' => 'required|string',
-    'severity' => 'required|in:Low,Medium,High',
+    'severity' => 'required|in:low,medium,high',
 ]);
 
 $save = function () {
@@ -44,7 +44,8 @@ $save = function () {
             ]);
         }
 
-        $this->dispatch('close-modal', ['type' => 'allergy']);
+        $this->dispatch('allergies-refreshed');
+        $this->dispatch('close-modal');
     } catch (\Exception $e) {
         $this->addError('save', 'Failed to save allergy record.');
     } finally {
@@ -54,7 +55,7 @@ $save = function () {
 
 ?>
 
-<form wire:submit.prevent="save" class="space-y-4">
+<form wire:submit="save" class="space-y-4">
     <div>
         <label for="allergen" class="block text-sm font-medium text-gray-700">Allergen</label>
         <input type="text" wire:model="allergen" id="allergen"

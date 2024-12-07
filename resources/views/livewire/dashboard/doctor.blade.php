@@ -7,15 +7,15 @@ use App\Models\PatientDoctor;
 use App\Models\Queue;
 use App\Models\Doctor;
 use App\Models\Encounter;
-use function Livewire\Volt\{state, form, mount, computed, with};
+use App\Events\QueueUpdated;
+use function Livewire\Volt\{state, form, mount, computed, with, on};
 
 state([
     'stats' => [],
-    'patient' => Patient::find(1),
+    'queue' => null,
     'recentVisits' => [],
     'todayQueue' => [],
     'recentPatients' => [],
-    'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
     'doctor' => Doctor::where('user_id', auth()->id())->first(),
     'recentActivities' => [],
 ]);
@@ -101,15 +101,28 @@ $refreshQueues = function () {
         ->get();
 };
 
-$visit = function ($id) {
-    $this->patient = Patient::find($id);
+$visit = function (Queue $visit) {
+    $this->queue = $visit;
+    $visit->update([
+        'status' => 'in_progress',
+        'called_at' => now(),
+    ]);
+
+    $this->dispatch('queue-updated');
+    broadcast(new QueueUpdated("Queue {$visit->queue_number} is now in progress!", 'in_progress'))->toOthers();
 };
 
+on([
+    'queue-completed' => function ($patientId) {
+        $this->queue = null;
+    },
+    'echo:queues,QueueUpdated' => $refreshQueues,
+]);
 ?>
 
 <div class="bg-gray-50 min-h-screen py-8">
-    @if ($patient)
-        <livewire:patient.record :patient="$patient" />
+    @if ($queue)
+        <livewire:patient.record :queue="$queue" />
     @else
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <!-- Stats Cards - Now with gradients and improved visual hierarchy -->
@@ -150,7 +163,7 @@ $visit = function ($id) {
                         <div class="divide-y divide-gray-100">
                             @forelse($todayQueue as $visit)
                                 <div class="cursor-pointer flex gap-4 group hover:bg-gray-50 items-center py-4 rounded-lg transition-colors"
-                                    wire:click="visit({{ $visit->patient->id }})">
+                                    wire:click="visit({{ $visit }})">
                                     <div
                                         class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
                                         {{ $loop->iteration }}
