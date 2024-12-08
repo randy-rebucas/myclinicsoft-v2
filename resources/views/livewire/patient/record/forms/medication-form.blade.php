@@ -3,7 +3,7 @@
 use App\Models\Medication;
 use function Livewire\Volt\{state, mount, rules};
 
-state(['patient', 'record' => null, 'encounter', 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '']);
+state(['patient', 'record' => null, 'encounter', 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '', 'isSubmitting' => false]);
 
 mount(function ($patient, $record = null, $encounter = null) {
     $this->patient = $patient;
@@ -34,24 +34,28 @@ $removePrescriptionItem = function ($index) {
 };
 
 $save = function () {
-    $this->validate();
+    $this->isSubmitting = true;
+    try {
+        $validated = $this->validate();
 
-    $data = [
-        'prescription_items' => $this->prescription_items,
-        'notes' => $this->notes,
-    ];
+        if ($this->record) {
+            $this->record->update($validated);
+        } else {
+            Medication::create([
+                'patient_id' => $this->patient->id,
+                'encounter_id' => $this->encounter->id,
+                ...$validated,
+            ]);
+        }
 
-    if ($this->record) {
-        $this->record->update($data);
-    } else {
-        Medication::create([
-            'patient_id' => $this->patient->id,
-            'encounter_id' => $this->encounter->id,
-            ...$data,
-        ]);
+        $this->dispatch('medication-refreshed');
+        $this->dispatch('close-modal');
+
+    } catch (\Exception $e) {
+        $this->addError('save', 'Failed to save medication record.');
+    } finally {
+        $this->isSubmitting = false;
     }
-
-    $this->dispatch('close-modal');
 };
 
 ?>
@@ -83,7 +87,7 @@ $save = function () {
         }
     </style>
 
-    <form wire:submit.prevent="save" class="flex flex-col h-full overflow-y-auto custom-scrollbar">
+    <form wire:submit="save" class="flex flex-col h-full overflow-y-auto custom-scrollbar">
         <div class="flex-1 py-4 space-y-4 ">
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Prescription Items</label>
@@ -148,14 +152,15 @@ $save = function () {
                 @enderror
             </div>
         </div>
-        <div class="flex justify-end gap-2">
-            <button type="button" wire:click="$dispatch('close-modal')"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <div class="flex justify-end space-x-3">
+            <button type="button" x-data @click="$dispatch('close-modal')"
+                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                 Cancel
             </button>
-            <button type="submit"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Save
+            <button type="submit" wire:loading.attr="disabled"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                <span wire:loading.remove>Save</span>
+                <span wire:loading>Saving...</span>
             </button>
         </div>
     </form>

@@ -1,239 +1,338 @@
 <?php
 
-use Faker\Generator as Faker;
+use App\Models\PatientDoctor;
+use App\Models\Encounter;
+use App\Models\Queue;
 use App\Models\Doctor;
-use Illuminate\Support\Facades\Hash;
-use App\Livewire\Forms\DoctorForm;
-use function Livewire\Volt\{layout, state, on, form, mount, with, usesPagination};
-
-form(DoctorForm::class);
-
-state('doctor');
+use App\Events\QueueUpdated;
+use function Livewire\Volt\{state, mount, on};
 
 state([
-    'search',
-    'genders' => fn() => [
-        'male' => 'Male',
-        'female' => 'Female',
-        'unknown' => 'Unknown',
-    ],
+    'stats' => [],
+    'recentVisits' => [],
+    'todayQueue' => [],
+    'recentPatients' => [],
+    'recentActivities' => [],
 ]);
 
-layout('layouts.app');
+mount(function () {
+    $this->stats = [
+        [
+            'label' => 'Total Patients',
+            'value' => PatientDoctor::where('doctor_id', auth()->user()->doctor->id)->count(),
+            'icon' => 'heroicon-o-users',
+        ],
+        [
+            'label' => 'New Patients',
+            'value' => PatientDoctor::whereMonth('created_at', now()->month)
+                ->where('doctor_id', auth()->user()->doctor->id)
+                ->count(),
+            'icon' => 'heroicon-o-user-plus',
+        ],
+        [
+            'label' => 'Total Visits',
+            'value' => Encounter::where('doctor_id', auth()->user()->doctor->id)->count(),
+            'icon' => 'heroicon-o-clipboard',
+        ],
+        [
+            'label' => 'This Month',
+            'value' => Encounter::whereMonth('created_at', now()->month)
+                ->where('doctor_id', auth()->user()->doctor->id)
+                ->count(),
+            'icon' => 'heroicon-o-calendar',
+        ],
+    ];
 
-usesPagination();
+    $this->todayQueue = Queue::with('patient')
+        ->whereDate('created_at', now()->toDateString())
+        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
+        ->orderBy('created_at')
+        ->get();
 
-with(
-    fn() => [
-        'doctors' => Doctor::when($this->search, function ($query) {
-            $query
-                ->where('first_name', 'like', '%' . $this->search . '%')
-                ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                ->orWhere('phone_number', 'like', '%' . $this->search . '%');
-        })->paginate(10),
-    ],
-);
+    $this->recentVisits = Encounter::with('patient')
+        ->where('doctor_id', auth()->user()->doctor->id)
+        ->latest()
+        ->take(8)
+        ->get();
 
-mount(function (Faker $faker) {
-    $this->form->name = $faker->userName();
-    $this->form->email = $faker->unique()->email();
-    $this->form->password = Hash::make('password');
+    $this->recentPatients = PatientDoctor::with('patient')
+        ->where('doctor_id', auth()->user()->doctor->id)
+        ->latest()
+        ->take(8)
+        ->get();
+
+    $this->recentActivities = auth()->user()->doctor
+        ?->activities()
+        ->latest()
+        ->take(5)
+        ->get()
+        ->map(function ($activity) {
+            $typeConfig = match ($activity->type) {
+                'appointment_created' => ['color' => 'blue', 'icon' => 'calendar'],
+                'prescription_added' => ['color' => 'green', 'icon' => 'prescription'],
+                'lab_result_added' => ['color' => 'purple', 'icon' => 'lab'],
+                'note_added' => ['color' => 'yellow', 'icon' => 'note'],
+                'billing_updated' => ['color' => 'red', 'icon' => 'billing'],
+                'created' => ['color' => 'gray', 'icon' => 'note'],
+                'updated' => ['color' => 'gray', 'icon' => 'note'],
+                'deleted' => ['color' => 'gray', 'icon' => 'note'],
+                default => ['color' => 'gray', 'icon' => 'note'],
+            };
+
+            return [
+                'type' => $activity->type,
+                'title' => ucfirst(str_replace('_', ' ', $activity->type)),
+                'description' => $activity->description,
+                'timestamp' => $activity->created_at->diffForHumans(),
+                'color' => $typeConfig['color'],
+                'icon' => $typeConfig['icon'],
+            ];
+        });
 });
 
-$delete = function (Doctor $doctor) {
-    $doctor->delete();
+$selectedQueue = function ($queueId) {
+    $queue = Queue::find($queueId);
+    $queue->update([
+        'status' => 'in_progress',
+        'called_at' => now(),
+    ]);
 
-    $this->dispatch('refresh');
+    broadcast(new QueueUpdated("Queue {$queue->queue_number} is now in progress!", 'in_progress'))->toOthers();
+
+    $this->dispatch('selected-queue', ['queueId' => $queue->id]);
 };
 
-$detail = function (Doctor $doctor) {
-    $this->redirectRoute('doctor-detail', ['doctorId' => $doctor]);
+$refreshQueues = function () {
+    $this->todayQueue = Queue::with('patient')
+        ->whereDate('created_at', now()->toDateString())
+        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
+        ->orderBy('created_at')
+        ->get();
 };
 
-$edit = function ($id) {
-    $this->doctor = Doctor::findOrFail($id);
-
-    $this->form->setDoctor($this->doctor);
-
-    $this->dispatch('open-modal', 'form-doctor');
-};
-
-$create = function () {
-    $this->doctor = null;
-
-    $this->dispatch('open-modal', 'form-doctor');
-};
-
-$save = function () {
-    $this->form->store($this->doctor);
-
-    $this->dispatch('close-modal', 'form-doctor');
-
-    $this->dispatch('refresh');
-};
+on([
+    'echo:queues,QueueUpdated' => $refreshQueues,
+]);
 ?>
 
-<div class="py-6">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <!-- Action Bar -->
-            <div class="flex items-center justify-between gap-4 p-4 border-b">
-                <div class="relative">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-4 h-4 text-gray-500">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                        </svg>
-                    </div>
-                    <x-text-input wire:model.live="search" class="ps-10" type="search" :placeholder="__('Search Doctors...')" />
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <!-- Stats Cards - Now with gradients and improved visual hierarchy -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        @foreach ($stats as $stat)
+            <div
+                class="relative group overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity">
                 </div>
-                <div class="flex items-center gap-4">
-                    <x-secondary-button wire:click="create" class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        {{ __('New Doctor') }}
-                    </x-secondary-button>
-                </div>
-
-            </div>
-
-            <!-- List -->
-            <div class="divide-y divide-gray-200">
-                @forelse ($doctors as $doctor)
-                    <div class="flex items-center px-4 py-3 hover:bg-gray-50 group">
-
-                        <div class="flex-1 min-w-0 px-4 cursor-pointer" wire:click="detail({{ $doctor }})">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-900">{{ $doctor->full_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $doctor->phone_number }}</div>
-                                </div>
-                                <div>
-                                    <span
-                                        class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium uppercase"
-                                        style="background-color: {{ $doctor->gender === 'male' ? '#e0e7ff' : ($doctor->gender === 'female' ? '#fce7f3' : '#f3f4f6') }}; color: {{ $doctor->gender === 'male' ? '#4338ca' : ($doctor->gender === 'female' ? '#be185d' : '#374151') }}">
-                                        {{ $doctor->gender }}
-                                    </span>
-                                </div>
-                            </div>
+                <div class="p-6 relative">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-medium text-gray-600">{{ $stat['label'] }}</div>
+                            <div class="mt-2 text-3xl font-bold text-gray-900">{{ $stat['value'] }}</div>
                         </div>
-
-                        <div class="flex-none opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                            <div class="flex items-center gap-2">
-                                <button type="button" wire:click="edit({{ $doctor->id }})"
-                                    class="p-1 rounded-full hover:bg-gray-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                    </svg>
-                                </button>
-                                <button type="button" wire:click="delete({{ $doctor }})"
-                                    wire:confirm="Are you sure you want to delete this doctor?"
-                                    class="p-1 rounded-full hover:bg-gray-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                    </svg>
-                                </button>
-                            </div>
+                        <div class="p-3 bg-indigo-100 rounded-xl">
+                            @svg($stat['icon'], 'w-7 h-7 text-indigo-600')
                         </div>
                     </div>
-                @empty
-                    <div class="px-4 py-8 text-center text-sm text-gray-500">
-                        {{ __('No doctors found!!') }}
-                    </div>
-                @endforelse
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column: Today's Queue -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Today's Queue</h3>
+                    <span class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-full">{{ $todayQueue->count() }}
+                        Patients</span>
+                </div>
+
+                <div class="divide-y divide-gray-100">
+                    @forelse($todayQueue as $queue)
+                        <div class="cursor-pointer flex gap-4 group hover:bg-gray-50 items-center py-4 rounded-lg transition-colors"
+                            wire:click="selectedQueue({{ $queue->id }})">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
+                                {{ $loop->iteration }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-900">{{ $queue->patient->full_name }}
+                                </p>
+                                <p class="text-xs text-gray-500 flex items-center gap-2">
+                                    @svg('heroicon-o-clock', 'w-4 h-4')
+                                    {{ $queue->created_at?->format('h:ia') ?? 'Unscheduled' }}
+                                </p>
+                            </div>
+                            <div @class([
+                                'px-3 py-1 text-xs font-medium rounded-full',
+                                'bg-yellow-100 text-yellow-800' => $queue->status === 'waiting',
+                                'bg-blue-100 text-blue-800' => $queue->status === 'in_progress',
+                                'bg-green-100 text-green-800' => $queue->status === 'completed',
+                                'bg-gray-100 text-gray-800' => !in_array($queue->status, [
+                                    'waiting',
+                                    'in_progress',
+                                    'completed',
+                                ]),
+                            ])>
+                                {{ str($queue->status)->replace('_', ' ')->title() }}
+                            </div>
+                        </div>
+                    @empty
+                        <div class="py-12 text-center">
+                            <div
+                                class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                                @svg('heroicon-o-queue-list', 'w-8 h-8 text-gray-400')
+                            </div>
+                            <p class="text-gray-500">No visits scheduled for today</p>
+                        </div>
+                    @endforelse
+                </div>
             </div>
 
-            <!-- Pagination -->
-            <div class="px-4 py-3 border-t">
-                {{ $doctors->links() }}
+            <!-- Recent Activity Timeline -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                    <button class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                        View All
+                    </button>
+                </div>
+
+                <div class="flow-root">
+                    <ul class="-mb-8">
+                        @foreach ($recentActivities as $activity)
+                            <li class="relative pb-8">
+                                @if (!$loop->last)
+                                    <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                                        aria-hidden="true"></span>
+                                @endif
+                                <div class="relative flex space-x-3">
+                                    <div>
+                                        <span
+                                            class="h-8 w-8 rounded-full {{ 'bg-' . $activity['color'] . '-500' }} flex items-center justify-center ring-8 ring-white">
+                                            @switch($activity['icon'])
+                                                @case('prescription')
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                    </svg>
+                                                @break
+
+                                                @case('calendar')
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                @break
+
+                                                @case('lab')
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                                    </svg>
+                                                @break
+
+                                                @case('note')
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+                                                    </svg>
+                                                @break
+
+                                                @case('billing')
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+                                                    </svg>
+                                                @break
+                                            @endswitch
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-medium text-gray-900">{{ $activity['title'] }}
+                                        </div>
+                                        <div class="mt-1 text-sm text-gray-500">{{ $activity['description'] }}
+                                        </div>
+                                        <div class="mt-1 text-sm text-gray-500">{{ $activity['timestamp'] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Recent Visits & Patients -->
+        <div class="space-y-6">
+            <!-- Recent Visits Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Visits</h3>
+                    <button class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                        View All
+                    </button>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    @forelse($recentVisits as $visit)
+                        <div class="py-4 flex items-center space-x-4">
+                            <div class="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500"></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">
+                                    {{ $visit->patient->full_name }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ $visit->encounter_date->format('M d, Y h:ia') }}
+                                </p>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ $visit->reason }}
+                            </div>
+                        </div>
+                    @empty
+                        <div class="py-4 text-gray-500 text-sm">No recent visits</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Recent Patients Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Patients</h3>
+                    <button class="text-sm text-blue-600 hover:text-blue-500 font-medium">
+                        View All
+                    </button>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    @forelse($recentPatients as $item)
+                        <div class="py-4 flex items-center space-x-4">
+                            <div class="flex-shrink-0 w-2 h-2 rounded-full bg-green-500"></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">
+                                    {{ $item->patient->full_name }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    Added {{ $item->patient->user->created_at->diffForHumans() }}
+                                </p>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ $item->patient->phone }}
+                            </div>
+                        </div>
+                    @empty
+                        <div class="py-4 text-gray-500 text-sm">No recent patients</div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
-
-    <x-modal name="form-doctor" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="save" class="p-6">
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Doctor Form') }}
-            </h2>
-
-            <fieldset class="border-2 border-double border-gray-200 p-4 rounded-md">
-                <legend class="text-gray-400 px-2">{{ __('Personal Details') }}</legend>
-                <div class="flex justify-between gap-4">
-                    <div class="w-1/2">
-                        <x-input-label for="first_name" :value="__('First Name')" />
-                        <x-text-input wire:model.live="form.first_name" id="first_name" class="block mt-1 w-full"
-                            type="text" name="first_name" autofocus />
-                        <x-input-error :messages="$errors->get('form.first_name')" class="mt-2" />
-                    </div>
-
-                    <div class="w-1/2">
-                        <x-input-label for="last_name" :value="__('Last Name')" />
-                        <x-text-input wire:model.live="form.last_name" id="last_name" class="block mt-1 w-full"
-                            type="text" name="last_name" />
-                        <x-input-error :messages="$errors->get('form.last_name')" class="mt-2" />
-                    </div>
-                </div>
-                <div class="flex justify-between gap-4 mt-4">
-                    <div class="w-1/2">
-                        <x-input-label for="phone_number" :value="__('Phone Number')" />
-                        <x-text-input wire:model.live="form.phone_number" id="phone_number" class="block mt-1 w-full"
-                            type="text" name="phone_number" />
-                        <x-input-error :messages="$errors->get('form.phone_number')" class="mt-2" />
-                    </div>
-                    <div class="w-1/2">
-                        <x-input-label for="gender" :value="__('Gender')" />
-                        <x-select wire:model.live="form.gender" id="gender" name="gender" :options="$genders"
-                            class="block mt-1 w-full" />
-                        <x-input-error :messages="$errors->get('form.gender')" class="mt-2" />
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="mt-6 border-2 border-double border-gray-200 p-4 rounded-md hidden">
-                <legend class="text-gray-400 px-2">{{ __('Auth Credentials') }}</legend>
-                <div class="flex justify-between gap-4">
-                    <div class="w-1/2">
-                        <x-input-label for="name" :value="__('Username')" />
-                        <x-text-input wire:model.live="form.name" id="name" class="block mt-1 w-full bg-gray-100"
-                            type="text" name="name" autofocus autocomplete="username" readonly />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                    </div>
-
-                    <!-- Email Address -->
-                    <div class="w-1/2">
-                        <x-input-label for="email" :value="__('Email')" />
-                        <x-text-input wire:model.live="form.email" id="email" class="block mt-1 w-full bg-gray-100"
-                            type="email" name="email" readonly />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                    </div>
-                </div>
-                <!-- Password -->
-                <div class="mt-4">
-                    <x-input-label for="password" :value="__('Password')" />
-
-                    <x-text-input wire:model.live="form.password" id="password" class="block mt-1 w-full bg-gray-100"
-                        type="password" name="password" autocomplete="new-password" readonly />
-
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
-            </fieldset>
-
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
-
-                <x-primary-button class="ms-3">
-                    {{ __('Save') }}
-                </x-primary-button>
-            </div>
-        </form>
-    </x-modal>
 </div>

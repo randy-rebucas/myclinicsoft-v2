@@ -11,6 +11,7 @@ state([
     'status' => '',
     'treatment_plan' => '',
     'notes' => '',
+    'isSubmitting' => false,
 ]);
 
 mount(function ($patient, $record = null) {
@@ -34,31 +35,31 @@ rules([
 ]);
 
 $save = function () {
-    $this->validate();
+    $this->isSubmitting = true;
+    try {
+        $validated = $this->validate();
 
-    $data = [
-        'condition_name' => $this->condition_name,
-        'diagnosis_date' => $this->diagnosis_date,
-        'status' => $this->status,
-        'treatment_plan' => $this->treatment_plan,
-        'notes' => $this->notes,
-    ];
+        if ($this->record) {
+            $this->record->update($validated);
+        } else {
+            MedicalCondition::create([
+                'patient_id' => $this->patient->id,
+                ...$validated,
+            ]);
+        }
 
-    if ($this->record) {
-        $this->record->update($data);
-    } else {
-        MedicalCondition::create([
-            'patient_id' => $this->patient->id,
-            ...$data
-        ]);
+        $this->dispatch('medical-conditions-refreshed');
+        $this->dispatch('close-modal');
+    } catch (\Exception $e) {
+        $this->addError('save', 'Failed to save medical condition record.');
+    } finally {
+        $this->isSubmitting = false;
     }
-
-    $this->dispatch('close-modal');
 };
 
 ?>
 
-<form wire:submit.prevent="save" class="space-y-4">
+<form wire:submit="save" class="space-y-4">
     <div>
         <label for="condition_name" class="block text-sm font-medium text-gray-700">Condition Name</label>
         <input type="text" wire:model="condition_name" id="condition_name"
@@ -100,14 +101,16 @@ $save = function () {
         @error('notes') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
     </div>
 
-    <div class="flex justify-end gap-2">
-        <button type="button" wire:click="$dispatch('close-modal')"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+    <div class="flex justify-end space-x-3">
+        <button type="button" x-data @click="$dispatch('close-modal')"
+            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
             Cancel
         </button>
         <button type="submit"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            Save
+            wire:loading.attr="disabled"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+            <span wire:loading.remove>Save</span>
+            <span wire:loading>Saving...</span>
         </button>
     </div>
 </form>
