@@ -10,21 +10,21 @@ use App\Models\Medication;
 use App\Models\PhysicalExamination;
 use App\Models\Vital;
 use App\Models\Encounter;
-
+use App\Models\Queue;
 use function Livewire\Volt\{state, mount, computed, on};
 
 // State Management
 state(['queue', 'patient', 'encounter', 'showModal' => false, 'modalType' => null, 'modalForm' => null, 'modalTitle' => null]);
 
 // Lifecycle Hooks
-mount(function ($queue) {
+mount(function (Queue $queue) {
     $this->queue = $queue;
-    $this->patient = $queue->patient;
+    $this->patient = $this->queue->patient;
 });
 
 // Event Handlers
 on([
-    'encounter-created' => function ($encounter) {
+    'encounter-refreshed' => function ($encounter) {
         $this->encounter = $encounter;
     },
     'show-modal' => function ($data) {
@@ -45,7 +45,6 @@ $medications = computed(fn() => Medication::where('patient_id', $this->patient->
 
 <!-- Rest of your Blade template remains the same -->
 <div class="w-full mx-auto p-8">
-
     <!-- Patient Information Card -->
     <div class="bg-white shadow-lg rounded-lg mb-8">
         <div class="p-6">

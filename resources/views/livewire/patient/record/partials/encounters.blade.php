@@ -6,7 +6,7 @@ use App\Events\QueueUpdated;
 use Carbon\Carbon;
 use function Livewire\Volt\{state, mount, rules, on};
 
-state(['patient']);
+state(['patient', 'encounter']);
 
 mount(function () {
     $this->encounter = $this->patient->encounters()->whereDate('encounter_date', Carbon::today()->format('Y-m-d'))->first();
@@ -15,11 +15,19 @@ mount(function () {
 // Event Handlers
 on([
     'encounter-refreshed' => function () {
-        $this->refresh();
+        $this->dispatch('refresh');
+        $this->dispatch('close-modal', 'form-encounter');
     }
 ]);
+
 $showModal = function ($type, $title, $form) {
     $this->dispatch('show-modal', ['type' => $type, 'title' => $title, 'form' => $form]);
+};
+
+$create = function () {
+    $this->encounter = null;
+
+    $this->dispatch('open-modal', 'form-encounter');
 };
 ?>
 
@@ -32,7 +40,7 @@ $showModal = function ($type, $title, $form) {
                     class="text-blue-600 hover:text-blue-700 text-sm">
                     View All
                 </button>
-                <button wire:click="showModal('add', 'Add New Encounter', 'encounter')"
+                <button wire:click="create"
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                     <x-heroicon-o-plus class="w-4 h-4 mr-1" />
                     New Encounter
@@ -64,4 +72,7 @@ $showModal = function ($type, $title, $form) {
             @endif
         </div>
     </div>
+    <x-modal name="form-encounter" :show="$errors->isNotEmpty()" focusable>
+        <livewire:patient.record.forms.encounter-form :patient="$this->patient" :record="$this->encounter" />
+    </x-modal>
 </div>
