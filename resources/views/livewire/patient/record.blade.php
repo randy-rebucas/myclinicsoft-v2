@@ -11,6 +11,7 @@ use App\Models\PhysicalExamination;
 use App\Models\Vital;
 use App\Models\Encounter;
 use App\Models\Queue;
+use Carbon\Carbon;
 use function Livewire\Volt\{state, mount, computed, on};
 
 // State Management
@@ -20,6 +21,7 @@ state(['queue', 'patient', 'encounter', 'showModal' => false, 'modalType' => nul
 mount(function (Queue $queue) {
     $this->queue = $queue;
     $this->patient = $this->queue->patient;
+    $this->encounter = $this->patient->encounters()->whereDate('encounter_date', Carbon::today()->format('Y-m-d'))->first();
 });
 
 // Event Handlers
@@ -38,8 +40,6 @@ on([
     },
 ]);
 
-// Computed Properties
-$medications = computed(fn() => Medication::where('patient_id', $this->patient->id)->get() ?? collect());
 
 ?>
 
@@ -77,7 +77,7 @@ $medications = computed(fn() => Medication::where('patient_id', $this->patient->
 
             <!-- Medications Section -->
             @if ($this->encounter)
-                <livewire:patient.record.partials.medications :medications="$this->medications" :queue="$queue" />
+                <livewire:patient.record.partials.medications :patient="$this->patient" :encounter="$this->encounter" :queue="$this->queue" />
             @endif
         </div>
 
@@ -145,6 +145,10 @@ $medications = computed(fn() => Medication::where('patient_id', $this->patient->
 
                         @case('encounter')
                             <livewire:patient.record.forms.encounter-form :patient="$this->patient" :record="null" />
+                        @break
+
+                        @case('medications')
+                            <livewire:patient.record.forms.medication-form :patient="$this->patient" :record="null" />
                         @break
 
                         @default

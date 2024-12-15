@@ -52,6 +52,7 @@ $save = function () {
         $this->dispatch('close-modal');
 
     } catch (\Exception $e) {
+        dd($e);
         $this->addError('save', 'Failed to save medication record.');
     } finally {
         $this->isSubmitting = false;
