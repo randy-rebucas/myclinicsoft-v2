@@ -7,7 +7,10 @@ use function Livewire\Volt\{state, mount, rules, computed, on};
 
 state(['patient', 'encounter', 'selectedPrescription', 'doctor', 'queue']);
 
-mount(function () {
+mount(function ($patient, $encounter, $queue) {
+    $this->patient = $patient;
+    $this->encounter = $encounter;
+    $this->queue = $queue;
     $this->doctor = Auth::user()->doctor;
 });
 
@@ -31,7 +34,7 @@ $completeMedication = function () {
 };
 
 $showModal = function ($type, $title, $form) {
-    $this->dispatch('show-modal', ['type' => $type, 'title' => $title, 'form' => $form]);
+    $this->dispatch('show-modal', ['type' => $type, 'title' => $title, 'form' => $form, 'encounter' => $this->encounter, 'record' => null]);
 };
 
 // Event Handlers

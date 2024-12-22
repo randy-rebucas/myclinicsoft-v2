@@ -15,7 +15,7 @@ use Carbon\Carbon;
 use function Livewire\Volt\{state, mount, computed, on};
 
 // State Management
-state(['queue', 'patient', 'encounter', 'showModal' => false, 'modalType' => null, 'modalForm' => null, 'modalTitle' => null]);
+state(['queue', 'patient', 'encounter' => null, 'record' => null, 'showModal' => false, 'modalType' => null, 'modalForm' => null, 'modalTitle' => null]);
 
 // Lifecycle Hooks
 mount(function (Queue $queue) {
@@ -34,6 +34,8 @@ on([
         $this->modalType = $data['type'];
         $this->modalTitle = $data['title'];
         $this->modalForm = $data['form'];
+        $this->encounter = $data['encounter'];
+        $this->record = $data['record'];
     },
     'close-modal' => function () {
         $this->showModal = false;
@@ -148,7 +150,7 @@ on([
                         @break
 
                         @case('medications')
-                            <livewire:patient.record.forms.medication-form :patient="$this->patient" :record="null" />
+                            <livewire:patient.record.forms.medication-form :patient="$this->patient" :record="$this->record" :encounter="$this->encounter"/>
                         @break
 
                         @default
