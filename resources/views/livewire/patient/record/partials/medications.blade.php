@@ -3,14 +3,23 @@
 use App\Models\Medication;
 use App\Models\Queue;
 use App\Events\QueueUpdated;
-use function Livewire\Volt\{state, mount, rules};
+use function Livewire\Volt\{state, mount, rules, computed, on};
 
-state(['medications', 'selectedPrescription', 'doctor', 'queue']);
+state(['patient', 'encounter', 'selectedPrescription', 'doctor', 'queue']);
 
-mount(function ($medications) {
-    $this->medications = $medications;
+mount(function ($patient, $encounter, $queue) {
+    $this->patient = $patient;
+    $this->encounter = $encounter;
+    $this->queue = $queue;
     $this->doctor = Auth::user()->doctor;
 });
+
+// Computed Properties
+$medications = computed(
+    fn() => Medication::where('patient_id', $this->patient->id)
+        ->where('encounter_id', $this->encounter->id)
+        ->get() ?? collect(),
+);
 
 $completeMedication = function () {
     $this->queue->update([
@@ -23,13 +32,25 @@ $completeMedication = function () {
 
     $this->dispatch('queue-completed');
 };
+
+$showModal = function ($type, $title, $form) {
+    $this->dispatch('show-modal', ['type' => $type, 'title' => $title, 'form' => $form, 'encounter' => $this->encounter, 'record' => null]);
+};
+
+// Event Handlers
+on([
+    'medication-refreshed' => function () {
+        $this->dispatch('refresh');
+        $this->dispatch('close-modal', 'medications');
+        $this->medications = Medication::where('patient_id', $this->patient->id)->where('encounter_id', $this->encounter->id)->get();
+    }
+]);
 ?>
 <div x-data="{ showPrintModal: false }" class="bg-white shadow-lg rounded-lg">
     <div class="p-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Current Medications</h3>
-            <button
-                @click="showModal = true; modalType = 'add'; modalTitle = 'Add New Medication'; modalForm = 'medications'"
+            <button wire:click="showModal('add', 'Add New Medication', 'medications')"
                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <x-heroicon-o-plus class="w-4 h-4 mr-1" />
                 Add Medication

@@ -3,11 +3,12 @@
 use App\Models\Medication;
 use function Livewire\Volt\{state, mount, rules};
 
-state(['patient', 'record' => null, 'encounter', 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '', 'isSubmitting' => false]);
+state(['patient', 'record' => null, 'encounter' => null, 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '', 'isSubmitting' => false]);
 
-mount(function ($patient, $record = null, $encounter = null) {
+mount(function ($patient, $record, $encounter) {
     $this->patient = $patient;
     $this->encounter = $encounter;
+
     if ($record) {
         $this->record = $record;
         $this->prescription_items = $record->prescription_items ?: [['medication_name' => '', 'dosage' => '', 'frequency' => '']];
@@ -35,6 +36,7 @@ $removePrescriptionItem = function ($index) {
 
 $save = function () {
     $this->isSubmitting = true;
+
     try {
         $validated = $this->validate();
 
@@ -43,7 +45,7 @@ $save = function () {
         } else {
             Medication::create([
                 'patient_id' => $this->patient->id,
-                'encounter_id' => $this->encounter->id,
+                'encounter_id' => $this->encounter['id'],
                 ...$validated,
             ]);
         }
@@ -52,6 +54,7 @@ $save = function () {
         $this->dispatch('close-modal');
 
     } catch (\Exception $e) {
+        dd($e);
         $this->addError('save', 'Failed to save medication record.');
     } finally {
         $this->isSubmitting = false;
