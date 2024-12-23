@@ -13,6 +13,7 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Wame\TelInput\TelInput;
+use App\Nova\Doctor;
 
 class Clinic extends Resource
 {
@@ -28,7 +29,7 @@ class Clinic extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'name';
 
     /**
      * The columns that should be searched.
@@ -37,6 +38,9 @@ class Clinic extends Resource
      */
     public static $search = [
         'id',
+        'name',
+        'city',
+        'email',
     ];
 
     /**

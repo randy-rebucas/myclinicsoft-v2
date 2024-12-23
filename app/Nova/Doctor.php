@@ -83,8 +83,6 @@ class Doctor extends Resource
 
             KeyValue::make('Meta')->rules('json'),
 
-            HasOne::make('Active Subscription', 'activeSubscription'),
-
             HasMany::make('Clinics'),
 
             HasMany::make('Activities'),

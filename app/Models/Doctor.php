@@ -93,57 +93,8 @@ class Doctor extends Model
             ->withPivot('is_active');
     }
 
-    /**
-     * Get all subscriptions for the doctor
-     */
-    public function subscriptions()
+    public function clinicDoctors()
     {
-        return $this->hasMany(DoctorSubscription::class);
-    }
-
-    /**
-     * Get the active subscription for the doctor
-     */
-    public function activeSubscription()
-    {
-        return $this->hasOne(DoctorSubscription::class)
-            ->where('status', 'active')
-            ->where('ends_at', '>', now())
-            ->latest();
-    }
-
-    /**
-     * Subscribe the doctor to a subscription plan
-     */
-    public function subscribe(SubscriptionPlan $plan)
-    {
-        $startDate = now();
-        $endDate = $plan->billing_period === 'monthly'
-            ? $startDate->addMonth()
-            : $startDate->addYear();
-
-        return $this->subscriptions()->create([
-            'subscription_plan_id' => $plan->id,
-            'starts_at' => $startDate,
-            'ends_at' => $endDate,
-            'status' => 'active',
-            'auto_renew' => true
-        ]);
-    }
-
-    /**
-     * Check if the doctor has an active subscription
-     */
-    public function hasActiveSubscription(): bool
-    {
-        return true;
-        // If you're using Laravel Cashier with Stripe, you might use:
-        // return $this->subscribed('default');
-
-        // Or if you have a subscriptions relationship:
-        // return $this->subscriptions()->active()->exists();
-
-        // Or if you have a subscription_ends_at column:
-        // return $this->subscription_ends_at === null || $this->subscription_ends_at->isFuture();
+        return $this->hasMany(ClinicDoctor::class);
     }
 }
