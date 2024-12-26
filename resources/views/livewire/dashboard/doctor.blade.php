@@ -10,6 +10,9 @@ on([
     'selected-queue' => function ($queueId) {
         $this->selectedQueue = Queue::findOrFail($queueId)->first();
     },
+    'queue-completed' => function () {
+        $this->selectedQueue = null;
+    },
 ]);
 
 ?>
