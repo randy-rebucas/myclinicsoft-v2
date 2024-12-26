@@ -8,10 +8,9 @@ use function Livewire\Volt\{layout, state, form, mount, with, usesPagination};
 
 form(PatientForm::class);
 
-state('patient');
-
 state([
     'search',
+    'patient' => null,
     'notification' => null,
     'genders' => fn() => [
         'male' => 'Male',
@@ -40,6 +39,7 @@ $delete = function (Patient $patient) {
 
     $this->dispatch('refresh');
     $this->dispatch('patient-saved');
+    $this->patient = null;
     $this->notification = ['type' => 'success', 'message' => 'Patient deleted successfully'];
 };
 
@@ -238,7 +238,7 @@ $save = function () {
 
                 <x-primary-button wire:loading.attr="disabled" wire:target="save" class="ms-3">
                     <span wire:loading.remove
-                        wire:target="save">{{ $patient ? __('Update Patient') : __('Create Patient') }}</span>
+                        wire:target="save">{{ __('Save Patient') }}</span>
                     <span wire:loading wire:target="save" class="flex items-center">
                         <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">

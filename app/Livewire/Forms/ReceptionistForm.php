@@ -83,4 +83,12 @@ class ReceptionistForm extends Form
 
         return $receptionist;
     }
+
+    public function clearInputs()
+    {
+        $this->first_name = '';
+        $this->last_name = '';
+        $this->phone_number = '';
+        $this->gender = '';
+    }
 }

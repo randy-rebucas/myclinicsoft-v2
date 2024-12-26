@@ -78,4 +78,12 @@ class MedRepresentativeForm extends Form
         $doctor = Auth::user()->doctor;
         $medRepresentative->doctors()->attach($doctor->id, ['is_active' => true]);
     }
+
+    public function clearInputs()
+    {
+        $this->first_name = '';
+        $this->last_name = '';
+        $this->phone_number = '';
+        $this->gender = '';
+    }
 }

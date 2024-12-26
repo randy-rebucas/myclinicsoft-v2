@@ -9,7 +9,7 @@ form(ReceptionistForm::class);
 
 state([
     'search',
-    'receptionist',
+    'receptionist' => null,
     'notification' => null,
     'genders' => fn() => [
         'male' => 'Male',
@@ -35,6 +35,7 @@ $delete = function (Receptionist $receptionist) {
 
     $this->dispatch('refresh');
     $this->dispatch('receptionist-saved');
+    $this->receptionist = null;
     $this->notification = ['type' => 'success', 'message' => 'Receptionist deleted successfully'];
 };
 
@@ -53,6 +54,7 @@ $edit = function ($id) {
 
 $create = function () {
     $this->receptionist = null;
+    $this->form->clearInputs();
     $this->dispatch('open-modal', 'form-receptionist');
 };
 
@@ -214,7 +216,7 @@ $save = function () {
 
                 <x-primary-button wire:loading.attr="disabled" wire:target="save" class="ms-3">
                     <span wire:loading.remove
-                        wire:target="save">{{ $receptionist ? __('Update Receptionist') : __('Create Receptionist') }}</span>
+                        wire:target="save">{{ __('Save Receptionist') }}</span>
                     <span wire:loading wire:target="save" class="flex items-center">
                         <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">

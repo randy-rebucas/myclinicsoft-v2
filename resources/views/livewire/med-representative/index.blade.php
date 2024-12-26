@@ -8,10 +8,9 @@ use function Livewire\Volt\{layout, state, on, form, mount, with, usesPagination
 
 form(MedRepresentativeForm::class);
 
-state('medRepresentative');
-
 state([
     'search',
+    'medRepresentative' => null,
     'notification' => null,
     'genders' => fn() => [
         'male' => 'Male',
@@ -40,6 +39,7 @@ $delete = function (MedRepresentative $medRepresentative) {
     $this->dispatch('refresh');
     $this->dispatch('med-representative-saved');
     $this->notification = ['type' => 'success', 'message' => 'Med Representative deleted successfully'];
+    $this->medRepresentative = null;
 };
 
 $detail = function (MedRepresentative $medRepresentative) {
@@ -56,7 +56,7 @@ $edit = function ($id) {
 
 $create = function () {
     $this->medRepresentative = null;
-
+    $this->form->clearInputs();
     $this->dispatch('open-modal', 'form-med-representative');
 };
 
@@ -221,7 +221,7 @@ $save = function () {
 
                 <x-primary-button wire:loading.attr="disabled" wire:target="save" class="ms-3">
                     <span wire:loading.remove
-                        wire:target="save">{{ $medRepresentative ? __('Update Med Representative') : __('Create Med Representative') }}</span>
+                        wire:target="save">{{ __('Save Med Representative') }}</span>
                     <span wire:loading wire:target="save" class="flex items-center">
                         <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
