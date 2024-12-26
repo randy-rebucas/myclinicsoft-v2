@@ -28,9 +28,9 @@ class Prescription extends Controller
 
         $client = new Party([
             'owner' => $doctor->full_name,
-            'prc' => $doctor->meta['PRC'],
-            'ptr' => $doctor->meta['PTR'],
-            's2' => $doctor->meta['S2']
+            'prc' => $doctor->meta['PRC'] ?? null,
+            'ptr' => $doctor->meta['PTR'] ?? null,
+            's2' => $doctor->meta['S2'] ?? null
         ]);
 
         $patient = new Party([
