@@ -15,13 +15,15 @@ state([
     'listeners' => ['echo:queues,QueueUpdated' => 'refreshQueues'],
 ]);
 
-layout('layouts.que');
+layout('layouts.queue');
 
 mount(function () {
     $this->clinic_id = ClinicDoctor::with('clinic')
         ->where('is_primary', true)
         ->where('doctor_id', auth()->user()->doctor->id)
         ->first()->clinic->id;
+
+    dd($this->clinic_id);
 
     $this->ads = Ads::active()->latest()->take(2)->get();
 });

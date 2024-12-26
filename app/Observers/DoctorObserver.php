@@ -18,10 +18,10 @@ class DoctorObserver
         $doctor->user->assignRole('doctor');
         $doctor->recordActivity('assigned role doctor');
 
-        $subscriptionService = new SubscriptionService();
-        $plan = SubscriptionPlan::find(1);
-        $subscription = $subscriptionService->subscribe($doctor, $plan);
-        $doctor->recordActivity('subscribed to ' . $plan->name . ' plan on ' . $subscription->starts_at);
+        // $subscriptionService = new SubscriptionService();
+        // $plan = SubscriptionPlan::find(1);
+        // $subscription = $subscriptionService->subscribe($doctor, $plan);
+        // $doctor->recordActivity('subscribed to ' . $plan->name . ' plan on ' . $subscription->starts_at);
     }
 
     /**

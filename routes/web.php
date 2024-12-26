@@ -9,6 +9,7 @@ Route::middleware(['auth'])->group(function () {
 
     Volt::route('/dashboard', 'dashboard')->name('dashboard');
     Volt::route('/profile', 'user.profile')->name('profile');
+    Volt::route('/queue-display', 'queue.display')->name('queue-display');
 
     Route::middleware(['role:doctor'])->group(function () {
         Volt::route('/patients', 'patient.index')->name('patients');
@@ -27,7 +28,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware('guest')->group(function () {
     Route::view('/', 'welcome');
-    Volt::route('/queue-display', 'queue.display')->name('queue-display');
+
 });
 
 require __DIR__ . '/auth.php';
