@@ -26,7 +26,7 @@ mount(function (Queue $queue) {
 
 // Event Handlers
 on([
-    'encounter-refreshed' => function ($encounter) {
+    'encounter-refreshed' => function (Encounter $encounter) {
         $this->encounter = $encounter;
     },
     'show-modal' => function ($data) {

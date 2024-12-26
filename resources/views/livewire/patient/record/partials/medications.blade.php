@@ -5,21 +5,16 @@ use App\Models\Queue;
 use App\Events\QueueUpdated;
 use function Livewire\Volt\{state, mount, rules, computed, on};
 
-state(['patient', 'encounter', 'selectedPrescription', 'doctor', 'queue']);
+state(['patient', 'encounter', 'selectedPrescription', 'doctor', 'queue', 'medications']);
 
 mount(function ($patient, $encounter, $queue) {
     $this->patient = $patient;
     $this->encounter = $encounter;
     $this->queue = $queue;
     $this->doctor = Auth::user()->doctor;
-});
 
-// Computed Properties
-$medications = computed(
-    fn() => Medication::where('patient_id', $this->patient->id)
-        ->where('encounter_id', $this->encounter->id)
-        ->get() ?? collect(),
-);
+    $this->medications = Medication::where('patient_id', $patient->id)->where('encounter_id', $encounter->id)->get();
+});
 
 $completeMedication = function () {
     $this->queue->update([
@@ -43,6 +38,9 @@ on([
         $this->dispatch('refresh');
         $this->dispatch('close-modal', 'medications');
         $this->medications = Medication::where('patient_id', $this->patient->id)->where('encounter_id', $this->encounter->id)->get();
+    },
+    'encounter-refreshed' => function () {
+        $this->medications = Medication::where('patient_id', $this->patient->id)->where('encounter_id', $this->encounter->id)->get();
     }
 ]);
 ?>
@@ -50,11 +48,18 @@ on([
     <div class="p-6">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Current Medications</h3>
-            <button wire:click="showModal('add', 'Add New Medication', 'medications')"
-                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <x-heroicon-o-plus class="w-4 h-4 mr-1" />
-                Add Medication
-            </button>
+            <div class="flex space-x-2">
+                <button wire:click="$refresh"
+                    class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <x-heroicon-o-arrow-path class="w-4 h-4 mr-1" />
+                    Refresh
+                </button>
+                <button wire:click="showModal('add', 'Add New Medication', 'medications')"
+                    class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <x-heroicon-o-plus class="w-4 h-4 mr-1" />
+                    Add Medication
+                </button>
+            </div>
         </div>
 
         <div class="space-y-4">

@@ -14,10 +14,9 @@ mount(function () {
 
 // Event Handlers
 on([
-    'encounter-refreshed' => function ($encounter) {
+    'encounter-refreshed' => function () {
         $this->dispatch('refresh');
         $this->dispatch('close-modal', 'form-encounter');
-        $this->encounter = $encounter;
     }
 ]);
 
