@@ -23,7 +23,7 @@ mount(function () {
         ->where('doctor_id', auth()->user()->doctor->id)
         ->first()->clinic->id;
 
-    dd($this->clinic_id);
+    // dd($this->clinic_id);
 
     $this->ads = Ads::active()->latest()->take(2)->get();
 });
