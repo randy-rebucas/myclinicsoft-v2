@@ -5,7 +5,9 @@ use App\Models\Queue;
 use App\Models\Ads;
 use App\Models\Clinic;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use function Livewire\Volt\{state, layout, form, mount, computed, with};
+
 
 state([
     'clinics' => [],
@@ -20,7 +22,7 @@ layout('layouts.queue');
 mount(function () {
     $this->clinic_id = ClinicDoctor::with('clinic')
         ->where('is_primary', true)
-        ->where('doctor_id', auth()->user()->doctor->id)
+        ->where('doctor_id', Auth::user()->doctor->id)
         ->first()->clinic->id;
 
     // dd($this->clinic_id);
