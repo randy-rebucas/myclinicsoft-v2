@@ -25,9 +25,8 @@ mount(function () {
         ->where('doctor_id', Auth::user()->doctor->id)
         ->first()->clinic->id;
 
-    // dd($this->clinic_id);
 
-    $this->ads = Ads::active()->latest()->take(2)->get();
+    $this->ads = Ads::active()->select('youtube_id')->get()->pluck('youtube_id');
 });
 
 $queues = computed(function () {
@@ -96,7 +95,7 @@ $refreshQueues = function () {
                                 <div
                                     class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
                                     <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {{ $queue->queue_number }}
+                                        {{ $queue->queue_number }} - <span class="font-normal">{{ $queue->patient->first_name }} {{ $queue->patient->last_name }}</span>
                                     </span>
                                     @if ($queue->priority !== 'normal')
                                         <span
@@ -118,90 +117,51 @@ $refreshQueues = function () {
 
     <!-- Ads Column (Right) -->
     <div class="w-2/3 h-screen">
-        <div class="h-full">
-            <div x-data="{
-                currentSlide: 0,
-                totalSlides: {{ count($this->ads) }},
-                autoplayInterval: null,
+        <!-- Youtube Container -->
+        <div class="h-full" x-data="{
+            videos: {{ $this->ads }},
+            currentVideo: 0,
+            player: null,
 
-                startAutoplay() {
-                    if (this.totalSlides <= 1) return;
-                    this.autoplayInterval = setInterval(() => this.next(), 10000);
-                },
+            initYouTube() {
+                if (typeof YT === 'undefined') {
+                    // Load YouTube IFrame API if not already loaded
+                    const tag = document.createElement('script');
+                    tag.src = 'https://www.youtube.com/iframe_api';
+                    const firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-                stopAutoplay() {
-                    if (this.autoplayInterval) clearInterval(this.autoplayInterval);
-                },
-
-                next() {
-                    this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
-                },
-
-                prev() {
-                    this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
-                },
-
-                goto(index) {
-                    this.currentSlide = index;
+                    window.onYouTubeIframeAPIReady = () => this.createPlayer();
+                } else {
+                    this.createPlayer();
                 }
-            }" x-init="startAutoplay()" @mouseenter="stopAutoplay()"
-                @mouseleave="startAutoplay()" class="h-full relative">
-                <!-- Carousel Container -->
-                <div class="h-full overflow-hidden">
-                    <div class="flex h-full transition-transform duration-500 ease-in-out"
-                        :style="`transform: translateX(-${currentSlide * 100}%)`">
-                        @forelse ($this->ads as $ad)
-                            <div class="w-full h-full flex-shrink-0 relative">
-                                @if ($ad->image_url)
-                                    <img src="{{ Storage::url($ad->image_url) }}" alt="{{ $ad->title }}"
-                                        class="w-full h-full object-cover">
-                                @endif
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
-                                </div>
-                                <div class="absolute bottom-0 left-0 right-0 p-6">
-                                    <h3 class="text-2xl font-bold text-white mb-3">{{ $ad->title }}</h3>
-                                    <p class="text-gray-200 text-lg line-clamp-2">{{ $ad->description }}</p>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="w-full h-full">
-                                <div class="bg-gray-100 dark:bg-gray-700 h-full flex items-center justify-center">
-                                    <span class="text-gray-500 dark:text-gray-400">No advertisements available</span>
-                                </div>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
+            },
 
-                <!-- Navigation controls remain the same -->
-                @if (count($this->ads) > 1)
-                    <button @click="prev()"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button @click="next()"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-
-                    <!-- Navigation Dots -->
-                    <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-3">
-                        @foreach ($this->ads as $index => $ad)
-                            <button @click="goto({{ $index }})"
-                                class="w-3 h-3 rounded-full transition-all duration-200 transform"
-                                :class="currentSlide === {{ $index }} ?
-                                    'bg-white scale-110' :
-                                    'bg-white/50 hover:bg-white/75'">
-                            </button>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
+            createPlayer() {
+                this.player = new YT.Player('youtube-player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: this.videos[this.currentVideo],
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 0,
+                        rel: 0,
+                        showinfo: 0,
+                        mute: 1
+                    },
+                    events: {
+                        onStateChange: (event) => {
+                            // When video ends, play next video
+                            if (event.data === YT.PlayerState.ENDED) {
+                                this.currentVideo = (this.currentVideo + 1) % this.videos.length;
+                                this.player.loadVideoById(this.videos[this.currentVideo]);
+                            }
+                        }
+                    }
+                });
+            }
+        }" x-init="initYouTube()">
+            <div id="youtube-player" class="w-full h-full"></div>
         </div>
     </div>
 </div>

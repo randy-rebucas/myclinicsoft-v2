@@ -15,6 +15,7 @@ class Ads extends Model
         'description',
         'image_url',
         'status',
+        'youtube_id',
         'start_date',
         'end_date',
         'url',

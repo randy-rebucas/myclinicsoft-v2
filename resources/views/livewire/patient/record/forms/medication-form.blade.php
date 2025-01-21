@@ -1,9 +1,18 @@
 <?php
 
 use App\Models\Medication;
-use function Livewire\Volt\{state, mount, rules};
+use function Livewire\Volt\{state, mount, rules, computed};
 
-state(['patient', 'record' => null, 'encounter' => null, 'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']], 'notes' => '', 'isSubmitting' => false]);
+state([
+    'patient',
+    'record' => null,
+    'encounter' => null,
+    'prescription_items' => [['medication_name' => '', 'dosage' => '', 'frequency' => '']],
+    'notes' => '',
+    'isSubmitting' => false,
+    'searchQuery' => '',
+    'suggestions' => []
+]);
 
 mount(function ($patient, $record, $encounter) {
     $this->patient = $patient;
@@ -32,6 +41,30 @@ $removePrescriptionItem = function ($index) {
         unset($this->prescription_items[$index]);
         $this->prescription_items = array_values($this->prescription_items);
     }
+};
+
+$searchMedications = function($index, $query) {
+    if (strlen($query) >= 2) {
+        $this->suggestions[$index] = Medication::where('prescription_items', 'like', "%\"{$query}%")
+            ->orWhereJsonContains('prescription_items', [['medication_name' => $query]])
+            ->select('prescription_items')
+            ->distinct()
+            ->get()
+            ->flatMap(function ($medication) {
+                return collect($medication->prescription_items)->pluck('medication_name');
+            })
+            ->unique()
+            ->values()
+            ->take(10)
+            ->toArray();
+    } else {
+        $this->suggestions[$index] = [];
+    }
+};
+
+$selectMedication = function($index, $name) {
+    $this->prescription_items[$index]['medication_name'] = $name;
+    $this->suggestions[$index] = [];
 };
 
 $save = function () {
@@ -111,8 +144,28 @@ $save = function () {
 
                         <div>
                             <label class="block text-xs font-medium text-gray-700">Medication Name</label>
-                            <input type="text" wire:model="prescription_items.{{ $index }}.medication_name"
-                                class="mt-0.5 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <div class="relative">
+                                <input type="text"
+                                    wire:model.live="prescription_items.{{ $index }}.medication_name"
+                                    wire:input="searchMedications({{ $index }}, $event.target.value)"
+                                    class="mt-0.5 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+
+                                @if (!empty($suggestions[$index]))
+                                    <div class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
+                                        <ul class="max-h-48 overflow-y-auto">
+                                            @foreach ($suggestions[$index] as $suggestion)
+                                                <li>
+                                                    <button type="button"
+                                                        wire:click="selectMedication({{ $index }}, '{{ $suggestion }}')"
+                                                        class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                                        {{ $suggestion }}
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                            </div>
                             @error("prescription_items.{$index}.medication_name")
                                 <span class="text-red-500 text-xs">{{ $message }}</span>
                             @enderror

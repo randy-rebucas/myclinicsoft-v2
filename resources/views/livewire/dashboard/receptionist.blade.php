@@ -240,7 +240,7 @@ on([
                         ->first();
                 @endphp
                 @if ($currentQueue)
-                    <p class="text-lg font-bold text-yellow-500">{{ $currentQueue->queue_number }}</p>
+                    <p class="text-lg font-bold text-yellow-500">{{ $currentQueue->queue_number }} - <span class="font-normal">{{ $currentQueue->patient->first_name }} {{ $currentQueue->patient->last_name }}</span></p>
                 @else
                     <p class="text-sm text-gray-500">No active queue</p>
                 @endif
