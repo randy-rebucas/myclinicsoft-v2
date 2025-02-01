@@ -147,6 +147,10 @@
             <td rowspan="3" colspan="2">
                 {{ _('Patient ID:' . $patient->id) }} <br />
                 <span>{{ _('Use this ID number on your next visit.') }}</span>
+                <br />
+                @if ($follow_up)
+                    <span>{{ _('Follow up on: ' . $follow_up) }}</span>
+                @endif
             </td>
             <td>{{ _('PRC No') }}</td>
             <td>{{ $client->prc }}</td>
