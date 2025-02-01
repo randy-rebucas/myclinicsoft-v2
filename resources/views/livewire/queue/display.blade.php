@@ -20,11 +20,14 @@ state([
 layout('layouts.queue');
 
 mount(function () {
-    $this->clinic_id = ClinicDoctor::with('clinic')
-        ->where('is_primary', true)
-        ->where('doctor_id', Auth::user()->doctor->id)
-        ->first()->clinic->id;
-
+    $query = ClinicDoctor::with('clinic')
+        ->where('is_primary', true);
+    if (Auth::user()->hasRole('receptionist')) {
+        $query->where('doctor_id', Auth::user()->receptionist->doctor->id);
+    } else {
+        $query->where('doctor_id', Auth::user()->doctor->id);
+    }
+    $this->clinic_id = $query->first()->clinic->id;
 
     $this->ads = Ads::active()->select('youtube_id')->get()->pluck('youtube_id');
 });

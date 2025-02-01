@@ -56,7 +56,8 @@ class Prescription extends Controller
             'logo' => $logo,
             'patient' => $patient,
             'prescriptions' => $prescriptions,
-            'client' => $client
+            'client' => $client,
+            'follow_up' => $request->get('follow-up') ?? null
         ]);
         $pdf->setOption(['dpi' => 150, 'defaultFont' => 'monospace']);
         $pdf->setPaper('a5', 'portrait');
