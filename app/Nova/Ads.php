@@ -69,6 +69,10 @@ class Ads extends Resource
                 ->sortable()
                 ->rules('required', 'max:255'),
 
+            Text::make('Youtube ID', 'youtube_id')
+                ->sortable()
+                ->rules('required'),
+
             Boolean::make('Status', 'status')
                 ->sortable()
                 ->default(true),
