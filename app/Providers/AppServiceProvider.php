@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\MedRepresentative;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use App\Models\Doctor;
 use App\Models\Setting;
 use App\Models\Patient;
@@ -30,17 +31,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (Schema::hasTable('settings')) {
-            if (!Config('settings')) {
-                foreach (Setting::all()->pluck('value', 'key') as $k => $val) {
-                    config(['settings.' . $k => $val]);
+        // Only load settings if database is connected and table exists
+        try {
+            if (Schema::hasTable('settings')) {
+                if (!config('settings')) {
+                    foreach (Setting::all()->pluck('value', 'key') as $k => $val) {
+                        config(['settings.' . $k => $val]);
+                    }
                 }
             }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the application boot
+            Log::warning('Failed to load settings: ' . $e->getMessage());
         }
 
         // Implicitly grant "admin" role all permission checks using can()
         Gate::before(function ($user, $ability) {
-            if ($user->hasRole('admin')) {
+            if ($user && $user->hasRole('admin')) {
                 return true;
             }
         });

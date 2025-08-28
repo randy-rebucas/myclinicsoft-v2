@@ -6,7 +6,6 @@ use App\Classes\PrescriptionItem;
 use App\Models\Encounter;
 use App\Models\Medication;
 use App\Models\Patient;
-use App\Models\PatientAddress;
 use App\Services\PrescriptionInvoice;
 use LaravelDaily\Invoices\Invoice;
 use LaravelDaily\Invoices\Classes\Party;

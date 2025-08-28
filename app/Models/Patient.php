@@ -33,10 +33,6 @@ class Patient extends Model
         'age'
     ];
 
-    protected $dates = [
-        'date_of_birth'
-    ];
-
     /**
      * Get the attributes that should be cast.
      *
