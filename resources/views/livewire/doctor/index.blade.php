@@ -16,47 +16,86 @@ state([
 ]);
 
 mount(function () {
+    // Check if user has an associated doctor
+    $doctor = auth()->user()->doctor;
+
+    if (!$doctor) {
+        // If no doctor is associated, set empty stats and return early
+        $this->stats = [
+            [
+                'label' => 'Total Patients',
+                'value' => 0,
+                'icon' => 'heroicon-o-users',
+            ],
+            [
+                'label' => 'New Patients',
+                'value' => 0,
+                'icon' => 'heroicon-o-user-plus',
+            ],
+            [
+                'label' => 'Total Visits',
+                'value' => 0,
+                'icon' => 'heroicon-o-clipboard',
+            ],
+            [
+                'label' => 'This Month',
+                'value' => 0,
+                'icon' => 'heroicon-o-calendar',
+            ],
+        ];
+
+        $this->todayQueue = collect();
+        $this->recentVisits = collect();
+        $this->recentPatients = collect();
+        $this->recentActivities = collect();
+        return;
+    }
+
     $this->stats = [
         [
             'label' => 'Total Patients',
-            'value' => PatientDoctor::where('doctor_id', auth()->user()->doctor->id)->count(),
+            'value' => PatientDoctor::where('doctor_id', $doctor->id)->count(),
             'icon' => 'heroicon-o-users',
         ],
         [
             'label' => 'New Patients',
             'value' => PatientDoctor::whereMonth('created_at', now()->month)
-                ->where('doctor_id', auth()->user()->doctor->id)
+                ->where('doctor_id', $doctor->id)
                 ->count(),
             'icon' => 'heroicon-o-user-plus',
         ],
         [
             'label' => 'Total Visits',
-            'value' => Encounter::where('doctor_id', auth()->user()->doctor->id)->count(),
+            'value' => Encounter::where('doctor_id', $doctor->id)->count(),
             'icon' => 'heroicon-o-clipboard',
         ],
         [
             'label' => 'This Month',
             'value' => Encounter::whereMonth('created_at', now()->month)
-                ->where('doctor_id', auth()->user()->doctor->id)
+                ->where('doctor_id', $doctor->id)
                 ->count(),
             'icon' => 'heroicon-o-calendar',
         ],
     ];
 
-    $this->todayQueue = Queue::with('patient')
+    // Check if doctor has clinics before accessing first clinic
+    $firstClinic = $doctor->clinics->first();
+    $clinicId = $firstClinic ? $firstClinic->id : null;
+
+    $this->todayQueue = $clinicId ? Queue::with('patient')
         ->whereDate('created_at', now()->toDateString())
-        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
+        ->where('clinic_id', $clinicId)
         ->orderBy('created_at')
-        ->get();
+        ->get() : collect();
 
     $this->recentVisits = Encounter::with('patient')
-        ->where('doctor_id', auth()->user()->doctor->id)
+        ->where('doctor_id', $doctor->id)
         ->latest()
         ->take(8)
         ->get();
 
     $this->recentPatients = PatientDoctor::with('patient')
-        ->where('doctor_id', auth()->user()->doctor->id)
+        ->where('doctor_id', $doctor->id)
         ->latest()
         ->take(8)
         ->get();
@@ -92,6 +131,11 @@ mount(function () {
 
 $selectedQueue = function ($queueId) {
     $queue = Queue::find($queueId);
+
+    if (!$queue) {
+        return;
+    }
+
     $queue->update([
         'status' => 'in_progress',
         'called_at' => now(),
@@ -103,11 +147,20 @@ $selectedQueue = function ($queueId) {
 };
 
 $refreshQueues = function () {
-    $this->todayQueue = Queue::with('patient')
+    $doctor = auth()->user()->doctor;
+    if (!$doctor) {
+        $this->todayQueue = collect();
+        return;
+    }
+
+    $firstClinic = $doctor->clinics->first();
+    $clinicId = $firstClinic ? $firstClinic->id : null;
+
+    $this->todayQueue = $clinicId ? Queue::with('patient')
         ->whereDate('created_at', now()->toDateString())
-        ->where('clinic_id', auth()->user()->doctor->clinics->first()->id)
+        ->where('clinic_id', $clinicId)
         ->orderBy('created_at')
-        ->get();
+        ->get() : collect();
 };
 
 on([
@@ -116,6 +169,24 @@ on([
 ?>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    @if(!auth()->user()->doctor)
+        <!-- No Doctor Associated Message -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    @svg('heroicon-o-exclamation-triangle', 'w-6 h-6 text-yellow-400')
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                        No Doctor Profile Found
+                    </h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>Your user account is not associated with a doctor profile. Please contact the administrator to set up your doctor profile.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @else
     <!-- Stats Cards - Now with gradients and improved visual hierarchy -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         @foreach ($stats as $stat)
@@ -335,4 +406,5 @@ on([
             </div>
         </div>
     </div>
+    @endif
 </div>

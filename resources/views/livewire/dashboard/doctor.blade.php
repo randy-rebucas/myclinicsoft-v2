@@ -8,7 +8,7 @@ state([
 
 on([
     'selected-queue' => function ($queueId) {
-        $this->selectedQueue = Queue::findOrFail($queueId)->first();
+        $this->selectedQueue = Queue::findOrFail($queueId);
     },
     'queue-completed' => function () {
         $this->selectedQueue = null;
