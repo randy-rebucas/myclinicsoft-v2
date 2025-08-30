@@ -40,10 +40,13 @@ class PracticeSeeder extends Seeder
         ];
 
         foreach ($practices as $name) {
-            Practice::create([
-                'title' => $name,
-                'slug' => Str::slug($name, '-'),
-            ]);
+            Practice::firstOrCreate(
+                ['slug' => Str::slug($name, '-')],
+                [
+                    'title' => $name,
+                    'slug' => Str::slug($name, '-'),
+                ]
+            );
         }
     }
 }

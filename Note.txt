@@ -108,3 +108,15 @@ $doctor->cancelSubscription();
 
 // Renew subscription
 $doctor->renewSubscription();
+
+
+=============
+admin
+
+admin@kidzklinika.com
+4QbjGCj2uXnApKA
+
+
+ldickens@gmail.com
+
+staff@kidzklinika.com
