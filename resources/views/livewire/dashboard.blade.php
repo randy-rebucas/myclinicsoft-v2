@@ -14,32 +14,40 @@ state(['user' => auth()->user()]);
         <!-- Welcome Banner -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-gray-900">
-                Welcome back, {{ $user->name }}
+                Welcome back, {{ $user?->name ?? 'Guest' }}
             </h1>
             <p class="mt-1 text-sm text-gray-600">
-                Logged in as {{ Str::title($user->roles->first()->name) }} on {{ now()->format('l, d F Y') }}
+                @if($user && $user->roles && $user->roles->first())
+                    Logged in as {{ Str::title($user->roles->first()->name) }} on {{ now()->format('l, d F Y') }}
+                @else
+                    Welcome on {{ now()->format('l, d F Y') }}
+                @endif
             </p>
         </div>
 
-        @switch($user->roles->first()->name)
-            @case('doctor')
-                <livewire:dashboard.doctor />
-            @break
+        @if($user && $user->roles && $user->roles->first())
+            @switch($user->roles->first()->name)
+                @case('doctor')
+                    <livewire:dashboard.doctor />
+                @break
 
-            @case('receptionist')
-                <livewire:dashboard.receptionist />
-            @break
+                @case('receptionist')
+                    <livewire:dashboard.receptionist />
+                @break
 
-            @case('patient')
-                <livewire:dashboard.patient />
-            @break
+                @case('patient')
+                    <livewire:dashboard.patient />
+                @break
 
-            @case('medrep')
-                <livewire:dashboard.med-representative />
-            @break
+                @case('medrep')
+                    <livewire:dashboard.med-representative />
+                @break
 
-            @default
-                <livewire:dashboard.no-dashboard />
-        @endswitch
+                @default
+                    <livewire:dashboard.no-dashboard />
+            @endswitch
+        @else
+            <livewire:dashboard.no-dashboard />
+        @endif
     </div>
 </section>
