@@ -43,7 +43,9 @@ with(
             ->whereHas('patient', function ($query) {
                 $query->where('first_name', 'like', '%' . $this->search . '%');
             })
-            ->where('doctor_id', auth()->user()->receptionist->doctor->id)
+            ->when(auth()->user()?->receptionist?->doctor?->id, function($query, $doctorId) {
+                $query->where('doctor_id', $doctorId);
+            })
             ->orderBy('created_at', 'asc')
             ->paginate(10),
     ],
@@ -78,10 +80,18 @@ mount(function () {
             ];
         });
 
-    $this->clinic_id = ClinicDoctor::with('clinic')
-        ->where('is_primary', true)
-        ->where('doctor_id', auth()->user()->receptionist->doctor->id)
-        ->first()->clinic->id;
+    $doctorId = auth()->user()?->receptionist?->doctor?->id;
+
+    if ($doctorId) {
+        $clinicDoctor = ClinicDoctor::with('clinic')
+            ->where('is_primary', true)
+            ->where('doctor_id', $doctorId)
+            ->first();
+
+        $this->clinic_id = $clinicDoctor ? $clinicDoctor->clinic->id : null;
+    } else {
+        $this->clinic_id = null;
+    }
 });
 
 $todayQueue = computed(function () {
@@ -240,7 +250,7 @@ on([
                         ->first();
                 @endphp
                 @if ($currentQueue)
-                    <p class="text-lg font-bold text-yellow-500">{{ $currentQueue->queue_number }} - <span class="font-normal">{{ $currentQueue->patient->first_name }} {{ $currentQueue->patient->last_name }}</span></p>
+                    <p class="text-lg font-bold text-yellow-500">{{ $currentQueue->queue_number }} - <span class="font-normal">{{ $currentQueue->patient?->first_name ?? 'Unknown' }} {{ $currentQueue->patient?->last_name ?? 'Patient' }}</span></p>
                 @else
                     <p class="text-sm text-gray-500">No active queue</p>
                 @endif
@@ -274,25 +284,25 @@ on([
                                 <div class="flex items-center space-x-4">
                                     <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                                         <img class="h-10 w-10 rounded-full object-cover"
-                                            src="{{ $item->patient->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($item->patient->full_name) }}"
-                                            alt="{{ $item->patient->full_name }}">
+                                            src="{{ $item->patient?->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($item->patient?->full_name ?? 'Unknown Patient') }}"
+                                            alt="{{ $item->patient?->full_name ?? 'Unknown Patient' }}">
                                     </div>
                                     <div>
-                                        <p class="font-medium text-gray-900">{{ $item->patient->full_name }}</p>
+                                        <p class="font-medium text-gray-900">{{ $item->patient?->full_name ?? 'Unknown Patient' }}</p>
                                         <div class="text-sm text-gray-500 truncate">
-                                            {{ strtoupper($item->patient->gender) }}
-                                            @if ($item->patient->date_of_birth)
-                                                • {{ $item->patient->age }} years
-                                                • Born {{ $item->patient->date_of_birth->format('M d, Y') }}
+                                            {{ strtoupper($item->patient?->gender ?? 'N/A') }}
+                                            @if ($item->patient?->date_of_birth)
+                                                • {{ $item->patient?->age }} years
+                                                • Born {{ $item->patient?->date_of_birth->format('M d, Y') }}
                                             @endif
-                                            @if ($item->patient->height || $item->patient->weight)
+                                            @if ($item->patient?->height || $item->patient?->weight)
                                                 •
-                                                {{ $item->patient->height ? 'H: ' . $item->patient->height . 'cm' : '' }}{{ $item->patient->height && $item->patient->weight ? ' / ' : '' }}{{ $item->patient->weight ? 'W: ' . $item->patient->weight . 'kg' : '' }}
+                                                {{ $item->patient?->height ? 'H: ' . $item->patient?->height . 'cm' : '' }}{{ $item->patient?->height && $item->patient?->weight ? ' / ' : '' }}{{ $item->patient?->weight ? 'W: ' . $item->patient?->weight . 'kg' : '' }}
                                             @endif
                                         </div>
                                     </div>
                                 </div>
-                                <button wire:click="preview({{ $item->patient->id }})"
+                                <button wire:click="preview({{ $item->patient?->id ?? 0 }})"
                                     class="p-2 text-gray-400 hover:text-blue-500">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -376,11 +386,11 @@ on([
                             <div class="flex items-center gap-3 text-sm text-gray-600">
                                 <div class="flex items-center gap-1">
                                     <x-heroicon-m-user class="w-4 h-4" />
-                                    <span>{{ $queue->patient->full_name }}</span>
+                                    <span>{{ $queue->patient?->full_name ?? 'Unknown Patient' }}</span>
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <x-heroicon-m-building-office class="w-4 h-4" />
-                                    <span>{{ $queue->clinic->name }}</span>
+                                    <span>{{ $queue->clinic?->name ?? 'Unknown Clinic' }}</span>
                                 </div>
                             </div>
 

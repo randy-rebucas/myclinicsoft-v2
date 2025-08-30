@@ -46,17 +46,28 @@ $addToQueue = function ($patientId) {
 
     $queueNumber = $lastQueue ? sprintf('%03d', intval(substr($lastQueue->queue_number, -3)) + 1) : '001';
 
-    $clinicDoctor = ClinicDoctor::with('clinic')->where('doctor_id', auth()->user()->doctor->id)->first();
-    $clinicName = $clinicDoctor->clinic->name;
+    $doctorId = auth()->user()?->doctor?->id;
+    $clinicDoctor = null;
+    $clinicName = 'Unknown Clinic';
+    $clinicId = null;
+
+    if ($doctorId) {
+        $clinicDoctor = ClinicDoctor::with('clinic')->where('doctor_id', $doctorId)->first();
+        $clinicName = $clinicDoctor ? $clinicDoctor->clinic->name : 'Unknown Clinic';
+        $clinicId = auth()->user()?->doctor?->clinics?->first()?->id;
+    }
+
     $fullQueueNumber = Str::substr($clinicName, 0, 1) . $queueNumber;
 
-    Queue::create([
-        'patient_id' => $patientId,
-        'clinic_id' => auth()->user()->doctor->clinics->first()->id,
-        'queue_number' => $fullQueueNumber,
-        'priority' => $this->priority,
-        'notes' => $this->notes,
-    ]);
+    if ($clinicId) {
+        Queue::create([
+            'patient_id' => $patientId,
+            'clinic_id' => $clinicId,
+            'queue_number' => $fullQueueNumber,
+            'priority' => $this->priority,
+            'notes' => $this->notes,
+        ]);
+    }
 
     $this->reset(['priority', 'notes']);
     $this->dispatch('queue-updated');
@@ -107,7 +118,7 @@ $cancel = function ($queueId) {
                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
                                 <option value="">All Clinics</option>
                                 @foreach ($this->clinics as $clinic)
-                                    <option value="{{ $clinic->clinic->id }}">{{ $clinic->clinic->name }}</option>
+                                    <option value="{{ $clinic->clinic?->id ?? '' }}">{{ $clinic->clinic?->name ?? 'Unknown Clinic' }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -178,10 +189,10 @@ $cancel = function ($queueId) {
                                         {{ $queue->queue_number }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $queue->patient->full_name }}
+                                        {{ $queue->patient?->full_name ?? 'Unknown Patient' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $queue->clinic->name }}
+                                        {{ $queue->clinic?->name ?? 'Unknown Clinic' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span

@@ -23,11 +23,18 @@ mount(function () {
     $query = ClinicDoctor::with('clinic')
         ->where('is_primary', true);
     if (Auth::user()->hasRole('receptionist')) {
-        $query->where('doctor_id', Auth::user()->receptionist->doctor->id);
+        $doctorId = Auth::user()?->receptionist?->doctor?->id;
+        if ($doctorId) {
+            $query->where('doctor_id', $doctorId);
+        }
     } else {
-        $query->where('doctor_id', Auth::user()->doctor->id);
+        $doctorId = Auth::user()?->doctor?->id;
+        if ($doctorId) {
+            $query->where('doctor_id', $doctorId);
+        }
     }
-    $this->clinic_id = $query->first()->clinic->id;
+    $clinicDoctor = $query->first();
+    $this->clinic_id = $clinicDoctor ? $clinicDoctor->clinic->id : null;
 
     $this->ads = Ads::active()->select('youtube_id')->get()->pluck('youtube_id');
 });
@@ -69,7 +76,7 @@ $refreshQueues = function () {
                             </div>
                             <div class="relative bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-indigo-500">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                                    {{ Clinic::where('id', $this->clinic_id)->first()->name }}</h3>
+                                    {{ Clinic::where('id', $this->clinic_id)->first()?->name ?? 'Unknown Clinic' }}</h3>
                                 <div class="text-5xl font-bold text-center text-indigo-600 dark:text-indigo-400">
                                     {{ $currentQueue ? $currentQueue->queue_number : '-' }}
                                 </div>
@@ -91,14 +98,14 @@ $refreshQueues = function () {
                     <div class="space-y-3">
                         <h3
                             class="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider sticky top-14 bg-white dark:bg-gray-800">
-                            {{ Clinic::where('id', $this->clinic_id)->first()->name }}
+                            {{ Clinic::where('id', $this->clinic_id)->first()?->name ?? 'Unknown Clinic' }}
                         </h3>
                         <div class="space-y-2">
                             @foreach ($this->queues->where('clinic_id', $this->clinic_id)->where('status', 'waiting') as $queue)
                                 <div
                                     class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors">
                                     <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {{ $queue->queue_number }} - <span class="font-normal">{{ $queue->patient->first_name }} {{ $queue->patient->last_name }}</span>
+                                        {{ $queue->queue_number }} - <span class="font-normal">{{ $queue->patient?->first_name ?? 'Unknown' }} {{ $queue->patient?->last_name ?? 'Patient' }}</span>
                                     </span>
                                     @if ($queue->priority !== 'normal')
                                         <span

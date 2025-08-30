@@ -112,7 +112,10 @@ $doctor->renewSubscription();
 
 =============
 admin
+admin@example.com
+password
 
+doctor
 admin@kidzklinika.com
 4QbjGCj2uXnApKA
 
