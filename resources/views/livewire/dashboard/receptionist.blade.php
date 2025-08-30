@@ -709,3 +709,7 @@ on([
             @click="show = false; $wire.closeModal()">
         </div>
     </div>
+
+    <!-- Real-time Notifications -->
+    <x-notification />
+</div>

@@ -1,15 +1,20 @@
-<div x-data="{ notifications: [] }" x-init="Echo.channel('queues')
-    .listen('QueueUpdated', (e) => {
-        const id = Date.now();
-        notifications.push({
-            id: id,
-            message: e.message,
-            status: e.status
-        });
-        setTimeout(() => {
-            notifications = notifications.filter(n => n.id !== id);
-        }, 5000);
-    });" class="fixed top-4 right-4 z-50 space-y-2 w-72">
+<div x-data="{
+    notifications: [],
+    init() {
+        Echo.channel('queues')
+            .listen('QueueUpdated', (e) => {
+                const id = Date.now();
+                this.notifications.push({
+                    id: id,
+                    message: e.message,
+                    status: e.status
+                });
+                setTimeout(() => {
+                    this.notifications = this.notifications.filter(n => n.id !== id);
+                }, 5000);
+            });
+    }
+}" class="fixed top-4 right-4 z-50 space-y-2 w-72">
     <template x-for="notification in notifications" :key="notification.id">
         <div x-show="true" x-transition:enter="transform ease-out duration-300 transition"
             x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
