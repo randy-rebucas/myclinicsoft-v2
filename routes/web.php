@@ -31,4 +31,7 @@ Route::middleware('guest')->group(function () {
 
 });
 
+// Public setup route
+Volt::route('/setup', 'setup.index')->name('setup');
+
 require __DIR__ . '/auth.php';
