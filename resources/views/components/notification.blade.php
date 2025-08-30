@@ -1,18 +1,29 @@
 <div x-data="{
     notifications: [],
     init() {
-        Echo.channel('queues')
-            .listen('QueueUpdated', (e) => {
-                const id = Date.now();
-                this.notifications.push({
-                    id: id,
-                    message: e.message,
-                    status: e.status
-                });
-                setTimeout(() => {
-                    this.notifications = this.notifications.filter(n => n.id !== id);
-                }, 5000);
-            });
+        // Function to initialize Echo listener
+        const initEcho = () => {
+            if (typeof window.Echo !== 'undefined') {
+                window.Echo.channel('queues')
+                    .listen('QueueUpdated', (e) => {
+                        const id = Date.now();
+                        this.notifications.push({
+                            id: id,
+                            message: e.message,
+                            status: e.status
+                        });
+                        setTimeout(() => {
+                            this.notifications = this.notifications.filter(n => n.id !== id);
+                        }, 5000);
+                    });
+            } else {
+                // Retry after a short delay if Echo is not available yet
+                setTimeout(initEcho, 100);
+            }
+        };
+
+        // Start initialization
+        initEcho();
     }
 }" class="fixed top-4 right-4 z-50 space-y-2 w-72">
     <template x-for="notification in notifications" :key="notification.id">
