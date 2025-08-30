@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Form;
 use App\Traits\GeneratesUserCredentials;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 
 class PatientForm extends Form
@@ -23,16 +24,16 @@ class PatientForm extends Form
     #[Validate('required')]
     public $last_name;
 
-    #[Validate('required')]
+    #[Validate('required|numeric|min:0|max:300')]
     public $height;
 
-    #[Validate('required')]
+    #[Validate('required|numeric|min:0|max:500')]
     public $weight;
 
     #[Validate('required')]
     public $phone_number;
 
-    #[Validate('required')]
+    #[Validate('required|in:male,female,unknown')]
     public $gender;
 
 
@@ -73,34 +74,64 @@ class PatientForm extends Form
 
     public function create()
     {
-        $credentials = $this->generateCredentials($this->first_name, $this->last_name);
-
-        $user = User::create([
-            'name' => $credentials['username'],
-            'email' => $credentials['email'],
-            'password' => Hash::make('password'),
-        ]);
-
-        $patient = Patient::create([
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'phone_number' => $this->phone_number,
-            'height' => $this->height,
-            'weight' => $this->weight,
-            'gender' => $this->gender,
-            'user_id' => $user->id,
-        ]);
-
-        $user = User::find(Auth::id());
-        if ($user->hasRole('doctor')) {
-            $doctor = Auth::user()->doctor;
-            $patient->doctors()->attach($doctor->id, ['is_active' => true]);
-        } else {
-            $doctor = Auth::user()->receptionist->doctor;
-            $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+        // Check database connection first
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception $e) {
+            throw new \Exception('Database connection is not available. Please try again later.');
         }
 
-        return $patient;
+        $credentials = $this->generateCredentials($this->first_name, $this->last_name);
+
+        try {
+            $user = User::create([
+                'name' => $credentials['username'],
+                'email' => $credentials['email'],
+                'password' => Hash::make('password'),
+            ]);
+
+            $patient = Patient::create([
+                'first_name' => $this->first_name,
+                'last_name' => $this->last_name,
+                'phone_number' => $this->phone_number,
+                'height' => $this->height,
+                'weight' => $this->weight,
+                'gender' => $this->gender,
+                'user_id' => $user->id,
+            ]);
+
+            $currentUser = Auth::user();
+            if ($currentUser->hasRole('doctor')) {
+                $doctor = $currentUser->doctor;
+                $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+            } else {
+                $doctor = $currentUser->receptionist->doctor;
+                $patient->doctors()->attach($doctor->id, ['is_active' => true]);
+            }
+
+            return $patient;
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle database-specific errors
+            if (isset($user)) {
+                $user->delete();
+            }
+
+            if (str_contains($e->getMessage(), 'Connection refused') || str_contains($e->getMessage(), 'No connection')) {
+                throw new \Exception('Database connection failed. Please try again later.');
+            }
+
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                throw new \Exception('A user with this email already exists. Please try again.');
+            }
+
+            throw new \Exception('Database error occurred while creating patient. Please try again.');
+        } catch (\Exception $e) {
+            // Handle other errors
+            if (isset($user)) {
+                $user->delete();
+            }
+            throw $e;
+        }
     }
 
     public function clearInputs()
