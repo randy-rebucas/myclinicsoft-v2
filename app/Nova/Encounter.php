@@ -49,7 +49,6 @@ class Encounter extends Resource
             ID::make()->sortable(),
 
             BelongsTo::make('Patient')
-                ->searchable()
                 ->rules('required'),
 
             Textarea::make('Chief Complaint')

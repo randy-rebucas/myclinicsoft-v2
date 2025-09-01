@@ -53,7 +53,7 @@ class Receptionist extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User')->searchable(),
+            BelongsTo::make('User'),
 
             ID::make()->hideFromIndex()->hideFromDetail(),
             Text::make('First Name')

@@ -53,7 +53,6 @@ class Allergy extends Resource
             ID::make()->sortable(),
 
             BelongsTo::make('Patient')
-                ->searchable()
                 ->rules('required'),
 
             Text::make('Allergen')

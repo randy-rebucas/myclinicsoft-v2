@@ -50,7 +50,6 @@ class DiagnosticTest extends Resource
     {
         return [
             BelongsTo::make('Patient')
-                ->searchable()
                 ->rules('required'),
 
             ID::make()->sortable(),

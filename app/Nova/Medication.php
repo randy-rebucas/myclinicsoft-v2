@@ -54,7 +54,6 @@ class Medication extends Resource
             ID::make()->hideFromDetail(),
 
             BelongsTo::make('Patient')
-                ->searchable()
                 ->required(),
 
             BelongsTo::make('Encounter')
@@ -84,7 +83,6 @@ class Medication extends Resource
     {
         return [
             BelongsTo::make('Patient')
-                ->searchable()
                 ->required(),
 
             Text::make('Prescription Items', function () {

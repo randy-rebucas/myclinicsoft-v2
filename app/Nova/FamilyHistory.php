@@ -50,7 +50,6 @@ class FamilyHistory extends Resource
     {
         return [
             BelongsTo::make('Patient')
-                ->searchable()
                 ->required(),
 
             ID::make()->sortable(),

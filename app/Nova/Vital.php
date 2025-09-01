@@ -53,7 +53,6 @@ class Vital extends Resource
             ID::make()->hideFromIndex()->hideFromDetail(),
 
             BelongsTo::make('Patient')
-                ->searchable()
                 ->required(),
 
             Text::make('Blood Pressure')

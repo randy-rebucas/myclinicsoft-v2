@@ -51,7 +51,6 @@ class MedicalCondition extends Resource
     {
         return [
             BelongsTo::make('Patient')
-                ->searchable()
                 ->required(),
 
             BelongsTo::make('Encounter')
