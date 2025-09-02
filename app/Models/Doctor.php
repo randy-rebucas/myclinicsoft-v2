@@ -19,7 +19,10 @@ class Doctor extends Model
         'last_name',
         'phone_number',
         'gender',
+        'specialty',
+        'is_active',
         'user_id',
+        'practice_id',
         'meta'
     ];
 
@@ -36,6 +39,7 @@ class Doctor extends Model
     {
         return [
             'meta' => 'array',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -51,7 +55,7 @@ class Doctor extends Model
 
     public function practice()
     {
-        return $this->hasOne(Practice::class);
+        return $this->belongsTo(Practice::class);
     }
 
     /**
@@ -96,5 +100,10 @@ class Doctor extends Model
     public function clinicDoctors()
     {
         return $this->hasMany(ClinicDoctor::class);
+    }
+
+    public function encounters()
+    {
+        return $this->hasMany(Encounter::class);
     }
 }

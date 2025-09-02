@@ -112,3 +112,19 @@ class Patient extends Model
             ->withPivot('is_active');
     }
 }
+
+/**
+ * Class alias for plural reference
+ */
+class Patients extends Patient
+{
+    /**
+     * Get the URI key for the resource.
+     *
+     * @return string
+     */
+    public static function uriKey()
+    {
+        return 'patients';
+    }
+}

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Practice extends Model
 {
@@ -34,10 +34,10 @@ class Practice extends Model
     ];
 
     /**
-     * Get the user that owns the practice.
+     * Get the doctors that belong to this practice.
      */
-    public function user(): BelongsTo
+    public function doctors(): HasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Doctor::class);
     }
 }

@@ -7,12 +7,8 @@ use Illuminate\Validation\Rules;
 use Laravel\Nova\Fields\Gravatar;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use App\Models\Role;
-use Laravel\Nova\Fields\MorphToMany;
-use App\Nova\Actions\UpdateUserRoles;
 
 class User extends Resource
 {
@@ -36,9 +32,7 @@ class User extends Resource
      * @var array
      */
     public static $search = [
-        'id',
-        'name',
-        'email',
+        'id', 'name', 'email',
     ];
 
     /**
@@ -50,9 +44,7 @@ class User extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            ID::make()->sortable()->hideFromIndex(),
-
-            MorphToMany::make('Roles', 'roles', \App\Nova\Role::class),
+            ID::make()->sortable(),
 
             Gravatar::make()->maxWidth(50),
 

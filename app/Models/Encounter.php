@@ -41,4 +41,9 @@ class Encounter extends Model
         return $this->belongsTo(Doctor::class);
     }
 
+    public function medications()
+    {
+        return $this->hasMany(Medication::class);
+    }
+
 }

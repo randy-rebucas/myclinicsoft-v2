@@ -27,6 +27,8 @@ use Laravel\Nova\Nova;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use App\Nova\PhysicalExamination;
+use App\Nova\Queue;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -57,6 +59,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(DiagnosticTest::class),
                     MenuItem::resource(Medication::class),
                     MenuItem::resource(Immunization::class),
+                    MenuItem::resource(PhysicalExamination::class),
                 ])->icon('document-text')->collapsable(),
 
                 MenuSection::make('Patient History', [
@@ -65,11 +68,12 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     MenuItem::resource(FamilyHistory::class),
                 ])->icon('clipboard-list')->collapsable(),
 
-                MenuSection::make('Settings', [
+                MenuSection::make('Clinic Management', [
+                    MenuItem::resource(Queue::class),
                     MenuItem::resource(Department::class),
                     MenuItem::resource(Setting::class),
                     MenuItem::resource(Ads::class),
-                ])->icon('cog')->collapsable(),
+                ])->icon('building-office')->collapsable(),
             ];
         });
 

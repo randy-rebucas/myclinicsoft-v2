@@ -3,37 +3,31 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Select;
-use Wame\TelInput\TelInput;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\Boolean;
 
-class Receptionist extends Resource
+class Queue extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Receptionist>
+     * @var class-string<\App\Models\Queue>
      */
-    public static $model = \App\Models\Receptionist::class;
-    /**
-     * The logical group associated with the resource.
-     *
-     * @var string
-     */
-    public static $group = 'User Management';
+    public static $model = \App\Models\Queue::class;
+
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'queue_number';
 
     /**
      * The columns that should be searched.
@@ -41,7 +35,10 @@ class Receptionist extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'queue_number',
+        'status',
+        'patient.first_name',
+        'patient.last_name',
     ];
 
     /**
@@ -51,7 +48,7 @@ class Receptionist extends Resource
      */
     public static function uriKey()
     {
-        return 'receptionists';
+        return 'queues';
     }
 
     /**
@@ -63,24 +60,44 @@ class Receptionist extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User'),
-            BelongsTo::make('Doctor'),
-            ID::make()->hideFromIndex()->hideFromDetail(),
-            Text::make('First Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            Text::make('Last Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            TelInput::make('Phone', 'phone_number')->onlyCountries(['PH'])->help(
-                'International format only e.g. +63'
-            ),
+            ID::make()->sortable(),
 
-            Select::make('Gender', 'gender')->options([
-                'male' => 'Male',
-                'female' => 'Female',
-                'unknown' => 'Unknown',
-            ]),
+            BelongsTo::make('Patient')
+                ->rules('required'),
+
+            BelongsTo::make('Clinic')
+                ->rules('required'),
+
+            Text::make('Queue Number')
+                ->sortable()
+                ->rules('required', 'max:50'),
+
+            Select::make('Status')->options([
+                'waiting' => 'Waiting',
+                'called' => 'Called',
+                'in_progress' => 'In Progress',
+                'completed' => 'Completed',
+                'cancelled' => 'Cancelled',
+            ])->rules('required'),
+
+            Select::make('Priority')->options([
+                'low' => 'Low',
+                'normal' => 'Normal',
+                'high' => 'High',
+                'urgent' => 'Urgent',
+            ])->default('normal'),
+
+            DateTime::make('Called At')
+                ->nullable()
+                ->hideFromIndex(),
+
+            DateTime::make('Completed At')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Textarea::make('Notes')
+                ->nullable()
+                ->hideFromIndex(),
         ];
     }
 
@@ -128,3 +145,4 @@ class Receptionist extends Resource
         return [];
     }
 }
+

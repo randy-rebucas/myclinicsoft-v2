@@ -51,6 +51,9 @@ class Encounter extends Resource
             BelongsTo::make('Patient')
                 ->rules('required'),
 
+            BelongsTo::make('Doctor')
+                ->rules('required'),
+
             Textarea::make('Chief Complaint')
                 ->rules('required')
                 ->alwaysShow(),

@@ -10,6 +10,8 @@ use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Laravel\Nova\Actions\ActionResponse;
+use Illuminate\Support\Facades\Auth;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PrintPrescriptionPDF extends Action
 {
@@ -25,33 +27,45 @@ class PrintPrescriptionPDF extends Action
     public function handle(ActionFields $fields, Collection $models)
     {
         $medication = $models->first();
-        // $pdf = PDF::loadView('pdfs.prescription', [
-        //     'medication' => $medication,
-        //     'patient' => $medication->patient,
-        //     'items' => $medication->prescription_items,
-        // ])
-        //     ->setOptions([
-        //         'isHtml5ParserEnabled' => true,
-        //         'isRemoteEnabled' => true,
-        //         'defaultFont' => 'sans-serif',
-        //         'isPhpEnabled' => true,
-        //         'isFontSubsettingEnabled' => true,
-        //         'defaultCharset' => 'utf-8'
-        //     ]);
 
-        // return Action::download($pdf->output(), 'prescription-' . $medication->id . '.pdf');
-        return Action::downloadUrl('Prescription', function ($medication) {
-            return route('prescription', $medication->encounter_id);
-        })->standalone();
-        // return $pdf->download('prescription-' . $medication->id . '.pdf');
-        // return ActionResponse::download(
-        //     'prescription-' . $medication->id . '.pdf',
-        //     $pdf->output()
-        // );
-        // return Action::streamDownload(
-        //     'prescription-' . $medication->id . '.pdf',
-        //     $pdf->output()
-        // );
+        // Get the authenticated doctor
+        $doctor = Auth::user()->doctor;
+
+        // Get patient information with address relationship
+        $patient = $medication->patient()->with('address')->first();
+
+        // Get prescription items
+        $items = $medication->prescription_items ?? [];
+
+        // Generate QR code for patient ID
+        $qrCode = QrCode::size(80)->generate($patient->id ?? 'N/A');
+
+        // Load the PDF view with all necessary data
+        $pdf = PDF::loadView('pdfs.prescription', [
+            'medication' => $medication,
+            'patient' => $patient,
+            'doctor' => $doctor,
+            'items' => $items,
+            'qrCode' => $qrCode,
+        ])->setOptions([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'sans-serif',
+            'isPhpEnabled' => true,
+            'isFontSubsettingEnabled' => true,
+            'defaultCharset' => 'utf-8',
+            'dpi' => 150,
+            'defaultPaperSize' => 'a4',
+        ]);
+
+        // Set paper size to A4 for perfect prescription size
+        $pdf->setPaper('a4', 'portrait');
+
+        // Generate filename
+        $filename = 'prescription-' . $medication->id . '-' . ($patient->id ?? 'unknown') . '.pdf';
+
+        // Return the PDF as a download
+        return Action::download($pdf->output(), $filename);
     }
 
     /**
@@ -63,5 +77,15 @@ class PrintPrescriptionPDF extends Action
     public function fields(NovaRequest $request)
     {
         return [];
+    }
+
+    /**
+     * Get the displayable name of the action.
+     *
+     * @return string
+     */
+    public function name()
+    {
+        return 'Print Prescription PDF';
     }
 }

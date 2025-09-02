@@ -3,31 +3,24 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\Password;
-use Laravel\Nova\Fields\Boolean;
-use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Textarea;
+use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Select;
-use Wame\TelInput\TelInput;
+use Laravel\Nova\Fields\Date;
 
-class Receptionist extends Resource
+class PhysicalExamination extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var class-string<\App\Models\Receptionist>
+     * @var class-string<\App\Models\PhysicalExamination>
      */
-    public static $model = \App\Models\Receptionist::class;
-    /**
-     * The logical group associated with the resource.
-     *
-     * @var string
-     */
-    public static $group = 'User Management';
+    public static $model = \App\Models\PhysicalExamination::class;
+
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
@@ -42,6 +35,8 @@ class Receptionist extends Resource
      */
     public static $search = [
         'id',
+        'patient.first_name',
+        'patient.last_name',
     ];
 
     /**
@@ -51,7 +46,7 @@ class Receptionist extends Resource
      */
     public static function uriKey()
     {
-        return 'receptionists';
+        return 'physical-examinations';
     }
 
     /**
@@ -63,24 +58,27 @@ class Receptionist extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User'),
-            BelongsTo::make('Doctor'),
-            ID::make()->hideFromIndex()->hideFromDetail(),
-            Text::make('First Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            Text::make('Last Name')
-                ->sortable()
-                ->rules('required', 'max:255'),
-            TelInput::make('Phone', 'phone_number')->onlyCountries(['PH'])->help(
-                'International format only e.g. +63'
-            ),
+            ID::make()->sortable(),
 
-            Select::make('Gender', 'gender')->options([
-                'male' => 'Male',
-                'female' => 'Female',
-                'unknown' => 'Unknown',
-            ]),
+            BelongsTo::make('Patient')
+                ->rules('required'),
+
+            Date::make('Created At')
+                ->sortable()
+                ->hideWhenCreating()
+                ->hideWhenUpdating(),
+
+            Text::make('General Appearance')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Text::make('Systematic Findings')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Textarea::make('Notes')
+                ->nullable()
+                ->hideFromIndex(),
         ];
     }
 
