@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PracticeSeeder::class,
             PermissionsSeeder::class,
+            ClinicSettingsSeeder::class,
         ]);
     }
 }

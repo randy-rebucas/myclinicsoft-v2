@@ -365,7 +365,7 @@
             </div>
 
             <div class="prescription-title">PRESCRIPTION</div>
-            <div class="prescription-number">Prescription #{{ $medication->id }} | Date: {{ $medication->created_at ? $medication->created_at->format('M d, Y') : 'N/A' }}</div>
+            <div class="prescription-number">Prescription #{{ $medication->id }} | Date: {{ $medication->created_at ?? 'N/A' }}</div>
         </div>
 
         <div class="patient-section">
@@ -381,7 +381,7 @@
                 </div>
                 <div class="patient-field">
                     <strong>Date of Birth:</strong>
-                    <span>{{ $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('M d, Y') : 'N/A' }}</span>
+                    <span>{{ $patient->date_of_birth ?? 'N/A' }}</span>
                 </div>
                 <div class="patient-field">
                     <strong>Age:</strong>
@@ -393,17 +393,7 @@
                 </div>
                 <div class="patient-field">
                     <strong>Address:</strong>
-                    <span>
-                        @if($patient->address)
-                            {{ $patient->address->address_line_1 ?? '' }}
-                            @if($patient->address->address_line_2), {{ $patient->address->address_line_2 }}@endif
-                            @if($patient->address->city), {{ $patient->address->city }}@endif
-                            @if($patient->address->state), {{ $patient->address->state }}@endif
-                            @if($patient->address->postal_code), {{ $patient->address->postal_code }}@endif
-                        @else
-                            N/A
-                        @endif
-                    </span>
+                    <span>{{ $patient->address ?? 'N/A' }}</span>
                 </div>
             </div>
         </div>
@@ -508,7 +498,7 @@
         @if(isset($medication->follow_up_date) && $medication->follow_up_date)
             <div class="notes-section">
                 <div class="notes-title">Follow-up Appointment:</div>
-                <div class="notes-content">Please schedule a follow-up appointment for {{ \Carbon\Carbon::parse($medication->follow_up_date)->format('M d, Y') }}</div>
+                <div class="notes-content">Please schedule a follow-up appointment for {{ $medication->follow_up_date }}</div>
             </div>
         @endif
 

@@ -7,6 +7,7 @@
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Prescription</title>
+    <meta charset="UTF-8">
     <style>
         * {
             font-family: Menlo, Monaco, Consolas, Courier New, monospace;
@@ -105,19 +106,19 @@
     <table class="rx-header">
         <tr>
             <th>Name: </th>
-            <th>{{ $patient->name }}</th>
+            <th>{{ $patient->name ?? 'N/A' }}</th>
             <td>DOB:</td>
-            <td>{{ $patient->birthdate }}</td>
+            <td>{{ $patient->birthdate ?? 'N/A' }}</td>
         </tr>
         <tr>
             <td>Age:</td>
-            <td>{{ $patient->age }}</td>
+            <td>{{ $patient->age ?? 'N/A' }}</td>
             <td>Gender:</td>
-            <td>{{ $patient->gender }}</td>
+            <td>{{ $patient->gender ?? 'N/A' }}</td>
         </tr>
         <tr>
             <td>Address:</td>
-            <td colspan="3">{{ $patient->address }}</td>
+            <td colspan="3">{{ $patient->address ?? 'N/A' }}</td>
         </tr>
     </table>
 
@@ -129,11 +130,11 @@
                     {{ $index + 1 }}
                 </td>
                 <td>
-                    {{ $prescription->title }} <br />
-                    <span>Sig: {{ $prescription->description }}</span>
+                    {{ $prescription->title ?? 'N/A' }} <br />
+                    <span>Sig: {{ $prescription->description ?? 'N/A' }}</span>
                 </td>
                 <td>
-                    # {{ $prescription->quantity }}
+                    # {{ $prescription->quantity ?? 'N/A' }}
                 </td>
             </tr>
         @endforeach
@@ -141,27 +142,27 @@
 
     <table class="rx-footer">
         <tr>
-            <th colspan="4">{{ $client->owner }}</th>
+            <th colspan="4">{{ $client->owner ?? 'N/A' }}</th>
         </tr>
         <tr>
             <td rowspan="3" colspan="2">
-                {{ _('Patient ID:' . $patient->id) }} <br />
-                <span>{{ _('Use this ID number on your next visit.') }}</span>
+                Patient ID: {{ $patient->id ?? 'N/A' }} <br />
+                <span>Use this ID number on your next visit.</span>
                 <br />
                 @if ($follow_up)
-                    <span>{{ _('Follow up on: ' . $follow_up) }}</span>
+                    <span>Follow up on: {{ $follow_up }}</span>
                 @endif
             </td>
-            <td>{{ _('PRC No') }}</td>
-            <td>{{ $client->prc }}</td>
+            <td>PRC No</td>
+            <td>{{ $client->prc ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td>{{ _('PTR No') }}</td>
-            <td>{{ $client->ptr }}</td>
+            <td>PTR No</td>
+            <td>{{ $client->ptr ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td>{{ _('S2 No') }}</td>
-            <td>{{ $client->s2 }}</td>
+            <td>S2 No</td>
+            <td>{{ $client->s2 ?? 'N/A' }}</td>
         </tr>
     </table>
 </body>
