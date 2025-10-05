@@ -24,7 +24,7 @@ Route::middleware('guest')->group(function () {
 Volt::route('/setup', 'setup.index')->name('setup');
 
 // Authenticated routes
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['check.initial.user', 'auth', 'verified'])->group(function () {
     
     // Dashboard - accessible to all authenticated users
     Volt::route('/dashboard', 'dashboard')

@@ -39,6 +39,9 @@ state(['user' => auth()->user()]);
                     <livewire:dashboard.patient />
                 @break
 
+                @case('admin')
+                    <livewire:dashboard.admin />
+                @break
 
                 @default
                     <livewire:dashboard.no-dashboard />

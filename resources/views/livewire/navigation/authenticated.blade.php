@@ -104,7 +104,7 @@ new class extends Component {
 
                         <div class="py-1">
                             @hasanyrole('doctor|admin')
-                                <x-dropdown-link :href="route('settings')" wire:navigate>
+                                <x-dropdown-link :href="route('settings.index')" wire:navigate>
                                     {{ __('Settings') }}
                                 </x-dropdown-link>
                             @endhasanyrole
@@ -173,7 +173,7 @@ new class extends Component {
 
             <div class="mt-3 space-y-1">
                 @hasanyrole('doctor|admin')
-                    <x-responsive-nav-link :href="route('settings')" wire:navigate>
+                    <x-responsive-nav-link :href="route('settings.index')" wire:navigate>
                         {{ __('Settings') }}
                     </x-responsive-nav-link>
                 @endhasanyrole

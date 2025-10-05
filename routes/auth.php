@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['check.initial.user', 'guest'])->group(function () {
     Volt::route('register', 'auth.register')
         ->name('register');
 
@@ -18,7 +18,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.reset');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['check.initial.user', 'auth'])->group(function () {
     Volt::route('verify-email', 'auth.verify-email')
         ->name('verification.notice');
 
