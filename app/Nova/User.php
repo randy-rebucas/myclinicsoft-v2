@@ -15,6 +15,7 @@ use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use App\Nova\Filters;
+use App\Nova\Activity;
 
 class User extends Resource
 {
@@ -87,7 +88,7 @@ class User extends Resource
             HasOne::make('Patient'),
             HasOne::make('Doctor'),
             MorphMany::make('Activities'),
-            MorphMany::make('Activities Caused', 'activitiesCaused'),
+            HasMany::make('Activities Caused', 'activitiesCaused', Activity::class),
             HasMany::make('Audit Logs'),
             MorphMany::make('Notifications'),
         ];

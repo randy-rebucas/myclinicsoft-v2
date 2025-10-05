@@ -23,24 +23,28 @@ state(['activeTab' => 'profile']);
                         </svg>
                         Profile
                     </button>
-                    <button wire:click="$set('activeTab', 'clinic')"
-                        class="{{ $activeTab === 'clinic' ? 'bg-blue-50 border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700' }} flex items-center gap-3 px-3 py-2 text-sm font-medium border-l-4">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
-                        </svg>
-                        Manage Clinic
-                    </button>
-                    <button wire:click="$set('activeTab', 'licenses')"
-                        class="{{ $activeTab === 'licenses' ? 'bg-blue-50 border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700' }} flex items-center gap-3 px-3 py-2 text-sm font-medium border-l-4">
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                        </svg>
-                        Licenses
-                    </button>
+                    @hasanyrole('doctor')
+                        <button wire:click="$set('activeTab', 'professional')"
+                            class="{{ $activeTab === 'professional' ? 'bg-blue-50 border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700' }} flex items-center gap-3 px-3 py-2 text-sm font-medium border-l-4">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0z" />
+                            </svg>
+                            Professional Info
+                        </button>
+                    @endhasanyrole
+                    @hasanyrole('doctor|admin')
+                        <button wire:click="$set('activeTab', 'clinics')"
+                            class="{{ $activeTab === 'clinics' ? 'bg-blue-50 border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:text-gray-700' }} flex items-center gap-3 px-3 py-2 text-sm font-medium border-l-4">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
+                            </svg>
+                            Clinic Associations
+                        </button>
+                    @endhasanyrole
                 </nav>
             </div>
 
@@ -59,16 +63,20 @@ state(['activeTab' => 'profile']);
                         <livewire:user.profile.delete-user-form />
                     </x-card>
                 </div>
-                <div x-show="$wire.activeTab === 'clinic'">
-                    <x-card>
-                        <livewire:setting.form.clinic />
-                    </x-card>
-                </div>
-                <div x-show="$wire.activeTab === 'licenses'">
-                    <x-card>
-                        <livewire:setting.form.license />
-                    </x-card>
-                </div>
+                @hasanyrole('doctor')
+                    <div x-show="$wire.activeTab === 'professional'">
+                        <x-card>
+                            <livewire:setting.form.professional />
+                        </x-card>
+                    </div>
+                @endhasanyrole
+                @hasanyrole('doctor|admin')
+                    <div x-show="$wire.activeTab === 'clinics'">
+                        <x-card>
+                            <livewire:setting.form.clinic-associations />
+                        </x-card>
+                    </div>
+                @endhasanyrole
             </div>
         </div>
     </div>

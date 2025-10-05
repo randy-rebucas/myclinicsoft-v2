@@ -12,7 +12,7 @@ class ClinicPrescriptionProvider extends BaseServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->registerServices();
     }
 
     /**
@@ -26,7 +26,7 @@ class ClinicPrescriptionProvider extends BaseServiceProvider
     protected function registerServices()
     {
         $this->app->singleton(PrescriptionInvoice::class, function (Application $app) {
-            return new PrescriptionInvoice(config('invoices.patient.attributes.name'));
+            return new PrescriptionInvoice(config('prescription-invoice.patient.attributes.name'));
         });
     }
 }

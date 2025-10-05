@@ -196,4 +196,52 @@ class EncounterService
         ]);
         return $encounter;
     }
+
+    /**
+     * Get encounter count for a specific doctor by month and year.
+     *
+     * @param int $doctorId
+     * @param int $month
+     * @param int $year
+     * @return int
+     */
+    public function getEncounterCountByMonthAndYear(int $doctorId, int $month, int $year): int
+    {
+        return Encounter::where('doctor_id', $doctorId)
+            ->whereMonth('encounter_date', $month)
+            ->whereYear('encounter_date', $year)
+            ->count();
+    }
+
+    /**
+     * Get encounter count for a specific doctor by month (current year).
+     *
+     * @param int $doctorId
+     * @param int $month
+     * @return int
+     */
+    public function getEncounterCountByMonth(int $doctorId, int $month): int
+    {
+        return Encounter::where('doctor_id', $doctorId)
+            ->whereMonth('encounter_date', $month)
+            ->whereYear('encounter_date', now()->year)
+            ->count();
+    }
+
+    /**
+     * Get recent encounters for a specific doctor.
+     *
+     * @param int $doctorId
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getRecentEncountersByDoctor(int $doctorId, int $limit = 8)
+    {
+        return Encounter::where('doctor_id', $doctorId)
+            ->with(['patient'])
+            ->orderBy('encounter_date', 'desc')
+            ->orderBy('encounter_time', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }

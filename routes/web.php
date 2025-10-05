@@ -301,18 +301,22 @@ Route::middleware(['check.initial.user', 'auth', 'verified'])->group(function ()
             ->name('permissions');
     });
 
-    // Settings routes
+    // User Settings routes - users can only access their own settings
     Route::prefix('settings')->name('settings.')->group(function () {
         Volt::route('/', 'setting.index')
-            ->middleware('permission:view settings')
+            ->middleware('auth')
             ->name('index');
         
-        Volt::route('/clinic', 'setting.form.clinic')
-            ->middleware('permission:manage clinic settings')
-            ->name('clinic');
+        Volt::route('/professional', 'setting.form.professional')
+            ->middleware('role:doctor')
+            ->name('professional');
+        
+        Volt::route('/clinics', 'setting.form.clinic-associations')
+            ->middleware('role:doctor|admin')
+            ->name('clinics');
         
         Volt::route('/system', 'setting.form.system')
-            ->middleware('permission:manage system settings')
+            ->middleware('role:admin')
             ->name('system');
     });
 
@@ -357,11 +361,6 @@ Route::middleware(['check.initial.user', 'auth', 'verified'])->group(function ()
         Route::get('/dump', DatabaseDumper::class)
             ->middleware('permission:dump database')
             ->name('dump');
-        
-        Route::get('/nova', function () {
-            return redirect('/nova');
-        })->middleware('permission:access nova admin')
-        ->name('nova');
     });
 
     // Legacy prescription route (for backward compatibility)

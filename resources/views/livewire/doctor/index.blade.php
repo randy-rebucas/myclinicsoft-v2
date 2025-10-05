@@ -5,6 +5,7 @@ use App\Models\Encounter;
 use App\Models\Queue;
 use App\Models\Doctor;
 use App\Events\QueueUpdated;
+use App\Services\EncounterService;
 use function Livewire\Volt\{state, mount, on};
 
 state([
@@ -18,6 +19,7 @@ state([
 mount(function () {
     // Check if user has an associated doctor
     $doctor = auth()->user()->doctor;
+    $encounterService = app(EncounterService::class);
 
     if (!$doctor) {
         // If no doctor is associated, set empty stats and return early
@@ -41,6 +43,11 @@ mount(function () {
                 'label' => 'This Month',
                 'value' => 0,
                 'icon' => 'heroicon-o-calendar',
+            ],
+            [
+                'label' => 'October 2024',
+                'value' => 0,
+                'icon' => 'heroicon-o-calendar-days',
             ],
         ];
 
@@ -71,10 +78,13 @@ mount(function () {
         ],
         [
             'label' => 'This Month',
-            'value' => Encounter::whereMonth('created_at', now()->month)
-                ->where('doctor_id', $doctor->id)
-                ->count(),
+            'value' => $encounterService->getEncounterCountByMonth($doctor->id, now()->month),
             'icon' => 'heroicon-o-calendar',
+        ],
+        [
+            'label' => 'October 2024',
+            'value' => $encounterService->getEncounterCountByMonthAndYear($doctor->id, 10, 2024),
+            'icon' => 'heroicon-o-calendar-days',
         ],
     ];
 
@@ -88,11 +98,7 @@ mount(function () {
         ->orderBy('created_at')
         ->get() : collect();
 
-    $this->recentVisits = Encounter::with('patient')
-        ->where('doctor_id', $doctor->id)
-        ->latest()
-        ->take(8)
-        ->get();
+    $this->recentVisits = $encounterService->getRecentEncountersByDoctor($doctor->id, 8);
 
     $this->recentPatients = PatientDoctor::with('patient')
         ->where('doctor_id', $doctor->id)
@@ -188,7 +194,7 @@ on([
         </div>
     @else
     <!-- Stats Cards - Now with gradients and improved visual hierarchy -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         @foreach ($stats as $stat)
             <div
                 class="relative group overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">

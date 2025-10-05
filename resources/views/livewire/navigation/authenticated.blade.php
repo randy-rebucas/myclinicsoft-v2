@@ -43,22 +43,106 @@ new class extends Component {
                             </svg>
                             <span>{{ __('Dashboard') }}</span>
                         </x-nav-link>
-                        <x-nav-link :href="route('patients')" :active="request()->routeIs('patients')" wire:navigate>
+                        @can('view patients')
+                            <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.*')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span>{{ __('Patients') }}</span>
+                            </x-nav-link>
+                        @endcan
+                        @can('view queue')
+                            <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.*')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                                </svg>
+                                <span>{{ __('Queue') }}</span>
+                            </x-nav-link>
+                        @endcan
+                        @can('manage appointments')
+                            <x-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.*')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>{{ __('Appointments') }}</span>
+                            </x-nav-link>
+                        @endcan
+                        @can('view encounters')
+                            <x-nav-link :href="route('encounters.index')" :active="request()->routeIs('encounters.*')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" />
+                                </svg>
+                                <span>{{ __('Encounters') }}</span>
+                            </x-nav-link>
+                        @endcan
+                        @can('view prescriptions')
+                            <x-nav-link :href="route('prescriptions.index')" :active="request()->routeIs('prescriptions.*')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                <span>{{ __('Prescriptions') }}</span>
+                            </x-nav-link>
+                        @endcan
+                    </div>
+                @endhasanyrole
+                
+                <!-- Patient Navigation -->
+                @hasanyrole('patient')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                             <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                </path>
                             </svg>
-                            <span>{{ __('Patients') }}</span>
+                            <span>{{ __('Dashboard') }}</span>
                         </x-nav-link>
-                        <x-nav-link :href="route('queue')" :active="request()->routeIs('queue')" wire:navigate>
+                        @can('view patient records')
+                            <x-nav-link :href="route('patients.show', auth()->user()->patient->id)" :active="request()->routeIs('patients.show')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>{{ __('My Records') }}</span>
+                            </x-nav-link>
+                        @endcan
+                    </div>
+                @endhasanyrole
+                
+                <!-- Medical Representative Navigation -->
+                @hasanyrole('medrep')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                             <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                                </path>
                             </svg>
-                            <span>{{ __('Queue') }}</span>
+                            <span>{{ __('Dashboard') }}</span>
                         </x-nav-link>
+                        @can('view doctors')
+                            <x-nav-link :href="route('doctors.index')" :active="request()->routeIs('doctors.*')" wire:navigate>
+                                <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <span>{{ __('Doctors') }}</span>
+                            </x-nav-link>
+                        @endcan
                     </div>
                 @endhasanyrole
             </div>
@@ -142,12 +226,59 @@ new class extends Component {
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                     <span>{{ __('Dashboard') }}</span>
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('patients')" :active="request()->routeIs('patients')" wire:navigate>
-                    <span>{{ __('Patients') }}</span>
+                @can('view patients')
+                    <x-responsive-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.*')" wire:navigate>
+                        <span>{{ __('Patients') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
+                @can('view queue')
+                    <x-responsive-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.*')" wire:navigate>
+                        <span>{{ __('Queue') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
+                @can('manage appointments')
+                    <x-responsive-nav-link :href="route('appointments.index')" :active="request()->routeIs('appointments.*')" wire:navigate>
+                        <span>{{ __('Appointments') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
+                @can('view encounters')
+                    <x-responsive-nav-link :href="route('encounters.index')" :active="request()->routeIs('encounters.*')" wire:navigate>
+                        <span>{{ __('Encounters') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
+                @can('view prescriptions')
+                    <x-responsive-nav-link :href="route('prescriptions.index')" :active="request()->routeIs('prescriptions.*')" wire:navigate>
+                        <span>{{ __('Prescriptions') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
+            </div>
+        @endhasanyrole
+        
+        <!-- Patient Responsive Navigation -->
+        @hasanyrole('patient')
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    <span>{{ __('Dashboard') }}</span>
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('queue')" :active="request()->routeIs('queue')" wire:navigate>
-                    <span>{{ __('Queue') }}</span>
+                @can('view patient records')
+                    <x-responsive-nav-link :href="route('patients.show', auth()->user()->patient->id)" :active="request()->routeIs('patients.show')" wire:navigate>
+                        <span>{{ __('My Records') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
+            </div>
+        @endhasanyrole
+        
+        <!-- Medical Representative Responsive Navigation -->
+        @hasanyrole('medrep')
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    <span>{{ __('Dashboard') }}</span>
                 </x-responsive-nav-link>
+                @can('view doctors')
+                    <x-responsive-nav-link :href="route('doctors.index')" :active="request()->routeIs('doctors.*')" wire:navigate>
+                        <span>{{ __('Doctors') }}</span>
+                    </x-responsive-nav-link>
+                @endcan
             </div>
         @endhasanyrole
 

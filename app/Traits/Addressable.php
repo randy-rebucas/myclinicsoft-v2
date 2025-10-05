@@ -29,4 +29,12 @@ trait Addressable
     {
         return $this->defaultAddress() ?? $this->addresses()->first();
     }
+
+    /**
+     * Get the primary address for the model (alias for primaryAddress).
+     */
+    public function address()
+    {
+        return $this->primaryAddress();
+    }
 }
