@@ -4,11 +4,17 @@ namespace App\Nova;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Gravatar;
+use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use App\Nova\Filters;
 
 class User extends Resource
 {
@@ -58,10 +64,32 @@ class User extends Resource
                 ->creationRules('unique:users,email')
                 ->updateRules('unique:users,email,{{resourceId}}'),
 
+            Text::make('Phone')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Text::make('Avatar')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Boolean::make('Is Active')
+                ->default(true),
+
+            DateTime::make('Last Login At')
+                ->nullable()
+                ->hideFromIndex(),
+
             Password::make('Password')
                 ->onlyOnForms()
                 ->creationRules('required', Rules\Password::defaults())
                 ->updateRules('nullable', Rules\Password::defaults()),
+
+            HasOne::make('Patient'),
+            HasOne::make('Doctor'),
+            MorphMany::make('Activities'),
+            MorphMany::make('Activities Caused', 'activitiesCaused'),
+            HasMany::make('Audit Logs'),
+            MorphMany::make('Notifications'),
         ];
     }
 
@@ -84,7 +112,9 @@ class User extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new Filters\StatusFilter,
+        ];
     }
 
     /**

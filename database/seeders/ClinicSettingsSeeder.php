@@ -38,6 +38,6 @@ class ClinicSettingsSeeder extends Seeder
             );
         }
 
-        $this->command->info('Clinic settings seeded successfully!');
+        // Clinic settings seeded successfully
     }
 }

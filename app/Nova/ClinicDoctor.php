@@ -31,6 +31,9 @@ class ClinicDoctor extends Resource
      */
     public static $search = [
         'id',
+        'clinic.name',
+        'doctor.first_name',
+        'doctor.last_name',
     ];
 
     /**
@@ -43,6 +46,17 @@ class ClinicDoctor extends Resource
     {
         return [
             ID::make()->sortable(),
+
+            BelongsTo::make('Clinic')
+                ->rules('required')
+                ->searchable(),
+
+            BelongsTo::make('Doctor')
+                ->rules('required')
+                ->searchable(),
+
+            Boolean::make('Is Primary')
+                ->default(false),
         ];
     }
 

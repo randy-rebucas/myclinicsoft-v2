@@ -10,6 +10,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Repeater;
+use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Actions\Action;
 
 class Medication extends Resource
@@ -40,6 +41,9 @@ class Medication extends Resource
      */
     public static $search = [
         'id',
+        'patient.first_name',
+        'patient.last_name',
+        'encounter.chief_complaint',
     ];
 
     /**
@@ -54,11 +58,13 @@ class Medication extends Resource
             ID::make()->hideFromDetail(),
 
             BelongsTo::make('Patient')
-                ->required(),
+                ->required()
+                ->searchable(),
 
             BelongsTo::make('Encounter')
                 ->sortable()
-                ->nullable(),
+                ->nullable()
+                ->searchable(),
 
 
             Repeater::make('Medication Items', 'prescription_items')
@@ -71,6 +77,7 @@ class Medication extends Resource
                 ->alwaysShow()
                 ->nullable(),
 
+            MorphMany::make('Activities'),
         ];
     }
     /**

@@ -12,6 +12,8 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\MorphMany;
+use App\Nova\Filters;
 
 class Queue extends Resource
 {
@@ -63,10 +65,16 @@ class Queue extends Resource
             ID::make()->sortable(),
 
             BelongsTo::make('Patient')
-                ->rules('required'),
+                ->rules('required')
+                ->searchable(),
 
             BelongsTo::make('Clinic')
-                ->rules('required'),
+                ->rules('required')
+                ->searchable(),
+
+            BelongsTo::make('Doctor')
+                ->nullable()
+                ->searchable(),
 
             Text::make('Queue Number')
                 ->sortable()
@@ -98,6 +106,8 @@ class Queue extends Resource
             Textarea::make('Notes')
                 ->nullable()
                 ->hideFromIndex(),
+
+            MorphMany::make('Activities'),
         ];
     }
 
@@ -120,7 +130,10 @@ class Queue extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new Filters\QueueStatusFilter,
+            new Filters\DateRangeFilter,
+        ];
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
@@ -49,7 +50,10 @@ class Address extends Resource
                 'home' => 'Home',
                 'work' => 'Work',
                 'other' => 'Other',
-            ]),
+            ])->rules('required'),
+
+            Boolean::make('Default')
+                ->default(false),
 
             Text::make('Street Address', 'address_line_1')
                 ->rules('required', 'max:255'),
@@ -69,6 +73,14 @@ class Address extends Resource
 
             Country::make('Country')
                 ->rules('required'),
+
+            Text::make('Addressable Type')
+                ->sortable()
+                ->hideFromIndex(),
+
+            Text::make('Addressable ID')
+                ->sortable()
+                ->hideFromIndex(),
         ];
     }
 

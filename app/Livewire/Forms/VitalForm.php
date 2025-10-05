@@ -25,7 +25,7 @@ class VitalForm extends Form
     {
         $this->validate();
 
-        Vital::create([
+        $vital = Vital::create([
             'patient_id' => $this->patient_id,
             'temperature' => $this->temperature,
             'blood_pressure' => $this->systolic . '/' . $this->diastolic,
@@ -34,6 +34,9 @@ class VitalForm extends Form
             'oxygen_saturation' => $this->oxygen_saturation,
             'blood_sugar' => $this->blood_sugar,
         ]);
+
+        // Log vital creation activity
+        $vital->recordActivity('created', 'Vital signs were recorded');
     }
 
     public function empty()

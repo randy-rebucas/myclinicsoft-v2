@@ -7,15 +7,15 @@ use App\Models\User;
 class UserObserver
 {
     /**
-     * Handle the Patient "created" event.
+     * Handle the User "created" event.
      */
     public function created(User $user): void
     {
-
+        $user->recordActivity('created');
     }
 
     /**
-     * Handle the Patient "updated" event.
+     * Handle the User "updated" event.
      */
     public function updated(User $user): void
     {
@@ -23,7 +23,7 @@ class UserObserver
     }
 
     /**
-     * Handle the Patient "deleted" event.
+     * Handle the User "deleted" event.
      */
     public function deleted(User $user): void
     {
@@ -31,7 +31,7 @@ class UserObserver
     }
 
     /**
-     * Handle the Patient "restored" event.
+     * Handle the User "restored" event.
      */
     public function restored(User $user): void
     {
@@ -39,7 +39,7 @@ class UserObserver
     }
 
     /**
-     * Handle the Patient "force deleted" event.
+     * Handle the User "force deleted" event.
      */
     public function forceDeleted(User $user): void
     {

@@ -29,7 +29,7 @@ class Allergy extends Resource
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'allergen';
 
     /**
      * The columns that should be searched.
@@ -38,7 +38,10 @@ class Allergy extends Resource
      */
     public static $search = [
         'id',
-        'name',
+        'allergen',
+        'reaction',
+        'patient.first_name',
+        'patient.last_name',
     ];
 
     /**

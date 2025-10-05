@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 
@@ -53,33 +54,37 @@ class Vital extends Resource
             ID::make()->hideFromIndex()->hideFromDetail(),
 
             BelongsTo::make('Patient')
-                ->required(),
+                ->required()
+                ->searchable(),
 
             Text::make('Blood Pressure')
-                ->rules('required')
+                ->nullable()
                 ->help('Systolic/Diastolic in mmHg'),
 
             Number::make('Heart Rate')
-                ->rules('numeric')
+                ->nullable()
                 ->help('Beats per minute (BPM)'),
 
             Number::make('Temperature')
-                ->rules('required', 'numeric')
+                ->nullable()
+                ->step(0.1)
                 ->help('Temperature in °C'),
 
             Number::make('Respiratory Rate')
-                ->rules('numeric')
+                ->nullable()
                 ->help('Breaths per minute'),
 
             Number::make('Oxygen Saturation')
-                ->rules('numeric')
+                ->nullable()
                 ->help('SpO2 percentage')
                 ->min(0)
                 ->max(100),
 
             Number::make('Blood Sugar')
-                ->rules('numeric')
+                ->nullable()
                 ->help('Blood glucose level in mg/dL'),
+
+            MorphMany::make('Activities'),
         ];
     }
 

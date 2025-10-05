@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\RecordsActivity;
 
 class Medication extends Model
 {
     use HasFactory;
+    use RecordsActivity;
 
     public $timestamps = FALSE;
 
@@ -39,4 +42,5 @@ class Medication extends Model
     {
         return $this->belongsTo(Encounter::class);
     }
+
 }

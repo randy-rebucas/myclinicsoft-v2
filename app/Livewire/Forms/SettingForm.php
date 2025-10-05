@@ -33,12 +33,18 @@ class SettingForm extends Form
 
     public function store()
     {
+        $doctor = Auth::user()->doctor;
+        $originalMeta = $doctor->meta;
+        
         foreach ($this->settings as $key => $value) {
-            $doctor = Auth::user()->doctor;
             $metas = $doctor->meta;
             $metas[$key] = $value;
             $doctor->meta = $metas;
-            $doctor->save();
         }
+        
+        $doctor->save();
+        
+        // Log settings update activity
+        $doctor->recordActivity('updated', 'Doctor settings were updated');
     }
 }

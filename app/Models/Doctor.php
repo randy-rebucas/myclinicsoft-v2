@@ -6,11 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\RecordsActivity;
+use App\Traits\Addressable;
+use App\Traits\HasFullName;
 
 class Doctor extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use RecordsActivity;
+    use Addressable;
+    use HasFullName;
 
     public $timestamps = FALSE;
 
@@ -20,9 +26,14 @@ class Doctor extends Model
         'phone_number',
         'gender',
         'specialty',
+        'license_number',
+        'npi_number',
+        'consultation_fee',
+        'bio',
+        'available_hours',
         'is_active',
         'user_id',
-        'practice_id',
+        'clinic_id',
         'meta'
     ];
 
@@ -38,43 +49,24 @@ class Doctor extends Model
     protected function casts(): array
     {
         return [
+            'consultation_fee' => 'decimal:2',
+            'available_hours' => 'array',
             'meta' => 'array',
             'is_active' => 'boolean',
         ];
     }
 
-    public function getFullNameAttribute()
-    {
-        return $this->first_name . ' ' . $this->last_name;
-    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function practice()
+    public function clinic()
     {
-        return $this->belongsTo(Practice::class);
+        return $this->belongsTo(Clinic::class);
     }
 
-    /**
-     * Get all activities for the doctor
-     */
-    public function activities()
-    {
-        return $this->morphMany(Activity::class, 'subject');
-    }
-
-    public function recordActivity($type, $description = null)
-    {
-        $this->activities()->create([
-            'type' => $type,
-            'description' => $description ?? "Doctor record was {$type}",
-            'changes' => $this->getChanges(),
-            'causer_id' => Auth::user()?->id
-        ]);
-    }
 
     public function clinics()
     {
@@ -90,13 +82,6 @@ class Doctor extends Model
             ->withPivot('is_active');
     }
 
-    public function medRepresentatives()
-    {
-        return $this->belongsToMany(MedRepresentative::class, 'med_rep_doctors')
-            ->withTimestamps()
-            ->withPivot('is_active');
-    }
-
     public function clinicDoctors()
     {
         return $this->hasMany(ClinicDoctor::class);
@@ -106,4 +91,20 @@ class Doctor extends Model
     {
         return $this->hasMany(Encounter::class);
     }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
 }

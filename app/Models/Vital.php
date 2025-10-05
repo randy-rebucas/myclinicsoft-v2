@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\RecordsActivity;
 
 class Vital extends Model
 {
+    use RecordsActivity;
     protected $fillable = [
         'patient_id',
         'blood_pressure',
@@ -39,4 +42,5 @@ class Vital extends Model
     {
         return $this->belongsTo(Patient::class);
     }
+
 }

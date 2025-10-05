@@ -8,24 +8,60 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
+use App\Traits\RecordsActivity;
+use App\Traits\Addressable;
+use App\Traits\HasFullName;
 
 class Patient extends Model
 {
     use HasFactory;
     use SoftDeletes;
     use Searchable;
+    use RecordsActivity;
+    use Addressable;
+    use HasFullName;
     public $timestamps = FALSE;
 
     protected $fillable = [
+        'avatar',
         'first_name',
         'last_name',
         'phone_number',
         'date_of_birth',
+        'gender',
+        'user_id',
+        'secondary_phone',
+        'emergency_contact_name',
+        'emergency_contact_relationship',
+        'emergency_contact_phone',
+        'insurance_provider',
+        'insurance_id',
+        'primary_physician',
+        'allergies',
+        'chronic_conditions',
+        'current_medications',
+        'philhealth_number',
+        'blood_type',
         'height',
         'weight',
-        'gender',
-        'avatar',
-        'user_id'
+        'bmi',
+        'occupation',
+        'civil_status',
+        'nationality',
+        'religion',
+        'status',
+        'mrn',
+        'risk_level',
+        'alerts',
+        'fall_risk',
+        'dietary_restrictions',
+        'family_history',
+        'surgical_history',
+        'smoking_status',
+        'alcohol_use',
+        'exercise_habits',
+        'immunizations',
+        'last_physical_date',
     ];
 
     protected $appends = [
@@ -41,7 +77,13 @@ class Patient extends Model
     protected function casts(): array
     {
         return [
-            'date_of_birth' => 'date'
+            'date_of_birth' => 'date',
+            'height' => 'decimal:2',
+            'weight' => 'decimal:2',
+            'bmi' => 'decimal:2',
+            'alerts' => 'array',
+            'immunizations' => 'array',
+            'last_physical_date' => 'date',
         ];
     }
 
@@ -53,10 +95,6 @@ class Patient extends Model
         return 'patients_index';
     }
 
-    public function address()
-    {
-        return $this->morphOne(Address::class, 'addressable');
-    }
 
     public function encounters()
     {
@@ -68,41 +106,16 @@ class Patient extends Model
         return $this->date_of_birth ? Carbon::parse($this->attributes['date_of_birth'])->age : null;
     }
 
-    public function getFullNameAttribute()
-    {
-        return $this->first_name . ' ' . $this->last_name;
-    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function full_name()
-    {
-        return $this->first_name . ' ' . $this->last_name;
-    }
 
     public function vitals()
     {
         return $this->hasMany(Vital::class);
-    }
-    /**
-     * Get all activities for the patient
-     */
-    public function activities()
-    {
-        return $this->morphMany(Activity::class, 'subject');
-    }
-
-    public function recordActivity($type, $description = null)
-    {
-        $this->activities()->create([
-            'type' => $type,
-            'description' => $description ?? "Patient record was {$type}",
-            'changes' => $this->getChanges(),
-            'causer_id' => Auth::user()?->id
-        ]);
     }
 
     public function doctors()
@@ -111,20 +124,30 @@ class Patient extends Model
             ->withTimestamps()
             ->withPivot('is_active');
     }
-}
 
-/**
- * Class alias for plural reference
- */
-class Patients extends Patient
-{
-    /**
-     * Get the URI key for the resource.
-     *
-     * @return string
-     */
-    public static function uriKey()
+    public function medications()
     {
-        return 'patients';
+        return $this->hasMany(Medication::class);
     }
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
+
+    public function allergies()
+    {
+        return $this->hasMany(Allergy::class);
+    }
+
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
 }

@@ -13,10 +13,13 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Country;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\MorphMany;
+use Laravel\Nova\Fields\BelongsToMany;
+use Laravel\Nova\Fields\Boolean;
 use Wame\TelInput\TelInput;
 use Laravel\Nova\Panel;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\MorphOne;
+use App\Nova\Doctor;
 
 class Patient extends Resource
 {
@@ -107,29 +110,21 @@ class Patient extends Resource
 
             MorphOne::make('Address', 'address'),
 
-            HasMany::make('Encounters', 'encounters'),
-            // new Panel('Emergency Contact', [
-            //     Text::make('Emergency Contact Name', 'emergency_contact_name')
-            //         ->rules('max:255')->hideFromIndex(),
-            //     TelInput::make('Emergency Contact Phone', 'emergency_contact_phone')
-            //         ->onlyCountries(['PH'])
-            //         ->help('International format only e.g. +63')->hideFromIndex(),
-            //     Text::make('Relationship to Patient', 'emergency_contact_relationship')
-            //         ->rules('max:100')->hideFromIndex(),
-            // ]),
-
-            // new Panel('Medical Information', [
-            //     Text::make('Blood Type')
-            //         ->rules('nullable', 'max:10')->hideFromIndex(),
-            //     Text::make('Allergies')
-            //         ->rules('nullable', 'max:255')->hideFromIndex(),
-            //     Text::make('Chronic Conditions', 'chronic_conditions')
-            //         ->rules('nullable', 'max:255')->hideFromIndex(),
-            //     Text::make('Current Medications', 'current_medications')
-            //         ->rules('nullable', 'max:255')->hideFromIndex(),
-            // ]),
-
-
+            HasMany::make('Encounters'),
+            HasMany::make('Medications'),
+            HasMany::make('Prescriptions'),
+            HasMany::make('Allergies'),
+            HasMany::make('Queues'),
+            HasMany::make('Appointments'),
+            HasMany::make('Vitals'),
+            MorphMany::make('Activities'),
+            MorphMany::make('Addresses'),
+            BelongsToMany::make('Doctors', 'doctors', Doctor::class)
+                ->fields(function ($request, $relatedModel) {
+                    return [
+                        Boolean::make('Is Active', 'is_active'),
+                    ];
+                }),
         ];
     }
 

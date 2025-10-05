@@ -42,7 +42,13 @@ class SetupForm extends Form
 
         event(new Registered($user = User::create($validated)));
 
+        // Log user registration activity
+        $user->recordActivity('created', 'User account was created');
+
         Auth::login($user);
+
+        // Log successful login activity
+        $user->recordActivity('login', 'User logged in');
 
         return redirect()->to('/');
     }

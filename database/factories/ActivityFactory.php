@@ -29,8 +29,6 @@ class ActivityFactory extends Factory
             'restored' => 'Record was restored',
             'force deleted' => 'Record was permanently deleted',
             'assigned role doctor' => 'Doctor role was assigned',
-            'assigned role receptionist' => 'Receptionist role was assigned',
-            'assigned role medrep' => 'Medical representative role was assigned',
             'assigned role patient' => 'Patient role was assigned',
             'login' => 'User logged in',
             'logout' => 'User logged out',

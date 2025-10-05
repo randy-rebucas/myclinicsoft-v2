@@ -11,9 +11,7 @@ use App\Nova\FamilyHistory;
 use App\Nova\Immunization;
 use App\Nova\MedicalCondition;
 use App\Nova\Medication;
-use App\Nova\MedRepresentative;
 use App\Nova\Patient;
-use App\Nova\Receptionist;
 use App\Nova\Setting;
 use App\Nova\User;
 use App\Nova\Vital;
@@ -48,8 +46,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('Users', [
                     MenuItem::resource(Doctor::class),
                     MenuItem::resource(Patient::class),
-                    MenuItem::resource(Receptionist::class),
-                    MenuItem::resource(MedRepresentative::class),
                     MenuItem::resource(User::class),
                 ])->icon('users')->collapsable(),
 

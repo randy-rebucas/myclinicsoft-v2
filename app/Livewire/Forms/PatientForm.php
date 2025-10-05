@@ -10,6 +10,7 @@ use Livewire\Form;
 use App\Traits\GeneratesUserCredentials;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Enums\GenderEnum;
 
 
 class PatientForm extends Form
@@ -100,6 +101,9 @@ class PatientForm extends Form
                 'user_id' => $user->id,
             ]);
 
+            // Log patient creation activity (aligns with ActivitySeeder)
+            $patient->recordActivity('created', 'Patient record was created');
+
             $currentUser = Auth::user();
             if ($currentUser->hasRole('doctor')) {
                 $doctor = $currentUser->doctor;
@@ -108,6 +112,9 @@ class PatientForm extends Form
                 $doctor = $currentUser->receptionist->doctor;
                 $patient->doctors()->attach($doctor->id, ['is_active' => true]);
             }
+
+            // Log patient information update activity
+            $patient->recordActivity('updated', 'Patient information was updated');
 
             return $patient;
         } catch (\Illuminate\Database\QueryException $e) {

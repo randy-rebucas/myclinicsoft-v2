@@ -10,10 +10,11 @@ use App\Models\Queue;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Illuminate\Support\Str;
+use App\Enums\QueuePriorityEnum;
 
 class QueueForm extends Form
 {
-    #[Validate('required')]
+    #[Validate('required|in:low,normal,high,urgent,emergency')]
     public $priority;
 
     #[Validate('max:3000')]
@@ -41,7 +42,7 @@ class QueueForm extends Form
 
         $fullQueueNumber = Str::substr($clinicName, 0, 1) . $queueNumber;
 
-        Queue::create([
+        $queue = Queue::create([
             'patient_id' => $this->patient_id,
             'clinic_id' => $this->clinic_id,
             'queue_number' => $fullQueueNumber,
@@ -49,11 +50,73 @@ class QueueForm extends Form
             'notes' => $this->notes,
         ]);
 
-        $patient = Patient::find($this->patient_id);
-        $patient->recordActivity('queue_created', "Added to queue {$fullQueueNumber} in {$clinicName} clinic");
+        // Log queue creation activity (aligns with ActivitySeeder)
+        $queue->recordActivity('created', 'Patient was added to queue');
 
         broadcast(new QueueUpdated("Queue {$fullQueueNumber} has been added!", 'new'))->toOthers();
 
         $this->reset();
+    }
+
+    /**
+     * Update queue status to in_progress and log activity
+     */
+    public function callNext($queueId)
+    {
+        $queue = Queue::find($queueId);
+        if ($queue) {
+            $queue->update([
+                'status' => 'in_progress',
+                'called_at' => now(),
+            ]);
+
+            // Log queue status update activity (aligns with ActivitySeeder)
+            $queue->recordActivity('updated', 'Patient was called');
+        }
+    }
+
+    /**
+     * Complete queue and log activity
+     */
+    public function complete($queueId)
+    {
+        $queue = Queue::find($queueId);
+        if ($queue) {
+            $queue->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
+
+            // Log queue completion activity (aligns with ActivitySeeder)
+            $queue->recordActivity('updated', 'Appointment was completed');
+        }
+    }
+
+    /**
+     * Cancel queue and log activity
+     */
+    public function cancel($queueId)
+    {
+        $queue = Queue::find($queueId);
+        if ($queue) {
+            $queue->update(['status' => 'cancelled']);
+
+            // Log queue cancellation activity
+            $queue->recordActivity('updated', 'Queue status was updated');
+        }
+    }
+
+    /**
+     * Update queue status and log activity
+     */
+    public function updateStatus($queueId, $status)
+    {
+        $queue = Queue::find($queueId);
+        if ($queue) {
+            $queue->update(['status' => $status]);
+
+            // Log queue status update activity (aligns with ActivitySeeder)
+            $queue->recordActivity('updated', 'Queue status was updated');
+        }
     }
 }

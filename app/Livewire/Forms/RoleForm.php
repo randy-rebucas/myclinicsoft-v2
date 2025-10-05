@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Auth;
 
 class RoleForm extends Form
 {
@@ -29,6 +30,14 @@ class RoleForm extends Form
         $role->save();
 
         $role->syncPermissions($this->assigned_permissions);
+
+        // Log role creation/update activity through the current user
+        $user = Auth::user();
+        if ($role->wasRecentlyCreated) {
+            $user->recordActivity('created', 'Role was created: ' . $role->name);
+        } else {
+            $user->recordActivity('updated', 'Role was updated: ' . $role->name);
+        }
 
         $this->reset();
         // if ($role) {

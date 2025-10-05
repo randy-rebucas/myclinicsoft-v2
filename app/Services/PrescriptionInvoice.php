@@ -51,8 +51,9 @@ class PrescriptionInvoice extends Invoice
     }
 
     /**
-     * @param $scopes
+     * Add multiple prescriptions to the invoice.
      *
+     * @param array|Collection $prescriptions
      * @return $this
      */
     public function addPrescriptions($prescriptions)
@@ -61,6 +62,39 @@ class PrescriptionInvoice extends Invoice
             $this->addPrescription($prescription);
         }
 
+        return $this;
+    }
+
+    /**
+     * Get the total amount for all prescriptions.
+     *
+     * @return float
+     */
+    public function getTotalAmount(): float
+    {
+        return $this->prescriptions->sum(function ($prescription) {
+            return $prescription->getTotalPrice();
+        });
+    }
+
+    /**
+     * Get the prescription count.
+     *
+     * @return int
+     */
+    public function getPrescriptionCount(): int
+    {
+        return $this->prescriptions->count();
+    }
+
+    /**
+     * Clear all prescriptions from the invoice.
+     *
+     * @return $this
+     */
+    public function clearPrescriptions()
+    {
+        $this->prescriptions = Collection::make([]);
         return $this;
     }
 }

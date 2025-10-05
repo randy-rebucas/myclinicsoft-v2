@@ -8,14 +8,8 @@ use Livewire\Form;
 
 class MedicationForm extends Form
 {
-    #[Validate('required|string|max:255')]
-    public $medication_name;
-
-    #[Validate('required')]
-    public $dosage;
-
-    #[Validate('required')]
-    public $frequency;
+    #[Validate('required|array')]
+    public $prescription_items;
 
     #[Validate('max:3000')]
     public $notes;
@@ -30,21 +24,20 @@ class MedicationForm extends Form
     {
         $this->validate();
 
-        Medication::create([
-            'medication_name' => $this->medication_name,
-            'dosage' => $this->dosage,
-            'frequency' => $this->frequency,
+        $medication = Medication::create([
+            'prescription_items' => $this->prescription_items,
             'notes' => $this->notes,
             'encounter_id' => $this->encounter_id,
             'patient_id' => $this->patient_id,
         ]);
+
+        // Log medication creation activity (aligns with ActivitySeeder)
+        $medication->recordActivity('created', 'Medication was prescribed');
     }
 
     public function empty()
     {
-        $this->medication_name = '';
-        $this->dosage = '';
-        $this->frequency = '';
+        $this->prescription_items = [];
         $this->notes = '';
     }
 

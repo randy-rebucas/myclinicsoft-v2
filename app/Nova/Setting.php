@@ -27,7 +27,7 @@ class Setting extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'key';
 
     /**
      * The columns that should be searched.
@@ -36,6 +36,8 @@ class Setting extends Resource
      */
     public static $search = [
         'id',
+        'key',
+        'value',
     ];
 
     /**
@@ -48,14 +50,15 @@ class Setting extends Resource
     {
         return [
             ID::make()->hideFromIndex()->hideFromDetail(),
-            // KeyValue::make('Settings')->rules('json'),
 
             Text::make('Key')
+                ->sortable()
                 ->rules('required', 'max:255')
                 ->creationRules('unique:settings,key')
                 ->updateRules('unique:settings,key,{{resourceId}}'),
 
             Text::make('Value')
+                ->sortable()
                 ->rules('required')
                 ->showOnIndex(),
         ];

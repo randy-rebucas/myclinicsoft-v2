@@ -11,6 +11,9 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\MorphMany;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Text;
 
 class Encounter extends Resource
 {
@@ -49,10 +52,12 @@ class Encounter extends Resource
             ID::make()->sortable(),
 
             BelongsTo::make('Patient')
-                ->rules('required'),
+                ->rules('required')
+                ->searchable(),
 
             BelongsTo::make('Doctor')
-                ->rules('required'),
+                ->rules('required')
+                ->searchable(),
 
             Textarea::make('Chief Complaint')
                 ->rules('required')
@@ -62,10 +67,46 @@ class Encounter extends Resource
                 ->sortable()
                 ->rules('required'),
 
+            DateTime::make('Encounter Time')
+                ->rules('required'),
+
+            Select::make('Appointment Type')->options([
+                'consultation' => 'Consultation',
+                'follow_up' => 'Follow-up',
+                'emergency' => 'Emergency',
+                'routine' => 'Routine Check-up',
+            ])->rules('required'),
+
+            Number::make('Duration (minutes)')
+                ->default(30)
+                ->rules('required', 'integer', 'min:15', 'max:240'),
+
+            Text::make('Diagnosis')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Textarea::make('Treatment Plan')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Date::make('Follow Up Date')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Select::make('Status')->options([
+                'scheduled' => 'Scheduled',
+                'in_progress' => 'In Progress',
+                'completed' => 'Completed',
+                'cancelled' => 'Cancelled',
+            ])->rules('required'),
+
             Textarea::make('Notes')
+                ->nullable()
                 ->alwaysShow(),
 
-            HasMany::make('Medications', 'medications'),
+            HasMany::make('Medications'),
+            HasMany::make('Prescriptions'),
+            MorphMany::make('Activities'),
         ];
     }
 

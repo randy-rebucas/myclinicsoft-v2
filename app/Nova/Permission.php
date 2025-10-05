@@ -32,6 +32,8 @@ class Permission extends Resource
      */
     public static $search = [
         'id',
+        'name',
+        'guard_name',
     ];
 
     /**
@@ -44,12 +46,19 @@ class Permission extends Resource
     {
         return [
             ID::make()->sortable(),
-            Text::make('Name'),
-            // Slug::make('Slug')->from('Name'),
+            
+            Text::make('Name')
+                ->sortable()
+                ->rules('required', 'max:255')
+                ->creationRules('unique:permissions,name')
+                ->updateRules('unique:permissions,name,{{resourceId}}'),
+                
             Select::make('Guard Name')->options([
                 'web' => 'Web',
                 'api' => 'API',
-            ])->displayUsingLabels(),
+            ])->displayUsingLabels()
+            ->rules('required')
+            ->default('web'),
         ];
     }
 

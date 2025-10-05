@@ -8,6 +8,7 @@ use App\Traits\GeneratesUserCredentials;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Enums\GenderEnum;
 
 class DoctorForm extends Form
 {
@@ -22,7 +23,7 @@ class DoctorForm extends Form
     #[Validate('required')]
     public $phone_number;
 
-    #[Validate('required')]
+    #[Validate('required|in:male,female,unknown')]
     public $gender;
 
     public function setDoctor(?Doctor $doctor = null)
@@ -66,12 +67,18 @@ class DoctorForm extends Form
             'password' => Hash::make('password'),
         ]);
 
-        Doctor::create([
+        $doctor = Doctor::create([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'phone_number' => $this->phone_number,
             'gender' => $this->gender,
             'user_id' => $user->id,
         ]);
+
+        // Log doctor creation activity (aligns with ActivitySeeder)
+        $doctor->recordActivity('created', 'Doctor profile was created');
+        
+        // Log role assignment activity
+        $doctor->recordActivity('assigned role doctor', 'Doctor role was assigned');
     }
 }

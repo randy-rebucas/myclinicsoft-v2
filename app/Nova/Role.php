@@ -2,7 +2,6 @@
 
 namespace App\Nova;
 
-use App\Models\Permission;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MultiSelect;
@@ -11,6 +10,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\MorphToMany;
+use App\Nova\Permission as PermissionResource;
 class Role extends Resource
 {
     /**
@@ -34,6 +34,7 @@ class Role extends Resource
      */
     public static $search = [
         'name',
+        'guard_name',
     ];
 
     /**
@@ -46,13 +47,21 @@ class Role extends Resource
     {
         return [
             ID::make()->sortable(),
-            Text::make('Name'),
+            
+            Text::make('Name')
+                ->sortable()
+                ->rules('required', 'max:255')
+                ->creationRules('unique:roles,name')
+                ->updateRules('unique:roles,name,{{resourceId}}'),
+                
             Select::make('Guard Name')->options([
                 'web' => 'Web',
                 'api' => 'API',
-            ])->displayUsingLabels(),
+            ])->displayUsingLabels()
+            ->rules('required')
+            ->default('web'),
 
-            MorphToMany::make('Permissions', 'permissions', \App\Nova\Permission::class),
+            MorphToMany::make('Permissions', 'permissions', PermissionResource::class),
         ];
     }
 

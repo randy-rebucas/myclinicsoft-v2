@@ -2,18 +2,32 @@
 
 namespace App\Providers;
 
-use App\Models\MedRepresentative;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Log;
 use App\Models\Doctor;
 use App\Models\Setting;
 use App\Models\Patient;
-use App\Models\Receptionist;
+use App\Models\User;
+use App\Models\Clinic;
+use App\Models\Encounter;
+use App\Models\Appointment;
+use App\Models\Prescription;
+use App\Models\Queue;
+use App\Models\Medication;
+use App\Models\Allergy;
+use App\Models\Vital;
 use App\Observers\DoctorObserver;
-use App\Observers\MedRepresentativeObserver;
 use App\Observers\PatientObserver;
-use App\Observers\ReceptionistObserver;
+use App\Observers\UserObserver;
+use App\Observers\ClinicObserver;
+use App\Observers\EncounterObserver;
+use App\Observers\AppointmentObserver;
+use App\Observers\PrescriptionObserver;
+use App\Observers\QueueObserver;
+use App\Observers\MedicationObserver;
+use App\Observers\AllergyObserver;
+use App\Observers\VitalObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -52,9 +66,17 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        // Register all model observers
+        User::observe(UserObserver::class);
         Patient::observe(PatientObserver::class);
         Doctor::observe(DoctorObserver::class);
-        MedRepresentative::observe(MedRepresentativeObserver::class);
-        Receptionist::observe(ReceptionistObserver::class);
+        Clinic::observe(ClinicObserver::class);
+        Encounter::observe(EncounterObserver::class);
+        Appointment::observe(AppointmentObserver::class);
+        Prescription::observe(PrescriptionObserver::class);
+        Queue::observe(QueueObserver::class);
+        Medication::observe(MedicationObserver::class);
+        Allergy::observe(AllergyObserver::class);
+        Vital::observe(VitalObserver::class);
     }
 }

@@ -55,17 +55,7 @@ class PermissionsSeeder extends Seeder
             'update doctors',
             'delete doctors',
             
-            // Receptionist management
-            'view receptionists',
-            'create receptionists',
-            'update receptionists',
-            'delete receptionists',
             
-            // Medical representative management
-            'view med representatives',
-            'create med representatives',
-            'update med representatives',
-            'delete med representatives',
             
             // Queue management
             'view queue',
@@ -145,23 +135,8 @@ class PermissionsSeeder extends Seeder
         $medrepRole->givePermissionTo([
             'view dashboard',
             'view doctors',
-            'view med representatives',
         ]);
 
-        // Receptionist role - queue and patient management
-        $receptionistRole = Role::create(['name' => 'receptionist']);
-        $receptionistRole->givePermissionTo([
-            'view dashboard',
-            'view patients',
-            'create patients',
-            'update patients',
-            'manage appointments',
-            'view queue',
-            'manage queue',
-            'update queue status',
-            'view doctors',
-            'view receptionists',
-        ]);
 
         // Doctor role - comprehensive medical access
         $doctorRole = Role::create(['name' => 'doctor']);
@@ -192,7 +167,6 @@ class PermissionsSeeder extends Seeder
             'manage queue',
             'update queue status',
             'view doctors',
-            'view med representatives',
             'view receptionists',
             'view activities',
         ]);

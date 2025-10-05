@@ -39,6 +39,10 @@ class LoginForm extends Form
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Log successful login activity
+        $user = Auth::user();
+        $user->recordActivity('login', 'User logged in');
     }
 
     /**

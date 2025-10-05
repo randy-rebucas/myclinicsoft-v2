@@ -2,20 +2,22 @@
 
 namespace App\Nova;
 
-use App\Models\Practice;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Email;
-use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\KeyValue;
+use Laravel\Nova\Fields\MorphMany;
+use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Textarea;
 use Wame\TelInput\TelInput;
+use App\Nova\Clinic;
+use App\Nova\Patient;
 
 class Doctor extends Resource
 {
@@ -52,7 +54,13 @@ class Doctor extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            BelongsTo::make('User'),
+            BelongsTo::make('User')
+                ->nullable()
+                ->searchable(),
+
+            BelongsTo::make('Clinic')
+                ->nullable()
+                ->searchable(),
 
             ID::make()->hideFromIndex()->hideFromDetail(),
 
@@ -64,28 +72,69 @@ class Doctor extends Resource
                 ->sortable()
                 ->rules('required', 'max:255'),
 
-            TelInput::make('Phone', 'phone_number')->onlyCountries(['PH'])->help(
-                'International format only e.g. +63'
-            ),
+            TelInput::make('Phone', 'phone_number')
+                ->onlyCountries(['PH'])
+                ->help('International format only e.g. +63')
+                ->rules('required', 'max:20'),
 
-            Select::make('Gender', 'gender')->options([
+            Select::make('Gender')->options([
                 'male' => 'Male',
                 'female' => 'Female',
                 'unknown' => 'Unknown',
-            ]),
+            ])->rules('required'),
 
-            Select::make('Specialty', 'practice_id')
-                ->options(Practice::all()->pluck('title', 'id'))
-                ->rules('required'),
+            Text::make('Specialty')
+                ->rules('required', 'max:255'),
+
+            Text::make('License Number')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Text::make('NPI Number')
+                ->nullable()
+                ->hideFromIndex(),
+
+            Number::make('Consultation Fee')
+                ->step(0.01)
+                ->nullable()
+                ->hideFromIndex(),
+
+            Textarea::make('Bio')
+                ->nullable()
+                ->hideFromIndex(),
+
+            KeyValue::make('Available Hours')
+                ->nullable()
+                ->hideFromIndex(),
 
             Boolean::make('Is Active')
-                ->sortable(),
+                ->sortable()
+                ->default(true),
 
-            KeyValue::make('Meta')->rules('json'),
+            KeyValue::make('Meta')
+                ->nullable()
+                ->hideFromIndex(),
 
-            HasMany::make('Clinics'),
+            BelongsToMany::make('Clinics', 'clinics', Clinic::class)
+                ->fields(function ($request, $relatedModel) {
+                    return [
+                        Boolean::make('Is Primary', 'is_primary'),
+                    ];
+                }),
 
-            HasMany::make('Activities'),
+            BelongsToMany::make('Patients', 'patients', Patient::class)
+                ->fields(function ($request, $relatedModel) {
+                    return [
+                        Boolean::make('Is Active', 'is_active'),
+                    ];
+                }),
+
+            HasMany::make('Encounters'),
+            HasMany::make('Prescriptions'),
+            HasMany::make('Queues'),
+            HasMany::make('Appointments'),
+            MorphMany::make('Activities'),
+            MorphMany::make('Addresses'),
         ];
     }
 

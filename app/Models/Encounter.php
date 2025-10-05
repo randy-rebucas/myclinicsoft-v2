@@ -4,16 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\RecordsActivity;
 
 class Encounter extends Model
 {
     use HasFactory;
+    use RecordsActivity;
 
     public $timestamps = FALSE;
 
     protected $fillable = [
         'chief_complaint',
         'encounter_date',
+        'encounter_time',
+        'appointment_type',
+        'duration',
+        'diagnosis',
+        'treatment_plan',
+        'follow_up_date',
+        'status',
         'notes',
         'patient_id',
         'doctor_id',
@@ -28,6 +38,8 @@ class Encounter extends Model
     {
         return [
             'encounter_date' => 'date',
+            'encounter_time' => 'datetime:H:i',
+            'follow_up_date' => 'date',
         ];
     }
 
@@ -46,4 +58,9 @@ class Encounter extends Model
         return $this->hasMany(Medication::class);
     }
 
+
+    public function prescriptions()
+    {
+        return $this->hasMany(Prescription::class);
+    }
 }

@@ -39,9 +39,6 @@ state(['user' => auth()->user()]);
                     <livewire:dashboard.patient />
                 @break
 
-                @case('medrep')
-                    <livewire:dashboard.med-representative />
-                @break
 
                 @default
                     <livewire:dashboard.no-dashboard />

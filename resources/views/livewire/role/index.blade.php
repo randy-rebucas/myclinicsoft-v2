@@ -68,7 +68,7 @@ $save = function () {
                         </div>
 
                         <div class="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
-                            <x-table for="med-representative">
+                            <x-table for="role">
                                 <x-table.thead>
                                     <x-table.row class="">
                                         <x-table.thead-cell :title="__('Role Name')" class="text-left" />

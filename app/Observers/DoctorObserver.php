@@ -3,8 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Doctor;
-use App\Models\SubscriptionPlan;
-use App\Services\SubscriptionService;
 
 class DoctorObserver
 {
@@ -15,13 +13,11 @@ class DoctorObserver
     {
         $doctor->recordActivity('created');
 
-        $doctor->user->assignRole('doctor');
-        $doctor->recordActivity('assigned role doctor');
+        if ($doctor->user) {
+            $doctor->user->assignRole('doctor');
+            $doctor->recordActivity('assigned role doctor');
+        }
 
-        // $subscriptionService = new SubscriptionService();
-        // $plan = SubscriptionPlan::find(1);
-        // $subscription = $subscriptionService->subscribe($doctor, $plan);
-        // $doctor->recordActivity('subscribed to ' . $plan->name . ' plan on ' . $subscription->starts_at);
     }
 
     /**
@@ -38,7 +34,9 @@ class DoctorObserver
     public function deleted(Doctor $doctor): void
     {
         $doctor->recordActivity('deleted');
-        $doctor->user->removeRole('doctor');
+        if ($doctor->user) {
+            $doctor->user->removeRole('doctor');
+        }
     }
 
     /**
@@ -46,7 +44,9 @@ class DoctorObserver
      */
     public function restored(Doctor $doctor): void
     {
-        $doctor->user->assignRole('doctor');
+        if ($doctor->user) {
+            $doctor->user->assignRole('doctor');
+        }
         $doctor->recordActivity('restored');
     }
 
@@ -55,7 +55,9 @@ class DoctorObserver
      */
     public function forceDeleted(Doctor $doctor): void
     {
-        $doctor->user->removeRole('doctor');
+        if ($doctor->user) {
+            $doctor->user->removeRole('doctor');
+        }
         $doctor->recordActivity('force deleted');
     }
 }

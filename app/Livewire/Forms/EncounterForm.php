@@ -31,6 +31,9 @@ class EncounterForm extends Form
             'patient_id' => $this->patient_id,
         ]);
 
+        // Log encounter creation activity (aligns with ActivitySeeder)
+        $encounter->recordActivity('created', 'Medical encounter was created');
+
         return $encounter->id;
     }
 

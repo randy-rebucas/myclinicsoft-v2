@@ -12,7 +12,9 @@ class PatientObserver
      */
     public function created(Patient $patient): void
     {
-        $patient->user->assignRole('patient');
+        if ($patient->user) {
+            $patient->user->assignRole('patient');
+        }
         $patient->recordActivity('created');
     }
 
@@ -29,7 +31,9 @@ class PatientObserver
      */
     public function deleted(Patient $patient): void
     {
-        $patient->user->removeRole('patient');
+        if ($patient->user) {
+            $patient->user->removeRole('patient');
+        }
         $patient->recordActivity('deleted');
     }
 
@@ -38,7 +42,9 @@ class PatientObserver
      */
     public function restored(Patient $patient): void
     {
-        $patient->user->assignRole('patient');
+        if ($patient->user) {
+            $patient->user->assignRole('patient');
+        }
         $patient->recordActivity('restored');
     }
 
@@ -47,7 +53,9 @@ class PatientObserver
      */
     public function forceDeleted(Patient $patient): void
     {
-        $patient->user->removeRole('patient');
+        if ($patient->user) {
+            $patient->user->removeRole('patient');
+        }
         $patient->recordActivity('force deleted');
     }
 }

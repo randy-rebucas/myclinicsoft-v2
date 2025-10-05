@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\KeyValue;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use App\Nova\Filters;
 
 class Activity extends Resource
 {
@@ -44,9 +46,35 @@ class Activity extends Resource
     {
         return [
             ID::make()->sortable(),
-            Text::make('Type'),
-            Text::make('Description'),
-            DateTime::make('Created At'),
+            
+            Text::make('Type')
+                ->sortable()
+                ->rules('required'),
+                
+            Text::make('Description')
+                ->nullable()
+                ->hideFromIndex(),
+                
+            Text::make('Subject Type')
+                ->sortable()
+                ->hideFromIndex(),
+                
+            Text::make('Subject ID')
+                ->sortable()
+                ->hideFromIndex(),
+                
+            BelongsTo::make('Causer', 'causer', User::class)
+                ->nullable()
+                ->searchable(),
+                
+            KeyValue::make('Changes')
+                ->nullable()
+                ->hideFromIndex(),
+
+            DateTime::make('Created At')
+                ->sortable()
+                ->hideWhenCreating()
+                ->hideWhenUpdating(),
         ];
     }
 
@@ -69,7 +97,10 @@ class Activity extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            new Filters\ActivityTypeFilter,
+            new Filters\DateRangeFilter,
+        ];
     }
 
     /**

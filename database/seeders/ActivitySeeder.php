@@ -5,8 +5,6 @@ namespace Database\Seeders;
 use App\Models\Activity;
 use App\Models\Patient;
 use App\Models\Doctor;
-use App\Models\Receptionist;
-use App\Models\MedRepresentative;
 use App\Models\User;
 use App\Models\Encounter;
 use App\Models\MedicalCondition;
@@ -21,8 +19,6 @@ class ActivitySeeder extends Seeder
         $users = User::all();
         $patients = Patient::all();
         $doctors = Doctor::all();
-        $receptionists = Receptionist::all();
-        $medRepresentatives = MedRepresentative::all();
         $encounters = Encounter::all();
         $medicalConditions = MedicalCondition::all();
         $medications = Medication::all();
@@ -38,15 +34,6 @@ class ActivitySeeder extends Seeder
             $this->createDoctorActivities($doctor, $users);
         }
 
-        // Create activities for receptionists
-        foreach ($receptionists as $receptionist) {
-            $this->createReceptionistActivities($receptionist, $users);
-        }
-
-        // Create activities for medical representatives
-        foreach ($medRepresentatives as $medRep) {
-            $this->createMedRepresentativeActivities($medRep, $users);
-        }
 
         // Create activities for encounters
         foreach ($encounters as $encounter) {
@@ -145,71 +132,7 @@ class ActivitySeeder extends Seeder
         }
     }
 
-    private function createReceptionistActivities($receptionist, $users)
-    {
-        $activities = [
-            [
-                'type' => 'assigned role receptionist',
-                'description' => 'Receptionist role was assigned',
-                'changes' => ['role' => 'receptionist']
-            ],
-            [
-                'type' => 'updated',
-                'description' => 'Receptionist profile was updated',
-                'changes' => ['field' => 'contact_info']
-            ],
-            [
-                'type' => 'updated',
-                'description' => 'Receptionist schedule was updated',
-                'changes' => ['field' => 'schedule']
-            ]
-        ];
 
-        foreach ($activities as $activity) {
-            Activity::create([
-                'subject_type' => Receptionist::class,
-                'subject_id' => $receptionist->id,
-                'type' => $activity['type'],
-                'description' => $activity['description'],
-                'changes' => $activity['changes'],
-                'causer_id' => $users->random()->id,
-                'created_at' => now()->subDays(rand(1, 30))
-            ]);
-        }
-    }
-
-    private function createMedRepresentativeActivities($medRep, $users)
-    {
-        $activities = [
-            [
-                'type' => 'created',
-                'description' => 'Medical representative profile was created',
-                'changes' => ['status' => 'new_medrep']
-            ],
-            [
-                'type' => 'updated',
-                'description' => 'Medical representative information was updated',
-                'changes' => ['field' => 'contact_info']
-            ],
-            [
-                'type' => 'updated',
-                'description' => 'Territory assignment was updated',
-                'changes' => ['field' => 'territory']
-            ]
-        ];
-
-        foreach ($activities as $activity) {
-            Activity::create([
-                'subject_type' => MedRepresentative::class,
-                'subject_id' => $medRep->id,
-                'type' => $activity['type'],
-                'description' => $activity['description'],
-                'changes' => $activity['changes'],
-                'causer_id' => $users->random()->id,
-                'created_at' => now()->subDays(rand(1, 30))
-            ]);
-        }
-    }
 
     private function createEncounterActivities($encounter, $users)
     {

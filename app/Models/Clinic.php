@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\RecordsActivity;
+use App\Traits\Addressable;
 
 class Clinic extends Model
 {
     use HasFactory;
+    use RecordsActivity;
+    use Addressable;
 
     protected $fillable = [
         'name',
@@ -18,11 +23,18 @@ class Clinic extends Model
         'zip',
         'phone',
         'email',
+        'website',
+        'license_number',
+        'tax_id',
+        'logo',
+        'operating_hours',
+        'emergency_contact',
         'description',
         'is_active'
     ];
 
     protected $casts = [
+        'operating_hours' => 'array',
         'is_active' => 'boolean'
     ];
 
@@ -42,4 +54,17 @@ class Clinic extends Model
             ->withPivot('is_primary')
             ->withTimestamps();
     }
+
+
+
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
 }

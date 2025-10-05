@@ -110,6 +110,9 @@ class ClinicForm extends Form
             'is_active' => $this->is_active,
         ]);
 
+        // Log clinic creation activity
+        $clinic->recordActivity('created', 'Clinic was created');
+
         return $clinic;
     }
 }
