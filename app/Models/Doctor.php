@@ -72,7 +72,7 @@ class Doctor extends Model
             'type' => $type,
             'description' => $description ?? "Doctor record was {$type}",
             'changes' => $this->getChanges(),
-            'causer_id' => Auth::user()->id
+            'causer_id' => Auth::user()?->id
         ]);
     }
 

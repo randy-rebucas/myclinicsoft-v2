@@ -14,9 +14,15 @@ class DoctorSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()
-            ->count(3)
-            ->has(Doctor::factory())
-            ->create();
+        // Get users with doctor role
+        $doctorUsers = User::role('doctor')->get();
+        
+        // Create doctor profiles for each doctor user
+        $doctorUsers->each(function ($user) {
+            Doctor::factory()->create([
+                'user_id' => $user->id,
+                'clinic_id' => \App\Models\Clinic::first()?->id ?? \App\Models\Clinic::factory()->create()->id,
+            ]);
+        });
     }
 }

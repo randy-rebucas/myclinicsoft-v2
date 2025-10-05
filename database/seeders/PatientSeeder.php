@@ -14,9 +14,14 @@ class PatientSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()
-            ->count(100)
-            ->has(Patient::factory())
-            ->create();
+        // Get users with patient role
+        $patientUsers = User::role('patient')->get();
+        
+        // Create patient profiles for each patient user
+        $patientUsers->each(function ($user) {
+            Patient::factory()->create([
+                'user_id' => $user->id,
+            ]);
+        });
     }
 }

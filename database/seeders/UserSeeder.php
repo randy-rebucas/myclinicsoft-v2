@@ -14,8 +14,28 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create admin user
+        $admin = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@clinic.com',
+            'is_active' => true,
+        ]);
+        $admin->assignRole('admin');
+
+        // Create doctor users
         User::factory()
-        ->count(50)
-        ->create();
+            ->count(5)
+            ->create()
+            ->each(function ($user) {
+                $user->assignRole('doctor');
+            });
+
+        // Create patient users
+        User::factory()
+            ->count(20)
+            ->create()
+            ->each(function ($user) {
+                $user->assignRole('patient');
+            });
     }
 }
