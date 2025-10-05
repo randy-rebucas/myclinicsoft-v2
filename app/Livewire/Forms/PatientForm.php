@@ -25,10 +25,10 @@ class PatientForm extends Form
     #[Validate('required')]
     public $last_name;
 
-    #[Validate('required|numeric|min:0|max:300')]
+    #[Validate('nullable|numeric|min:0|max:300')]
     public $height;
 
-    #[Validate('required|numeric|min:0|max:500')]
+    #[Validate('nullable|numeric|min:0|max:500')]
     public $weight;
 
     #[Validate('required')]
@@ -36,6 +36,21 @@ class PatientForm extends Form
 
     #[Validate('required|in:male,female,unknown')]
     public $gender;
+
+    #[Validate('nullable|date|before:today')]
+    public $date_of_birth;
+
+    #[Validate('nullable|string|max:255')]
+    public $emergency_contact_name;
+
+    #[Validate('nullable|string|max:255')]
+    public $emergency_contact_phone;
+
+    #[Validate('nullable|string|max:255')]
+    public $emergency_contact_relationship;
+
+    #[Validate('nullable|string|max:255')]
+    public $blood_type;
 
 
     public function setPatient(?Patient $patient = null)
@@ -46,6 +61,11 @@ class PatientForm extends Form
         $this->weight = $patient->weight;
         $this->phone_number = $patient->phone_number;
         $this->gender = $patient->gender;
+        $this->date_of_birth = $patient->date_of_birth?->format('Y-m-d');
+        $this->emergency_contact_name = $patient->emergency_contact_name;
+        $this->emergency_contact_phone = $patient->emergency_contact_phone;
+        $this->emergency_contact_relationship = $patient->emergency_contact_relationship;
+        $this->blood_type = $patient->blood_type;
     }
 
     public function store(?Patient $patient)
@@ -58,7 +78,7 @@ class PatientForm extends Form
             $this->newPatient = $this->create();
         }
 
-        $this->reset('first_name', 'last_name', 'phone_number', 'height', 'weight', 'gender');
+        $this->reset('first_name', 'last_name', 'phone_number', 'height', 'weight', 'gender', 'date_of_birth', 'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relationship', 'blood_type');
     }
 
     public function update(Patient $patient)
@@ -69,7 +89,12 @@ class PatientForm extends Form
             'phone_number' => $this->phone_number,
             'height' => $this->height,
             'weight' => $this->weight,
-            'gender' => $this->gender
+            'gender' => $this->gender,
+            'date_of_birth' => $this->date_of_birth,
+            'emergency_contact_name' => $this->emergency_contact_name,
+            'emergency_contact_phone' => $this->emergency_contact_phone,
+            'emergency_contact_relationship' => $this->emergency_contact_relationship,
+            'blood_type' => $this->blood_type
         ]);
     }
 
@@ -98,6 +123,11 @@ class PatientForm extends Form
                 'height' => $this->height,
                 'weight' => $this->weight,
                 'gender' => $this->gender,
+                'date_of_birth' => $this->date_of_birth,
+                'emergency_contact_name' => $this->emergency_contact_name,
+                'emergency_contact_phone' => $this->emergency_contact_phone,
+                'emergency_contact_relationship' => $this->emergency_contact_relationship,
+                'blood_type' => $this->blood_type,
                 'user_id' => $user->id,
             ]);
 
@@ -149,5 +179,10 @@ class PatientForm extends Form
         $this->height = '';
         $this->weight = '';
         $this->gender = '';
+        $this->date_of_birth = '';
+        $this->emergency_contact_name = '';
+        $this->emergency_contact_phone = '';
+        $this->emergency_contact_relationship = '';
+        $this->blood_type = '';
     }
 }

@@ -47,19 +47,19 @@ Route::middleware(['check.initial.user', 'auth', 'verified'])->group(function ()
             ->middleware('permission:create patients')
             ->name('create');
         
-        Volt::route('/{patient}', 'patient.detail')
+        Volt::route('/{patientId}', 'patient.detail')
             ->middleware('permission:view patients')
             ->name('show');
         
-        Volt::route('/{patient}/edit', 'patient.form')
+        Volt::route('/{patientId}/edit', 'patient.form')
             ->middleware('permission:update patients')
             ->name('edit');
         
-        Volt::route('/{patient}/record', 'patient.record.index')
+        Volt::route('/{patientId}/record', 'patient.record.index')
             ->middleware('permission:view patient records')
             ->name('record');
         
-        Volt::route('/{patient}/record/{queueId}', 'patient.record.index')
+        Volt::route('/{patientId}/record/{queueId}', 'patient.record.index')
             ->middleware('permission:view patient records')
             ->name('record.queue');
     });

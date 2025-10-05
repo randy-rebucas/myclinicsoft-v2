@@ -2,7 +2,6 @@
 
 use App\Models\ClinicDoctor;
 use App\Models\Queue;
-use App\Models\Ads;
 use App\Models\Clinic;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +35,8 @@ mount(function () {
     $clinicDoctor = $query->first();
     $this->clinic_id = $clinicDoctor ? $clinicDoctor->clinic->id : null;
 
-    $this->ads = Ads::active()->select('youtube_id')->get()->pluck('youtube_id');
+    // Ads functionality removed - table was dropped in cleanup migration
+    $this->ads = [];
 });
 
 $queues = computed(function () {
@@ -129,7 +129,7 @@ $refreshQueues = function () {
     <div class="w-2/3 h-screen">
         <!-- Youtube Container -->
         <div class="h-full" x-data="{
-            videos: {{ $this->ads }},
+            videos: @json($this->ads),
             currentVideo: 0,
             player: null,
 

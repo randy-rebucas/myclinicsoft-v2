@@ -4,7 +4,6 @@ namespace App\Livewire\Forms;
 
 use App\Events\QueueUpdated;
 use App\Models\ClinicDoctor;
-use App\Models\Department;
 use App\Models\Patient;
 use App\Models\Queue;
 use Livewire\Attributes\Validate;

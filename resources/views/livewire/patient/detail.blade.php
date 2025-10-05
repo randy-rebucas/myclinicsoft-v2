@@ -2,7 +2,6 @@
 
 use App\Models\Patient;
 use App\Models\Queue;
-use App\Models\Department;
 use App\Events\QueueUpdated;
 use function Livewire\Volt\{layout, form, computed, state, on, mount, title};
 use App\Livewire\Forms\QueueForm;
@@ -13,25 +12,38 @@ state(['patientId'])->url();
 form(QueueForm::class);
 
 state([
-    'patient' => fn() => Patient::find($this->patientId),
+    'patient' => null,
     'activeTab' => 'overview',
 ]);
 
 layout('layouts.app');
 
-title(fn() => 'Patient: ' . $this->patient->full_name);
+title(fn() => $this->patient ? 'Patient: ' . $this->patient->full_name : 'Patient Not Found');
 
 mount(function () {
-    $this->form->department_id = 1;
+    // Handle both scalar ID and model instance from route model binding
+    if (is_object($this->patientId) && $this->patientId instanceof Patient) {
+        // Route model binding provided a Patient model
+        $this->patient = $this->patientId;
+    } else {
+        // Route model binding provided an ID, find the patient
+        $this->patient = Patient::find($this->patientId);
+    }
+    
+    if (!$this->patient) {
+        abort(404, 'Patient not found');
+    }
+    
     $this->form->patient_id = $this->patient->id;
     $this->form->priority = 'normal';
 });
 
-$departments = computed(function () {
-    return Department::active()->get();
-});
 
 $que = computed(function () {
+    if (!$this->patient) {
+        return null;
+    }
+    
     return Queue::where('patient_id', $this->patient->id)
         ->where('status', '!=', 'completed')
         ->whereDate('created_at', now()->toDateString()) // Add this line to filter by current date
@@ -71,6 +83,17 @@ $create = function () {
 ?>
 
 <div>
+    @if (!$patient)
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Patient Not Found</h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">The patient you're looking for doesn't exist or has been removed.</p>
+                <a href="{{ route('patients.index') }}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                    Back to Patients
+                </a>
+            </div>
+        </div>
+    @else
     <!-- Patient Header -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div class="flex items-center justify-between">
@@ -205,9 +228,9 @@ $create = function () {
                                             </div>
                                         </div>
                                         <div>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">Marital Status</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Civil Status</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->marital_status ?? '-' }}</p>
+                                                {{ $patient->civil_status ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Occupation</p>
@@ -215,9 +238,9 @@ $create = function () {
                                                 {{ $patient->occupation ?? '-' }}</p>
                                         </div>
                                         <div>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">National ID</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">PhilHealth Number</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->national_id ?? '-' }}</p>
+                                                {{ $patient->philhealth_number ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Nationality</p>
@@ -225,9 +248,21 @@ $create = function () {
                                                 {{ $patient->nationality ?? '-' }}</p>
                                         </div>
                                         <div>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">Language</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Religion</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->preferred_language ?? '-' }}</p>
+                                                {{ $patient->religion ?? '-' }}</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">Patient Status</p>
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ $patient->status ?? 'Active' }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">Medical Record #</p>
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ $patient->mrn ?? '-' }}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -245,17 +280,12 @@ $create = function () {
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Primary Phone</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->phone ?? '-' }}</p>
+                                                {{ $patient->phone_number ?? '-' }}</p>
                                         </div>
                                         <div>
                                             <p class="text-sm text-gray-500 dark:text-gray-400">Secondary Phone</p>
                                             <p class="text-sm font-medium text-gray-900 dark:text-white">
                                                 {{ $patient->secondary_phone ?? '-' }}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
-                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->email ?? '-' }}</p>
                                         </div>
                                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                                             <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">Emergency
@@ -282,35 +312,24 @@ $create = function () {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">Address</p>
-                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                {{ $patient->address ?? '-' }}</p>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">City</p>
-                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->city ?? '-' }}</p>
+                                        @if ($patient->addresses && $patient->addresses->count() > 0)
+                                            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">Address</p>
+                                                @foreach ($patient->addresses as $address)
+                                                    <div class="mb-2">
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $address->label ?? 'Address' }}</p>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ $address->address_line_1 }}
+                                                            @if ($address->address_line_2), {{ $address->address_line_2 }}@endif
+                                                            @if ($address->city), {{ $address->city }}@endif
+                                                            @if ($address->state), {{ $address->state }}@endif
+                                                            @if ($address->postal_code), {{ $address->postal_code }}@endif
+                                                            @if ($address->country), {{ $address->country }}@endif
+                                                        </p>
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                            <div>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">State/Province</p>
-                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->state ?? '-' }}</p>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">Postal Code</p>
-                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->postal_code ?? '-' }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400">Country</p>
-                                                <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $patient->country ?? '-' }}</p>
-                                            </div>
-                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -370,23 +389,43 @@ $create = function () {
                                             <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">
                                                 Additional Information</p>
                                             <div class="space-y-2">
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Height</p>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ $patient->height ?? '-' }} cm
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Weight</p>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ $patient->weight ?? '-' }} kg
+                                                        </p>
+                                                    </div>
+                                                </div>
                                                 <div>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Height</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">BMI</p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->height ?? '-' }} cm
+                                                        {{ $patient->bmi ?? '-' }}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Weight</p>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Risk Level</p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->weight ?? '-' }} kg
+                                                        {{ $patient->risk_level ?? '-' }}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Fall Risk</p>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {{ $patient->fall_risk ?? '-' }}
                                                     </p>
                                                 </div>
                                                 <div>
                                                     <p class="text-sm text-gray-500 dark:text-gray-400">Past Surgeries
                                                     </p>
                                                     <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $patient->past_surgeries ?: 'None reported' }}
+                                                        {{ $patient->surgical_history ?: 'None reported' }}
                                                     </p>
                                                 </div>
                                                 <div>
@@ -396,8 +435,92 @@ $create = function () {
                                                         {{ $patient->family_history ?: 'None reported' }}
                                                     </p>
                                                 </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Dietary Restrictions
+                                                    </p>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {{ $patient->dietary_restrictions ?: 'None reported' }}
+                                                    </p>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Smoking Status</p>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ $patient->smoking_status ?? '-' }}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm text-gray-500 dark:text-gray-400">Alcohol Use</p>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ $patient->alcohol_use ?? '-' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Exercise Habits</p>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {{ $patient->exercise_habits ?? '-' }}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Last Physical Exam</p>
+                                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                        {{ $patient->last_physical_date?->format('M d, Y') ?? '-' }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Medical Alerts & Immunizations -->
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Medical Alerts & Immunizations</h3>
+                                </div>
+                                <div class="p-6 space-y-4">
+                                    <div class="space-y-3">
+                                        @if ($patient->alerts)
+                                            <div>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">Medical Alerts</p>
+                                                <div class="mt-1">
+                                                    @if (is_string($patient->alerts))
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $patient->alerts }}</p>
+                                                    @elseif (is_array($patient->alerts))
+                                                        <ul class="list-disc list-inside text-sm font-medium text-gray-900 dark:text-white">
+                                                            @foreach ($patient->alerts as $alert)
+                                                                <li>{{ $alert }}</li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if ($patient->immunizations)
+                                            <div>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">Immunizations</p>
+                                                <div class="mt-1">
+                                                    @if (is_string($patient->immunizations))
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $patient->immunizations }}</p>
+                                                    @elseif (is_array($patient->immunizations))
+                                                        <ul class="list-disc list-inside text-sm font-medium text-gray-900 dark:text-white">
+                                                            @foreach ($patient->immunizations as $immunization)
+                                                                <li>{{ $immunization }}</li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if (!$patient->alerts && !$patient->immunizations)
+                                            <div class="text-center py-4">
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">No medical alerts or immunizations recorded</p>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -423,19 +546,6 @@ $create = function () {
             </h2>
 
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
-                    <select wire:model.live="form.department_id" name="department_id"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900">
-                        <option value="">Select Department</option>
-                        @foreach ($this->departments as $department)
-                            <option value="{{ $department->id }}">{{ $department->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('form.department_id')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
@@ -466,4 +576,5 @@ $create = function () {
         </form>
 
     </x-modal>
+    @endif
 </div>

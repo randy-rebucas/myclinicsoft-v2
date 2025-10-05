@@ -29,6 +29,7 @@ use App\Observers\MedicationObserver;
 use App\Observers\AllergyObserver;
 use App\Observers\VitalObserver;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -78,5 +79,19 @@ class AppServiceProvider extends ServiceProvider
         Medication::observe(MedicationObserver::class);
         Allergy::observe(AllergyObserver::class);
         Vital::observe(VitalObserver::class);
+
+        // Explicit route model binding
+        Route::model('patient', Patient::class);
+        Route::model('patientId', Patient::class);
+        Route::model('doctor', Doctor::class);
+        Route::model('user', User::class);
+        Route::model('clinic', Clinic::class);
+        Route::model('encounter', Encounter::class);
+        Route::model('appointment', Appointment::class);
+        Route::model('prescription', Prescription::class);
+        Route::model('queue', Queue::class);
+        Route::model('medication', Medication::class);
+        Route::model('allergy', Allergy::class);
+        Route::model('vital', Vital::class);
     }
 }
