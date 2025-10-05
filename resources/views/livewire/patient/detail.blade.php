@@ -34,7 +34,11 @@ mount(function () {
         abort(404, 'Patient not found');
     }
     
+    // Get the current user's clinic
+    $clinicDoctor = \App\Models\ClinicDoctor::where('doctor_id', auth()->user()->doctor->id)->first();
+    
     $this->form->patient_id = $this->patient->id;
+    $this->form->clinic_id = $clinicDoctor?->clinic_id;
     $this->form->priority = 'normal';
 });
 
@@ -565,12 +569,12 @@ $create = function () {
             </div>
 
             <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
+                <x-secondary-button wire:click="$dispatch('close-modal', 'add-to-queue')">
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-primary-button class="ms-3">
-                    {{ __('Add to que') }}
+                <x-primary-button class="ms-3" wire:click="create">
+                    {{ __('Add to Queue') }}
                 </x-primary-button>
             </div>
         </form>

@@ -39,7 +39,7 @@ $showModal = function ($type, $title, $form) {
                     <div>
                         <p class="font-medium">{{ $immunization->vaccine_name }}</p>
                         <p class="text-gray-600">
-                            {{ $immunization->date ? $immunization->date->format('M d, Y') : 'N/A' }}
+                            {{ $immunization->date_administered ? $immunization->date_administered->format('M d, Y') : 'N/A' }}
                         </p>
                     </div>
                     <button wire:click="delete({{ $immunization->id }})"

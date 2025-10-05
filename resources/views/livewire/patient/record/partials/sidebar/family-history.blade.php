@@ -38,7 +38,7 @@ $showModal = function ($type, $title, $form) {
                 <div class="text-sm flex justify-between items-start">
                     <div>
                         <p class="font-medium">{{ $history->condition }}</p>
-                        <p class="text-gray-600">{{ $history->relation }}</p>
+                        <p class="text-gray-600">{{ $history->relationship }}</p>
                     </div>
                     <button wire:click="delete({{ $history->id }})"
                         wire:confirm="Are you sure you want to delete this family history record?"

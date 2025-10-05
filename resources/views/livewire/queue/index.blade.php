@@ -75,22 +75,22 @@ $updateQueueStatus = function ($queueId, $status, $message) {
 
 $callNext = function ($queueId) {
     $queue = Queue::findOrFail($queueId);
-    $this->updateQueueStatus($queueId, 'in_progress', "Queue {$queue->queue_number} is now in progress!");
+    $updateQueueStatus($queueId, 'in_progress', "Queue {$queue->queue_number} is now in progress!");
 };
 
 $complete = function ($queueId) {
     $queue = Queue::findOrFail($queueId);
-    $this->updateQueueStatus($queueId, 'completed', "Queue {$queue->queue_number} is now completed!");
+    $updateQueueStatus($queueId, 'completed', "Queue {$queue->queue_number} is now completed!");
 };
 
 $cancel = function ($queueId) {
     $queue = Queue::findOrFail($queueId);
-    $this->updateQueueStatus($queueId, 'cancelled', "Queue {$queue->queue_number} has been cancelled!");
+    $updateQueueStatus($queueId, 'cancelled', "Queue {$queue->queue_number} has been cancelled!");
 };
 
 $noShow = function ($queueId) {
     $queue = Queue::findOrFail($queueId);
-    $this->updateQueueStatus($queueId, 'no_show', "Queue {$queue->queue_number} marked as no show!");
+    $updateQueueStatus($queueId, 'no_show', "Queue {$queue->queue_number} marked as no show!");
 };
 
 // Bulk actions

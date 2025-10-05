@@ -2,15 +2,14 @@
 
 use App\Models\Patient;
 use App\Models\Allergy;
-use App\Models\FamilyHistory;
-use App\Models\DiagnosticTest;
-use App\Models\Immunization;
-use App\Models\MedicalCondition;
 use App\Models\Medication;
-use App\Models\PhysicalExamination;
 use App\Models\Vital;
 use App\Models\Encounter;
 use App\Models\Queue;
+use App\Models\FamilyHistory;
+use App\Models\Immunization;
+use App\Models\DiagnosticTest;
+use App\Models\MedicalCondition;
 use Carbon\Carbon;
 use function Livewire\Volt\{state, mount, computed, on};
 

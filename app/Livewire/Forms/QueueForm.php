@@ -37,8 +37,12 @@ class QueueForm extends Form
         $queueNumber = $lastQueue ? sprintf('%03d', intval(substr($lastQueue->queue_number, -3)) + 1) : '001';
 
         $clinicDoctor = ClinicDoctor::with('clinic')->where('clinic_id', $this->clinic_id)->first();
+        
+        if (!$clinicDoctor || !$clinicDoctor->clinic) {
+            throw new \Exception('Clinic not found or not associated with any doctor.');
+        }
+        
         $clinicName = $clinicDoctor->clinic->name;
-
         $fullQueueNumber = Str::substr($clinicName, 0, 1) . $queueNumber;
 
         $queue = Queue::create([

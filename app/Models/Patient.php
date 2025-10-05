@@ -150,4 +150,29 @@ class Patient extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    public function familyHistories()
+    {
+        return $this->hasMany(FamilyHistory::class);
+    }
+
+    public function immunizations()
+    {
+        return $this->hasMany(Immunization::class);
+    }
+
+    public function diagnosticTests()
+    {
+        return $this->hasMany(DiagnosticTest::class);
+    }
+
+    public function medicalConditions()
+    {
+        return $this->hasMany(MedicalCondition::class);
+    }
+
+    public function physicalExaminations()
+    {
+        return $this->hasMany(PhysicalExamination::class);
+    }
+
 }

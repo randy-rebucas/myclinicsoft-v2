@@ -1,7 +1,8 @@
 <?php
 
-use function Livewire\Volt\{state, computed, on};
 use App\Models\MedicalCondition;
+use function Livewire\Volt\{state, computed, on};
+
 state(['patient', 'open' => false]);
 // Event Handlers
 on([

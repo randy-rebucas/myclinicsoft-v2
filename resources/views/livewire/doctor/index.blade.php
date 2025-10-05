@@ -149,7 +149,7 @@ $selectedQueue = function ($queueId) {
 
     broadcast(new QueueUpdated("Queue {$queue->queue_number} is now in progress!", 'in_progress'))->toOthers();
 
-    $this->dispatch('selected-queue', ['queueId' => $queue->id]);
+    $this->dispatch('selected-queue', $queue->id);
 };
 
 $refreshQueues = function () {
@@ -230,7 +230,8 @@ on([
                 <div class="divide-y divide-gray-100">
                     @forelse($todayQueue as $queue)
                         <div class="cursor-pointer flex gap-4 group hover:bg-gray-50 items-center py-4 rounded-lg transition-colors"
-                            wire:click="selectedQueue({{ $queue->id }})">
+                            wire:click="selectedQueue({{ $queue->id }})"
+                            wire:loading.attr="disabled">
                             <div
                                 class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
                                 {{ $loop->iteration }}

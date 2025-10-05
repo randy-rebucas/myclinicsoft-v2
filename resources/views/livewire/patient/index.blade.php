@@ -64,7 +64,7 @@ $delete = function (Patient $patient) {
 };
 
 $detail = function ($patientId) {
-    $this->redirectRoute('patients.show', ['patient' => $patientId]);
+    $this->redirectRoute('patients.show', ['patientId' => $patientId]);
 };
 
 $edit = function ($id) {
