@@ -20,6 +20,16 @@ class PrescriptionItem
     public $quantity;
 
     /**
+     * @var float
+     */
+    public $pricePerUnit = 0.0;
+
+    /**
+     * @var float
+     */
+    public $subTotalPrice = 0.0;
+
+    /**
      * InvoiceItem constructor.
      */
     public function __construct()
@@ -58,6 +68,37 @@ class PrescriptionItem
         $this->quantity = $quantity;
 
         return $this;
+    }
+
+    /**
+     * @param float $pricePerUnit
+     * @return $this
+     */
+    public function pricePerUnit(float $pricePerUnit)
+    {
+        $this->pricePerUnit = $pricePerUnit;
+
+        return $this;
+    }
+
+    /**
+     * @param float $subTotalPrice
+     * @return $this
+     */
+    public function subTotalPrice(float $subTotalPrice)
+    {
+        $this->subTotalPrice = $subTotalPrice;
+
+        return $this;
+    }
+
+    /**
+     * Get the total price for this prescription item
+     * @return float
+     */
+    public function getTotalPrice(): float
+    {
+        return $this->subTotalPrice > 0 ? $this->subTotalPrice : ($this->pricePerUnit * $this->quantity);
     }
 
 }

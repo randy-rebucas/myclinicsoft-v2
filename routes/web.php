@@ -209,6 +209,14 @@ Route::middleware(['check.initial.user', 'auth', 'verified'])->group(function ()
             ->middleware('permission:print prescriptions')
             ->name('print');
         
+        Route::get('/{prescription}/download', [PrescriptionController::class, 'download'])
+            ->middleware('permission:print prescriptions')
+            ->name('download');
+        
+        Route::get('/{prescription}/pdf-data', [PrescriptionController::class, 'getPdfData'])
+            ->middleware('permission:print prescriptions')
+            ->name('pdf-data');
+        
         Route::post('/{prescription}/ready', [PrescriptionController::class, 'markReady'])
             ->middleware('permission:update prescriptions')
             ->name('ready');

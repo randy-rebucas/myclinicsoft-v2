@@ -1,0 +1,286 @@
+<?php
+
+use App\Models\Prescription;
+use App\Models\Patient;
+use App\Models\Doctor;
+use App\Enums\PrescriptionStatusEnum;
+use Carbon\Carbon;
+use function Livewire\Volt\{state, layout, mount, computed};
+
+state([
+    'search' => '',
+    'dateFilter' => '',
+    'statusFilter' => '',
+    'doctorFilter' => '',
+    'perPage' => 10,
+    'sortBy' => 'start_date',
+    'sortDirection' => 'desc'
+]);
+
+layout('layouts.app');
+
+mount(function () {
+    // Initialize any default values if needed
+});
+
+$prescriptions = computed(function () {
+    $query = Prescription::with(['patient', 'doctor'])
+        ->when($this->search, function ($query) {
+            $query->whereHas('patient', function ($q) {
+                $q->where('first_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('last_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('patient_id', 'like', '%' . $this->search . '%');
+            })->orWhere('medication_name', 'like', '%' . $this->search . '%');
+        })
+        ->when($this->dateFilter, function ($query) {
+            $query->whereDate('start_date', $this->dateFilter);
+        })
+        ->when($this->statusFilter, function ($query) {
+            $query->where('status', $this->statusFilter);
+        })
+        ->when($this->doctorFilter, function ($query) {
+            $query->where('doctor_id', $this->doctorFilter);
+        })
+        ->orderBy($this->sortBy, $this->sortDirection);
+
+    return $query->paginate($this->perPage);
+});
+
+$doctors = computed(function () {
+    return Doctor::with('user')->get();
+});
+
+$statuses = fn() => [
+    '' => 'All Statuses',
+    'active' => 'Active',
+    'completed' => 'Completed',
+    'cancelled' => 'Cancelled',
+];
+
+$updateSort = function ($field) {
+    if ($this->sortBy === $field) {
+        $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        $this->sortBy = $field;
+        $this->sortDirection = 'asc';
+    }
+};
+
+$clearFilters = function () {
+    $this->search = '';
+    $this->dateFilter = '';
+    $this->statusFilter = '';
+    $this->doctorFilter = '';
+};
+
+?>
+
+<section class="min-h-screen bg-gray-50/30 py-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="space-y-6">
+            <!-- Header -->
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Prescriptions</h1>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Manage patient prescriptions and medications</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{{ route('prescriptions.create') }}" target="_blank"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        New Prescription
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search</label>
+                        <input type="text" 
+                               wire:model.live.debounce.300ms="search"
+                               placeholder="Patient name, ID, or medication..."
+                               class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
+                        <input type="date" 
+                               wire:model.live="dateFilter"
+                               class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+                        <select wire:model.live="statusFilter" 
+                                class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            @foreach($this->statuses() as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Doctor Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Doctor</label>
+                        <select wire:model.live="doctorFilter" 
+                                class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value="">All Doctors</option>
+                            @foreach($this->doctors as $doctor)
+                                <option value="{{ $doctor->id }}">{{ $doctor->user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Clear Filters -->
+                <div class="mt-4 flex justify-end">
+                    <button type="button" 
+                            wire:click="clearFilters"
+                            class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Prescriptions Table -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer"
+                                    wire:click="updateSort('patient_id')">
+                                    Patient
+                                    @if($sortBy === 'patient_id')
+                                        <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                    @endif
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Medication
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Dosage & Frequency
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer"
+                                    wire:click="updateSort('start_date')">
+                                    Start Date
+                                    @if($sortBy === 'start_date')
+                                        <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                    @endif
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Doctor
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer"
+                                    wire:click="updateSort('status')">
+                                    Status
+                                    @if($sortBy === 'status')
+                                        <span class="ml-1">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                    @endif
+                                </th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            @forelse($this->prescriptions as $prescription)
+                                <tr class="group hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ $prescription->patient->first_name }} {{ $prescription->patient->last_name }}
+                                                </div>
+                                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                                    ID: {{ $prescription->patient->patient_id }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                            {{ $prescription->medication_name }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900 dark:text-white">
+                                            <div>{{ $prescription->dosage }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $prescription->frequency }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        {{ Carbon::parse($prescription->start_date)->format('M d, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        {{ $prescription->doctor->user->name ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                            @if($prescription->status === 'active') bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                                            @elseif($prescription->status === 'completed') bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100
+                                            @else bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100
+                                            @endif">
+                                            {{ ucfirst($prescription->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            <!-- View Prescription Icon -->
+                                            <a href="{{ route('prescriptions.show', $prescription) }}" 
+                                               class="p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                                               title="View Prescription">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </a>
+
+                                            <!-- Edit Prescription Icon -->
+                                            <a href="{{ route('prescriptions.edit', $prescription) }}" 
+                                               class="p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-200"
+                                               title="Edit Prescription">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </a>
+
+                                            <!-- Print Prescription Icon -->
+                                            <a href="{{ route('prescriptions.print', $prescription) }}" 
+                                               class="p-1.5 rounded-full hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors duration-200"
+                                               title="Print Prescription">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        No prescriptions found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if($this->prescriptions->hasPages())
+                    <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700">
+                        {{ $this->prescriptions->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</section>

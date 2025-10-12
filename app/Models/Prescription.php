@@ -31,6 +31,8 @@ class Prescription extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'quantity' => 'integer',
+        'refills' => 'integer',
     ];
 
     public function patient(): BelongsTo

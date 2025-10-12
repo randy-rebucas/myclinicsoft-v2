@@ -337,7 +337,7 @@ $createAppointment = function () {
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($this->appointments as $appointment)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="group hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <input 
                                     type="checkbox" 
@@ -404,12 +404,24 @@ $createAppointment = function () {
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-2">
-                                    <button wire:click="view({{ $appointment->id }})" class="text-blue-600 hover:text-blue-900">
-                                        View
+                                <div class="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <!-- View Appointment Icon -->
+                                    <button wire:click="view({{ $appointment->id }})" 
+                                            class="p-1.5 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-200"
+                                            title="View Appointment">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
                                     </button>
-                                    <button wire:click="edit({{ $appointment->id }})" class="text-indigo-600 hover:text-indigo-900">
-                                        Edit
+
+                                    <!-- Edit Appointment Icon -->
+                                    <button wire:click="edit({{ $appointment->id }})" 
+                                            class="p-1.5 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-200"
+                                            title="Edit Appointment">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                        </svg>
                                     </button>
                                 </div>
                             </td>
